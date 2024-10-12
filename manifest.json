@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "Website Blocker",
+  "description": "Extension for blocking unwanted websites",
+  "version": "1.0",
+  "action": {
+    "default_title": "Click to show the form"
+  },
+  "permissions": [
+    "activeTab",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "scripting", 
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": ["*://*/"],
+  "background": {
+    "service_worker": "./dist/background.js"
+  },
+  "commands": {
+    "trigger_form": {
+      "suggested_key": {
+        "default": "Ctrl+Q",
+        "mac": "Command+B"
+      },
+      "description": "Show HTML form"
+    }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["/blocked.html", "options.html"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "options_page": "options.html"
+}
