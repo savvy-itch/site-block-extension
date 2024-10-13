@@ -22,7 +22,14 @@ export interface ResToSend {
   success: boolean,
   status?: Status, 
   msg?: string,
+  rules?: Site[],
   error?: any
 }
 
-type Status = "added" | "duplicate" | "deleted";
+export interface MsgToSend {
+  action: Action,
+  url?: string
+}
+
+type Status = "added" | "duplicate" | "deleted" | "getRules";
+type Action = "blockUrl" | "deleteAll" | "getRules";

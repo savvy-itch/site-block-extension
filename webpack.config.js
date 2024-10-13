@@ -3,10 +3,14 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: "development",
-  entry: './background.ts',
+  entry: {
+    background: './src/background.ts',
+    options: './src/options.ts'
+  },
   output: {
     path: path.resolve(__dirname, "dist"),
-    filename: "background.js",
+    filename: "[name].js",
+    clean: true // Clean the output directory before emit.
   },
   resolve: {
     extensions: [".ts", ".js"],
@@ -24,10 +28,10 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        { from: 'blocked.html', to: '.' },
-        { from: 'options.html', to: '.'},
-        { from: 'popup.css', to: '.' },
-      ]
+        {from: 'static'}
+        // { from: 'blocked.html', to: '.' },
+        // { from: 'popup.css', to: '.' },
+      ],
     })
   ]
 };

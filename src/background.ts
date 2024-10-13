@@ -1,9 +1,12 @@
-import { NewRule, ResToSend, Site } from "./types.js";
+import { NewRule, ResToSend, Site } from "./types";
 
 /*
   + handle form submission
   + check the current tab URL for blocked ones
   - display custom UI if the website is blocked
+  ! options page
+    - display list of rules
+    - allow rule edit/delete
   - add regex to form (specific URl/the whole domain blocking toggle);
   - remove form after successful submission
   - add permanent/temporary block option
@@ -98,6 +101,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse: (response: ResT
         })
         .catch(error => sendResponse({ success: false, error }))
         .finally(() => console.log(`Updated rules: ${blackList}`))
+      } else if (msg.action === 'getRules') {
+        sendResponse({ success: true, status: "getRules", rules: blackList });
       }
     })
     .catch(error => sendResponse({ success: false, error })

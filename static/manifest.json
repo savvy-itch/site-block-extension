@@ -16,7 +16,7 @@
   ],
   "host_permissions": ["*://*/"],
   "background": {
-    "service_worker": "./dist/background.js"
+    "service_worker": "background.js"
   },
   "commands": {
     "trigger_form": {
@@ -29,7 +29,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["/blocked.html", "options.html"],
+      "resources": ["blocked.html", "options.html"],
       "matches": ["<all_urls>"]
     }
   ],

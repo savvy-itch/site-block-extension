@@ -1,7 +1,6 @@
 {
   "scripts": {
-    "build": "webpack",
-    "watch": "tsc --watch"
+    "build": "webpack --config webpack.config.js"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^12.0.2",

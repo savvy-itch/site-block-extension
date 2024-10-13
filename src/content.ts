@@ -1,3 +1,5 @@
+import { MsgToSend, ResToSend } from "./types";
+
 function showPopup() {
   const body = document.body;
   const formExists = document.getElementById('popup-form');
@@ -66,7 +68,8 @@ function handleFormSubmission() {
       return;
     }
 
-    chrome.runtime.sendMessage({ action: 'blockUrl', url: urlToBlock }, (res) => {
+    const msg: MsgToSend = {action: "blockUrl", url: urlToBlock};
+    chrome.runtime.sendMessage(msg, (res: ResToSend) => {
       if (res.success) {
         if (res.status === 'added') {
           alert('URL has been saved');
@@ -81,11 +84,12 @@ function handleFormSubmission() {
 }
 
 function deleteRules() {
-  chrome.runtime.sendMessage({ action: 'deleteAll' }, (res) => {
+  const msg: MsgToSend = {action: 'deleteAll'};
+  chrome.runtime.sendMessage(msg, (res: ResToSend) => {
     if (res.success) {
       alert('All rules have been deleted');
     } else {
-      alert('An error occured. Check the console.')
+      alert('An error occured. Check the console.');
       console.error(res.error);
     }
   })
