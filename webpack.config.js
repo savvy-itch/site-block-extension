@@ -5,6 +5,7 @@ module.exports = {
   mode: "development",
   entry: {
     background: './src/background.ts',
+    content: './src/content.ts',
     options: './src/options.ts'
   },
   output: {

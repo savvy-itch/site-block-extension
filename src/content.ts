@@ -1,4 +1,4 @@
-import { MsgToSend, ResToSend } from "./types";
+import { CustomReq, ResToSend } from "./types";
 
 function showPopup() {
   const body = document.body;
@@ -8,7 +8,7 @@ function showPopup() {
     popupForm.classList.add('popup-form');
     popupForm.id = 'popup-form';
     const content = `
-      <label for="site-url" class="url-input-label">
+      <label for="url" class="url-input-label">
         Enter URL of the website you want to block 
         <input 
           classname="url-input"
@@ -19,10 +19,18 @@ function showPopup() {
         />
       </label>
 
-      <button id="submit-btn" type="submit">Submit</button>
-      <button id="clear-btn" type="button">Clear All Rules</button>
+      <div>
+        <input type="checkbox" id="block-domain" name="block-domain" value="blockDomain" checked />
+        <label for="domain">Block entire domain</label>
+      </div>
+      
       <button id="close-form-btn" type="button">X</button>
-      <button id="go-to-options">Go to options</button>
+
+      <div>
+        <button id="submit-btn" type="submit">Submit</button>
+        <button id="clear-btn" type="button">Clear All Rules</button>
+        <button id="go-to-options">Go to options</button>
+      </div>
     `;
     popupForm.innerHTML = content;
     body.appendChild(popupForm);
@@ -62,14 +70,17 @@ function handleFormSubmission() {
   if (form) {
     const formData = new FormData(form);
     const urlToBlock = formData.get('url') as string;
+    const blockDomain = (document.getElementById('block-domain') as HTMLInputElement).checked;
+    console.log({urlToBlock});
 
     if (!urlToBlock) {
-      console.error('Invalid URL');
+      console.error(`Invalid URL: ${urlToBlock}`);
       return;
     }
 
-    const msg: MsgToSend = {action: "blockUrl", url: urlToBlock};
+    const msg: CustomReq = { action: "blockUrl", url: urlToBlock, blockDomain };
     chrome.runtime.sendMessage(msg, (res: ResToSend) => {
+      console.log({res});
       if (res.success) {
         if (res.status === 'added') {
           alert('URL has been saved');
@@ -84,7 +95,7 @@ function handleFormSubmission() {
 }
 
 function deleteRules() {
-  const msg: MsgToSend = {action: 'deleteAll'};
+  const msg: CustomReq = { action: 'deleteAll' };
   chrome.runtime.sendMessage(msg, (res: ResToSend) => {
     if (res.success) {
       alert('All rules have been deleted');

@@ -14,8 +14,9 @@ export interface NewRule {
 }
 
 export interface Site {
-  id: string,
-  url: string
+  id: number,
+  url: string,
+  blockDomain: boolean
 }
 
 export interface ResToSend {
@@ -26,10 +27,12 @@ export interface ResToSend {
   error?: any
 }
 
-export interface MsgToSend {
+export interface CustomReq {
   action: Action,
-  url?: string
+  url?: string,
+  blockDomain?: boolean,
+  deleteRuleId?: number
 }
 
-type Status = "added" | "duplicate" | "deleted" | "getRules";
-type Action = "blockUrl" | "deleteAll" | "getRules";
+type Status = "added" | "duplicate" | "deleted" | "deletedRule" | "getRules";
+type Action = "blockUrl" | "deleteAll" | "deleteRule" | "getRules";

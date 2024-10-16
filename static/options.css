@@ -1,3 +1,39 @@
 body {
-  background-color: slategray;
+  background-color: hsl(210, 13%, 80%);
+}
+
+.blacklist-table {
+  border-collapse: collapse;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.blacklist-table th,
+.blacklist-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border: 1px solid darkslategrey;
+}
+
+.blacklist-table tr:nth-child(even) {
+  background-color: #fff;
+}
+
+.blacklist-table tr:nth-child(odd) {
+  background-color: lightgray;
+}
+
+.blacklist-table th {
+  background-color: cornflowerblue;
+  color: white;
+  font-weight: bold;
+}
+
+.btn:disabled {
+  color: hsl(0, 0%, 30%);
+  background-color: lightgray;
+}
+
+.btn:disabled:hover {
+  cursor: not-allowed;
 }

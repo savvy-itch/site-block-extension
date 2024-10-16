@@ -9,16 +9,23 @@
 <body>
   <h1>Extension Settings</h1>
   <section id="settings-section">
-    <table>
+    <table class="blacklist-table">
       <thead>
         <th>No.</th>
+        <th>ID</th>
         <th>URL</th>
+        <th>Block all subdomains</th>
         <th></th>
         <th></th>
       </thead>
-      <tbody id="url-table"></tbody>
+      <tbody id="url-table">
+      </tbody>
     </table>
   </section>
+  <div>
+    <button id="save-btn" class="btn">Save Changes</button>
+    <button id="cancel-btn" class="btn">Cancel</button>
+  </div>
   <script src="./options.js"></script>
 </body>
 </html>
