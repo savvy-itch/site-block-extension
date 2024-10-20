@@ -20,13 +20,17 @@ body {
 }
 
 .blacklist-table tr:nth-child(odd) {
-  background-color: lightgray;
+  background-color: hsl(0, 0%, 88%);
 }
 
 .blacklist-table th {
   background-color: cornflowerblue;
   color: white;
   font-weight: bold;
+}
+
+.blacklist-table .test-col {
+  background-color: darkorange;
 }
 
 .btn:disabled {

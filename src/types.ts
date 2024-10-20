@@ -4,11 +4,13 @@ export interface NewRule {
   action: {
     type: chrome.declarativeNetRequest.RuleActionType,
     redirect?: {
-      url: string
+      // url: string
+      regexSubstitution: string
     }
   },
   condition: {
-    urlFilter: string,
+    // urlFilter: string,
+    regexFilter: string,
     resourceTypes: chrome.declarativeNetRequest.ResourceType[]
   }
 }
@@ -27,12 +29,31 @@ export interface ResToSend {
   error?: any
 }
 
-export interface CustomReq {
-  action: Action,
-  url?: string,
-  blockDomain?: boolean,
-  deleteRuleId?: number
+type Status = "added" | "duplicate" | "deleted" | "deletedRule" | "getRules" | "updated";
+
+export interface AddAction {
+  action: "blockUrl",
+  url: string,
+  blockDomain: boolean
 }
 
-type Status = "added" | "duplicate" | "deleted" | "deletedRule" | "getRules";
-type Action = "blockUrl" | "deleteAll" | "deleteRule" | "getRules";
+export interface DeleteAction {
+  action: "deleteRule",
+  deleteRuleId: number
+}
+
+export interface DeleteAllAction {
+  action: "deleteAll"
+}
+
+export interface GetAllAction {
+  action: "getRules",
+}
+
+export interface UpdateAction {
+  action: "updateRules",
+  updatedRules: NewRule[]
+}
+
+
+export type Action = AddAction | DeleteAction | DeleteAllAction | GetAllAction | UpdateAction

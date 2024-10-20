@@ -1,4 +1,4 @@
-import { CustomReq, ResToSend } from "./types";
+import { AddAction, DeleteAllAction, ResToSend } from "./types";
 
 function showPopup() {
   const body = document.body;
@@ -78,7 +78,7 @@ function handleFormSubmission() {
       return;
     }
 
-    const msg: CustomReq = { action: "blockUrl", url: urlToBlock, blockDomain };
+    const msg: AddAction = { action: "blockUrl", url: urlToBlock, blockDomain };
     chrome.runtime.sendMessage(msg, (res: ResToSend) => {
       console.log({res});
       if (res.success) {
@@ -95,7 +95,7 @@ function handleFormSubmission() {
 }
 
 function deleteRules() {
-  const msg: CustomReq = { action: 'deleteAll' };
+  const msg: DeleteAllAction = { action: 'deleteAll' };
   chrome.runtime.sendMessage(msg, (res: ResToSend) => {
     if (res.success) {
       alert('All rules have been deleted');
