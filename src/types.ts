@@ -18,7 +18,14 @@ export interface NewRule {
 export interface Site {
   id: number,
   url: string,
-  blockDomain: boolean
+  strippedUrl: string,
+  blockDomain: boolean,
+  isActive: boolean
+}
+
+export interface RuleInStorage {
+  id: number,
+  isActive: boolean
 }
 
 export interface ResToSend {
@@ -26,10 +33,12 @@ export interface ResToSend {
   status?: Status, 
   msg?: string,
   rules?: Site[],
+  url?: string,
   error?: any
 }
 
-type Status = "added" | "duplicate" | "deleted" | "deletedRule" | "getRules" | "updated";
+type Status = "added" | 
+"currUrl" |"duplicate" | "deleted" | "deletedRule" | "forbidden" | "getRules" | "updated";
 
 export interface AddAction {
   action: "blockUrl",
@@ -55,5 +64,10 @@ export interface UpdateAction {
   updatedRules: NewRule[]
 }
 
+export interface GetCurrentUrl {
+  action: "getCurrentUrl",
+}
 
-export type Action = AddAction | DeleteAction | DeleteAllAction | GetAllAction | UpdateAction
+
+export type Action = AddAction | DeleteAction | DeleteAllAction | GetAllAction |
+GetCurrentUrl | UpdateAction

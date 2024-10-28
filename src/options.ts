@@ -1,27 +1,36 @@
-import { DeleteAction, GetAllAction, NewRule, ResToSend, UpdateAction } from "./types";
+import { forbiddenUrls, storageKey } from "./globals";
+import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
+
+/*
+Edge cases:
+Options page:
+  + don't allow adding options page to the list
+  + don't allow empty url string
+  - adding an existing URL (when one is temporarily disabled)
+*/
 
 const saveBtn = document.getElementById('save-btn');
 const cancelBtn = document.getElementById('cancel-btn');
 const tbody = document.getElementById('url-table');
 let isEdited = false;
 let showEditInput = false;
-let editedRulesIds: number[] = [];
+let editedRulesIds: Set<number> = new Set();
 
 document.addEventListener('DOMContentLoaded', () => {
+  displayUrlList();
   saveBtn?.setAttribute('disabled', '');
   cancelBtn?.setAttribute('disabled', '');
 });
 
 cancelBtn?.addEventListener('click', () => {
-  editedRulesIds = [];
-  showEditInput = false;
+  editedRulesIds.clear();
   toggleEditMode(false);
   displayUrlList();
 });
 
 saveBtn?.addEventListener('click', () => {
   saveChanges();
-  editedRulesIds = [];
+  editedRulesIds.clear();
 })
 
 function toggleEditMode(bool: boolean) {
@@ -36,24 +45,23 @@ function toggleEditMode(bool: boolean) {
 }
 
 function displayUrlList() {
-  // console.log('displayUrlList');
   const msg: GetAllAction = { action: 'getRules' };
   chrome.runtime.sendMessage(msg, (res: ResToSend) => {
     if (res.success) {
-      // console.log({ rules: res.rules });
-      if (res.rules && tbody) {
-        tbody.innerHTML = '';
-        const urlList = res.rules;
+      if (res.rules) {
+        console.log(res.rules);
+        showEditInput = false;
+        tbody!.innerHTML = '';
+        const urlList = res.rules.sort((a, b) => a.strippedUrl.localeCompare(b.strippedUrl));
         urlList.map((rule, i) => {
           const ruleElem = document.createElement('tr');
           ruleElem.id = `row-${rule.id}`;
           ruleElem.classList.add('row');
-          // const strippedUrl = rule.url.replace(/^\^/, '').replace(/\*|\$$/, '');
-          const strippedUrl = rule.url.replace(/^\^https\?:\/\//, '').replace(/\.\*|\$$/, '');
+          !rule.isActive && ruleElem.classList.add('inactive-url');
           const content = `
             <td>${i + 1}</td>
             <td class="row-id">${rule.id}</td>
-            <td class="row-url">${strippedUrl}</td>
+            <td class="row-url">${rule.strippedUrl}</td>
             <td>${rule.url}</td>
             <td class="row-domain">
               <input 
@@ -69,9 +77,17 @@ function displayUrlList() {
             <td>
               <button class="delete-rule-btn" ${showEditInput ? 'disabled' : ''}>Delete</button>
             </td>
+            <td>
+              <input 
+                class="active-checkbox ${!rule.isActive ? 'inactive-url' : ''}"
+                name="active"
+                type="checkbox"
+                ${rule.isActive && 'checked'}
+              />
+            </td>
           `;
           ruleElem.innerHTML = content;
-          tbody.appendChild(ruleElem);
+          tbody!.appendChild(ruleElem);
 
           const updateRuleRow = document.getElementById(`row-${rule.id}`);
           const editBtn = updateRuleRow?.querySelector('.edit-rule-btn');
@@ -79,7 +95,7 @@ function displayUrlList() {
             editBtn.addEventListener('click', () => {
               if (!showEditInput) {
                 showEditInput = true;
-                editedRulesIds.push(rule.id)
+                editedRulesIds.add(rule.id)
                 disableOtherBtns(rule.id);
                 toggleEditMode(true);
                 const urlCell = updateRuleRow?.querySelector('.row-url');
@@ -88,7 +104,8 @@ function displayUrlList() {
                     <input
                       name="url"
                       type="text"
-                      value=${strippedUrl}
+                      value=${rule.strippedUrl}
+                      required
                     />
                   `;
                 }
@@ -104,11 +121,18 @@ function displayUrlList() {
           }
 
           const domainToggle = updateRuleRow?.querySelector('.domain-checkbox');
-          // console.log(domainToggle);
           domainToggle?.addEventListener('change', () => {
-            console.log('checkbox toggled');
+            console.log('domain checkbox toggled');
             toggleEditMode(true);
-            editedRulesIds.push(rule.id);
+            editedRulesIds.add(rule.id);
+          });
+
+          const activeToggle = updateRuleRow?.querySelector('.active-checkbox');
+          activeToggle?.addEventListener('change', () => {
+            console.log('active checkbox toggled');
+            updateRuleRow?.classList.toggle('inactive-url');
+            toggleEditMode(true);
+            editedRulesIds.add(rule.id);
           });
         });
       }
@@ -119,14 +143,12 @@ function displayUrlList() {
   })
 }
 
-displayUrlList();
-
 function deleteRule(id: number) {
   console.log(`Called deleteRule for ID: ${id}`);
   const msg: DeleteAction = { action: "deleteRule", deleteRuleId: id };
   chrome.runtime.sendMessage(msg, (res: ResToSend) => {
     if (res.success) {
-      showEditInput = false;
+      editedRulesIds.delete(id);
       displayUrlList();
     } else {
       alert('Error: Could not delete the rule')
@@ -136,55 +158,116 @@ function deleteRule(id: number) {
 }
 
 function saveChanges() {
-  let updatedList: NewRule[] = [];
+  let updatedRules: NewRule[] = [];
 
-  if (editedRulesIds.length === 0) {
+  if (editedRulesIds.size === 0) {
     toggleEditMode(false);
-    showEditInput = false;
     displayUrlList();
     alert('No changes were made');
     return;
   }
 
-  editedRulesIds
-    .filter(elem => document.getElementById(`row-${elem}`))
-    .map(id => {
-      const editedRow = document.getElementById(`row-${id}`);
+  const rulesToStore: RuleInStorage[] = [];
+  for (const elem of editedRulesIds) {
+    const editedRow = document.getElementById(`row-${elem}`);
+    if (editedRow) {
+      const rowId = Number(editedRow.querySelector('.row-id')?.textContent);
+      const urlInput = editedRow.querySelector('.row-url > input') as HTMLInputElement;
+      const strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent;
+      const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
+      const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '.*' : '$'}`;
+      const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;
 
-      if (editedRow) {
-        const rowId = Number(editedRow.querySelector('.row-id')?.textContent);
-        const strippedUrl = (editedRow.querySelector('.row-url > input') as HTMLInputElement)?.value;
-        const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
-        const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '.*' : '$'}`;
-        console.log({ blockDomain, urlToBlock, elem: editedRow.querySelector('.domain-checkbox') as HTMLInputElement });
+      if (!strippedUrl || forbiddenUrls.some(url => url.test(strippedUrl))) {
+        alert('Invalid URL');
+        editedRulesIds.clear();
+        toggleEditMode(false);
+        displayUrlList();
+        console.error(`Invalid URL: ${urlToBlock}`);
+        return;
+      }
 
-        const updatedRule: NewRule = {
-          id: rowId,
-          priority: 1,
-          action: {
-            type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
+      const updatedRule: NewRule = {
+        id: rowId,
+        priority: 1,
+        action: {
+          type: isActive
+            ? chrome.declarativeNetRequest.RuleActionType.REDIRECT
+            : chrome.declarativeNetRequest.RuleActionType.ALLOW,
+          ...(isActive && {
             redirect: {
-              // url: chrome.runtime.getURL("blocked.html")
               regexSubstitution: chrome.runtime.getURL("blocked.html")
             }
-          },
-          condition: {
-            // urlFilter: urlToBlock,
-            regexFilter: urlToBlock,
-            resourceTypes: ["main_frame" as chrome.declarativeNetRequest.ResourceType]
-          }
-        };
-        updatedList.push(updatedRule);
-      }
-    });
-    console.log(editedRulesIds);
+          })
+        },
+        condition: {
+          regexFilter: urlToBlock,
+          resourceTypes: ["main_frame" as chrome.declarativeNetRequest.ResourceType]
+        }
+      };
+      updatedRules.push(updatedRule);
+      rulesToStore.push({ id: rowId, isActive });
+    }
+  }
+  // editedRulesIds.forEach(elem => {
+  //   const editedRow = document.getElementById(`row-${elem}`);
+  //   if (editedRow) {
+  //     const rowId = Number(editedRow.querySelector('.row-id')?.textContent);
+  //     const urlInput = editedRow.querySelector('.row-url > input') as HTMLInputElement;
+  //     const strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent;
+  //     const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
+  //     const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '.*' : '$'}`;
+  //     const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;
 
-  // checkForDuplicatesAfterUpdate(updatedList);
+  //     if (!strippedUrl || forbiddenUrls.some(url => url.test(strippedUrl))) {
+  //       alert('Invalid URL');
+  //       editedRulesIds.clear();
+  //       showEditInput = false;
+  //       toggleEditMode(false);
+  //       displayUrlList();
+  //       console.error(`Invalid URL: ${urlToBlock}`);
+  //       return;
+  //     }
 
-  const msg: UpdateAction = { action: 'updateRules', updatedRules: updatedList };
+  //     const updatedRule: NewRule = {
+  //       id: rowId,
+  //       priority: 1,
+  //       action: {
+  //         type: isActive
+  //           ? chrome.declarativeNetRequest.RuleActionType.REDIRECT
+  //           : chrome.declarativeNetRequest.RuleActionType.ALLOW,
+  //         ...(isActive && {
+  //           redirect: {
+  //             regexSubstitution: chrome.runtime.getURL("blocked.html")
+  //           }
+  //         })
+  //       },
+  //       condition: {
+  //         regexFilter: urlToBlock,
+  //         resourceTypes: ["main_frame" as chrome.declarativeNetRequest.ResourceType]
+  //       }
+  //     };
+  //     updatedRules.push(updatedRule);
+  //     rulesToStore.push({ id: rowId, isActive });
+  //   }
+  // })
+
+  console.log({ updatedRules });
+
+  const msg: UpdateAction = { action: 'updateRules', updatedRules };
   chrome.runtime.sendMessage(msg, (res: ResToSend) => {
-    if (res.success) {
+    if (res.success && res.rules) {
       isEdited = false;
+      // chrome.storage.local.get([storageKey], result => {
+      //   const rules = result.urlRules as RuleInStorage[];
+      //   rules.forEach(rule => {
+      //     const updatedRule = rulesToStore.find(el => el.id === rule.id);
+      //     if (updatedRule) {
+      //       rule.isActive = updatedRule.isActive;
+      //     }
+      //   });
+      //   chrome.storage.local.set({ urlRules: rules });
+      // });
       displayUrlList();
       alert('Changes have been saved');
     } else {
@@ -209,22 +292,4 @@ function disableOtherBtns(ruleId: number) {
       }
     }
   })
-}
-
-// DO I STILL NEED THIS FUNCTION?
-// check if after editing rules, some of the changes are identical
-function checkForDuplicatesAfterUpdate(updatedList: NewRule[]) {
-  const uniqueFilters = new Set<string>();
-  const tempArr: NewRule[] = [];
-
-  updatedList.forEach(rule => {
-    if (!uniqueFilters.has(rule.condition.regexFilter)) {
-      uniqueFilters.add(rule.condition.regexFilter);
-      tempArr.push(rule);
-    }
-  });
-
-  console.log({tempArr, updatedList});
-  updatedList = tempArr;
-  return updatedList;
 }

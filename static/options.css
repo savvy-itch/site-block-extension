@@ -2,14 +2,14 @@ body {
   background-color: hsl(210, 13%, 80%);
 }
 
-.blacklist-table {
+.table {
   border-collapse: collapse;
   border-radius: 6px;
   overflow: hidden;
 }
 
-.blacklist-table th,
-.blacklist-table td {
+.table th,
+.table td {
   padding: 12px 15px;
   text-align: left;
   border: 1px solid darkslategrey;
@@ -23,13 +23,18 @@ body {
   background-color: hsl(0, 0%, 88%);
 }
 
-.blacklist-table th {
+.blacklist-table tbody .inactive-url {
+  background-color: hsl(0, 0%, 58%);
+  color: hsl(0, 0%, 36%);
+}
+
+.table th {
   background-color: cornflowerblue;
   color: white;
   font-weight: bold;
 }
 
-.blacklist-table .test-col {
+.table .test-col {
   background-color: darkorange;
 }
 

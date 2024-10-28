@@ -1,4 +1,4 @@
-.popup-form {
+.extension-popup-form {
   position: absolute;
   top: 50dvh;
   left: 50%;
@@ -9,9 +9,9 @@
   border-radius: 10px;
   background-color: white;
   color: black;
-  z-index: 100;
   width: 45vw;
   font-size: 16px;
+  z-index: 500;
 }
 
 .url-input-label {
@@ -25,11 +25,18 @@
   font-size: 1.5rem;
 }
 
-.popup-form button {
+.extension-popup-form button {
   padding: 10px;
   font-size: 1.4rem;
 }
 
-.popup-form button:hover {
+.extension-popup-form button:hover {
   cursor: pointer;
+}
+
+.extension-error-para {
+  font-size: 14px;
+  height: 14px;
+  margin: 12px 0;
+  color: darkred;
 }

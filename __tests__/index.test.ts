@@ -38,7 +38,7 @@ test('popup renders correctly on icon click', async () => {
   }
 
   const worker = await serviceWorkerTarget.worker();
-  await worker?.evaluate("chrome.action.onClicked.dispatch()");
+  // await worker?.evaluate(() => chrome.action.onClicked.dispatch());
   const form = await page.waitForSelector('#popup-form')
   expect(form).not.toBeNull()
 });
