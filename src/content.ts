@@ -1,5 +1,6 @@
 import { forbiddenUrls } from "./globals";
-import { AddAction, DeleteAllAction, GetCurrentUrl, ResToSend } from "./types";
+import { deleteRules } from "./helpers";
+import { AddAction, GetCurrentUrl, ResToSend } from "./types";
 
 async function showPopup() {
   const body = document.body;
@@ -114,16 +115,4 @@ function handleFormSubmission() {
 function hidePopup() {
   const popup = document.getElementById('extension-popup-form');
   popup && document.body.removeChild(popup);
-}
-
-function deleteRules() {
-  const msg: DeleteAllAction = { action: 'deleteAll' };
-  chrome.runtime.sendMessage(msg, (res: ResToSend) => {
-    if (res.success) {
-      alert('All rules have been deleted');
-    } else {
-      alert('An error occured. Check the console.');
-      console.error(res.error);
-    }
-  })
 }

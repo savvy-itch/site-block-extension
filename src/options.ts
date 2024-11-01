@@ -1,4 +1,5 @@
-import { forbiddenUrls, storageKey } from "./globals";
+import { forbiddenUrls, storageKey, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
+import { deleteRules } from "./helpers";
 import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
 
 /*
@@ -6,32 +7,75 @@ Edge cases:
 Options page:
   + don't allow adding options page to the list
   + don't allow empty url string
-  - adding an existing URL (when one is temporarily disabled)
+  + adding an existing URL (when one is temporarily disabled)
 */
 
 const saveBtn = document.getElementById('save-btn');
 const cancelBtn = document.getElementById('cancel-btn');
 const tbody = document.getElementById('url-table');
+const clearBtn = document.getElementById('clear-btn');
+const strictModeSwitch = document.getElementById('strict-mode-switch') as HTMLInputElement;
+
 let isEdited = false;
 let showEditInput = false;
 let editedRulesIds: Set<number> = new Set();
+// let isStrictModeOn = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   displayUrlList();
   saveBtn?.setAttribute('disabled', '');
   cancelBtn?.setAttribute('disabled', '');
+  syncStrictMode();
 });
 
 cancelBtn?.addEventListener('click', () => {
   editedRulesIds.clear();
   toggleEditMode(false);
   displayUrlList();
+  syncStrictMode();
 });
 
-saveBtn?.addEventListener('click', () => {
-  saveChanges();
+saveBtn?.addEventListener('click', async () => {
+  console.log('before saving changes', editedRulesIds);
+  await saveChanges();
+  // console.log('after saving changes', editedRulesIds);
+  // editedRulesIds.clear();
+});
+
+clearBtn?.addEventListener('click', () => {
+  deleteRules();
   editedRulesIds.clear();
-})
+  toggleEditMode(false);
+  displayUrlList();
+  syncStrictMode();
+});
+
+strictModeSwitch?.addEventListener('change', () => {
+  console.log(`change event triggered: ${strictModeSwitch.checked}`);
+  const isStrictModeOn = strictModeSwitch.checked;
+  chrome.storage.local.set({ strictMode: isStrictModeOn });
+  handleInactiveRules(isStrictModeOn);
+});
+
+function handleInactiveRules(isStrictModeOn: boolean) {
+  if (!isStrictModeOn) {
+    chrome.storage.local.set({ inactiveRules: [] });
+  } else {
+    const msg: GetAllAction = { action: 'getRules' };
+    chrome.runtime.sendMessage(msg, (res: ResToSend) => {
+      if (res.success && res.rules) {
+        const inactiveRulesToStore: RuleInStorage[] = [];
+        const date = new Date();
+        const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
+        res.rules.forEach(rule => {
+          const urlToBlock = `^https?:\/\/${rule.strippedUrl}${rule.blockDomain ? '.*' : '$'}`;
+          inactiveRulesToStore.push({ id: rule.id, unblockDate: unblockDate, urlToBlock })
+        });
+        chrome.storage.local.set({ inactiveRules: inactiveRulesToStore });
+      }
+    })
+  }
+}
 
 function toggleEditMode(bool: boolean) {
   isEdited = bool;
@@ -49,7 +93,7 @@ function displayUrlList() {
   chrome.runtime.sendMessage(msg, (res: ResToSend) => {
     if (res.success) {
       if (res.rules) {
-        console.log(res.rules);
+        // console.log(res.rules);
         showEditInput = false;
         tbody!.innerHTML = '';
         const urlList = res.rules.sort((a, b) => a.strippedUrl.localeCompare(b.strippedUrl));
@@ -129,10 +173,10 @@ function displayUrlList() {
 
           const activeToggle = updateRuleRow?.querySelector('.active-checkbox');
           activeToggle?.addEventListener('change', () => {
-            console.log('active checkbox toggled');
             updateRuleRow?.classList.toggle('inactive-url');
             toggleEditMode(true);
             editedRulesIds.add(rule.id);
+            // console.log(`active checkbox toggled`, editedRulesIds);
           });
         });
       }
@@ -150,6 +194,7 @@ function deleteRule(id: number) {
     if (res.success) {
       editedRulesIds.delete(id);
       displayUrlList();
+      syncStrictMode();
     } else {
       alert('Error: Could not delete the rule')
       console.error(res.error);
@@ -157,20 +202,27 @@ function deleteRule(id: number) {
   });
 }
 
-function saveChanges() {
+async function saveChanges() {
   let updatedRules: NewRule[] = [];
 
   if (editedRulesIds.size === 0) {
     toggleEditMode(false);
     displayUrlList();
+    syncStrictMode();
     alert('No changes were made');
     return;
   }
 
+  // console.log({editedRulesIds});
+
   const rulesToStore: RuleInStorage[] = [];
+  const strictModeOn = await chrome.storage.local.get(['strictMode']);
+  const date = new Date();
+  const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
   for (const elem of editedRulesIds) {
     const editedRow = document.getElementById(`row-${elem}`);
     if (editedRow) {
+      console.log('editedRow exists');
       const rowId = Number(editedRow.querySelector('.row-id')?.textContent);
       const urlInput = editedRow.querySelector('.row-url > input') as HTMLInputElement;
       const strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent;
@@ -183,6 +235,7 @@ function saveChanges() {
         editedRulesIds.clear();
         toggleEditMode(false);
         displayUrlList();
+        syncStrictMode();
         console.error(`Invalid URL: ${urlToBlock}`);
         return;
       }
@@ -206,7 +259,7 @@ function saveChanges() {
         }
       };
       updatedRules.push(updatedRule);
-      rulesToStore.push({ id: rowId, isActive });
+      strictModeOn && !isActive && rulesToStore.push({ id: rowId, unblockDate, urlToBlock });
     }
   }
   // editedRulesIds.forEach(elem => {
@@ -252,12 +305,13 @@ function saveChanges() {
   //   }
   // })
 
-  console.log({ updatedRules });
+  // console.log({ updatedRules });
 
   const msg: UpdateAction = { action: 'updateRules', updatedRules };
   chrome.runtime.sendMessage(msg, (res: ResToSend) => {
     if (res.success && res.rules) {
       isEdited = false;
+      chrome.storage.local.set({ inactiveRules: rulesToStore });
       // chrome.storage.local.get([storageKey], result => {
       //   const rules = result.urlRules as RuleInStorage[];
       //   rules.forEach(rule => {
@@ -268,6 +322,7 @@ function saveChanges() {
       //   });
       //   chrome.storage.local.set({ urlRules: rules });
       // });
+      editedRulesIds.clear();
       displayUrlList();
       alert('Changes have been saved');
     } else {
@@ -291,5 +346,13 @@ function disableOtherBtns(ruleId: number) {
         deleteBtn.setAttribute('disabled', '');
       }
     }
-  })
+  });
+}
+
+async function syncStrictMode() {
+  const strictModeOn = await chrome.storage.local.get([storageStrictModeKey]);
+  console.log(`strictModeOn.strictMode: ${strictModeOn.strictMode}`);
+  if (strictModeOn) {
+    strictModeSwitch.checked = strictModeOn.strictMode;
+  }
 }

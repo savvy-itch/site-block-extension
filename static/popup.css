@@ -1,5 +1,5 @@
 .extension-popup-form {
-  position: absolute;
+  position: fixed;
   top: 50dvh;
   left: 50%;
   transform: translate(-50%, -50%);

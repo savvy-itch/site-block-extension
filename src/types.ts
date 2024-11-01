@@ -4,12 +4,10 @@ export interface NewRule {
   action: {
     type: chrome.declarativeNetRequest.RuleActionType,
     redirect?: {
-      // url: string
       regexSubstitution: string
     }
   },
   condition: {
-    // urlFilter: string,
     regexFilter: string,
     resourceTypes: chrome.declarativeNetRequest.ResourceType[]
   }
@@ -25,7 +23,8 @@ export interface Site {
 
 export interface RuleInStorage {
   id: number,
-  isActive: boolean
+  unblockDate: number,
+  urlToBlock: string
 }
 
 export interface ResToSend {

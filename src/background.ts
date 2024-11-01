@@ -1,18 +1,28 @@
-import { storageKey } from "./globals";
+import { storageRulesKey, storageStrictModeKey } from "./globals";
 import { stripUrl } from "./helpers";
 import { Action, NewRule, ResToSend, Site, RuleInStorage } from "./types";
 import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
-  - delete all rules button on options page
+  + delete all rules button on options page
+  + add strict mode - when user disables a rule, it automatically gets reenabled in 1h:
+    + store the state of strict mode in storage
+    + store disabled rules ({ id, expirationTime })
+    + when making a new request:
+      1) check if strict mode is on
+      2) if it's on, then check every stored rule for an expired date
+      3) if the date has expired, change the rule action from "allow" to "redirect" 
   - customize form
   - customize block page
   - customize options page
   - make cross browser versions
   - add more custom messages for failed and successful actions 
-  ? add strict mode - when user disables a rule, it automatically gets reenabled in 1h
-  ? block URLs with specific words in them 
+  - add more dialogs for actions
+  - add tooltips
+  - store strictMode state in a variable to eliminate redundant requests
+  ? sort/filter rules by alphabet/active/domain
+  ? block URLs with specific words in them
   ? allow blocking a list of URLs
   ? replace nanoid with Math.random
   ? testing
@@ -108,7 +118,7 @@ chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (respon
         .finally(() => console.log(`Updated rules: ${blackList}`))
     } else if (msg.action === 'getRules') {
       const blackList = await getRules();
-      console.log({ blackList });
+      // console.log({ blackList });
       sendResponse({ success: true, status: "getRules", rules: blackList });
     } else if (msg.action === 'deleteRule') {
       // delete single rule
@@ -130,7 +140,7 @@ chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (respon
       const filteredRules: NewRule[] = [];
       const blackList = await getRules();
 
-      console.log({ updatedRules: msg.updatedRules });
+      // console.log({ updatedRules: msg.updatedRules });
 
       // NOTE: if getRules() is going to return map instead of array, this loop can be removed
       blackList.forEach(rule => {
@@ -152,7 +162,7 @@ chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (respon
         rulesToRemove.push(rule.id);
       });
 
-      console.log({ filteredRules });
+      // console.log({ filteredRules });
 
       chrome.declarativeNetRequest.updateDynamicRules({
         removeRuleIds: rulesToRemove,
@@ -176,8 +186,8 @@ chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (respon
 async function getRules(): Promise<Site[]> {
   try {
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
-    // const result = await chrome.storage.local.get([storageKey]);
-    // const storedRules = result.urlRules as RuleInStorage[] || [];
+
+    // console.log({ dynamicRules: existingRules });
 
     const blackList: Site[] = existingRules.map(rule => ({
       id: rule.id,
@@ -203,6 +213,12 @@ async function getCurrentUrl() {
 
 // client-side redirection (when no new requests are sent)
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  const strictModeOn = await chrome.storage.local.get([storageStrictModeKey]);
+  // console.log(`strictModeOn.strictMode: ${strictModeOn.strictMode}`);
+  if (strictModeOn) {
+    checkInactiveRules();
+  }
+
   const url = changeInfo.url;
   if (url) {
     const blackList = await getRules();
@@ -218,6 +234,51 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   }
   return true;
 });
+
+async function checkInactiveRules() {
+  const result = await chrome.storage.local.get([storageRulesKey]);
+  const inactiveRules = result.inactiveRules as RuleInStorage[];
+  console.log(inactiveRules);
+  if (!inactiveRules || inactiveRules.length === 0 || Object.keys(inactiveRules).length === 0) {
+    console.log('no inactive rules');
+    return;
+  };
+
+  const date = new Date().getTime();
+  const rulesToUpdate: NewRule[] = [];
+  const expiredRulesSet = new Set<number>();
+  inactiveRules.forEach(rule => {
+    if (rule.unblockDate < date) {
+      const updatedRule: NewRule = {
+        id: rule.id,
+        priority: 1,
+        action: {
+          type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
+          redirect: {
+            regexSubstitution: chrome.runtime.getURL("blocked.html")
+          }
+        },
+        condition: {
+          regexFilter: rule.urlToBlock,
+          resourceTypes: ["main_frame" as chrome.declarativeNetRequest.ResourceType]
+        }
+      };
+      rulesToUpdate.push(updatedRule);
+      expiredRulesSet.add(rule.id);
+    }
+  });
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: rulesToUpdate.map(rule => rule.id),
+    addRules: rulesToUpdate
+  })
+    .then(() => {
+      // remove rules with expired block time from the storage 
+      const updatedRules = inactiveRules.filter(rule => !expiredRulesSet.has(rule.id));
+      chrome.storage.local.set({ inactiveRules: updatedRules });
+    })
+    .catch(error => console.error(error));
+  // console.log(inactiveRules);
+}
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
