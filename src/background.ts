@@ -5,14 +5,6 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
-  + delete all rules button on options page
-  + add strict mode - when user disables a rule, it automatically gets reenabled in 1h:
-    + store the state of strict mode in storage
-    + store disabled rules ({ id, expirationTime })
-    + when making a new request:
-      1) check if strict mode is on
-      2) if it's on, then check every stored rule for an expired date
-      3) if the date has expired, change the rule action from "allow" to "redirect" 
   - customize form
   - customize block page
   - customize options page
@@ -109,6 +101,7 @@ chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (respon
         removeRuleIds: []
       })
         .then(() => {
+          console.log('updateRules 1');
           sendResponse({ success: true, status: "added", msg: 'URL has been saved' });
         })
         .catch(error => {
@@ -126,6 +119,7 @@ chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (respon
         removeRuleIds: [msg.deleteRuleId],
         addRules: []
       })
+      console.log('updateRules 2');
       sendResponse({ success: true, status: "deletedRule", msg: `Rule ${msg.deleteRuleId} have been deleted` });
     } else if (msg.action === 'deleteAll') {
       const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
@@ -134,6 +128,7 @@ chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (respon
         removeRuleIds: existingRules.map(rule => rule.id),
         addRules: []
       });
+      console.log('updateRules 3');
       sendResponse({ success: true, status: "deleted", msg: 'All rules have been deleted' });
     } else if (msg.action === 'updateRules') {
       const uniqueFilters = new Map<string, number>();
@@ -170,6 +165,7 @@ chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (respon
       })
         .then(() => getRules())
         .then((storedRules) => {
+          console.log('updateRules 4');
           sendResponse({ success: true, status: "updated", msg: 'Rules updated', rules: storedRules });
         });
     } else if (msg.action === 'getCurrentUrl') {
@@ -187,14 +183,13 @@ async function getRules(): Promise<Site[]> {
   try {
     const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
 
-    // console.log({ dynamicRules: existingRules });
+    console.log({ dynamicRules: existingRules });
 
     const blackList: Site[] = existingRules.map(rule => ({
       id: rule.id,
       url: rule.condition.regexFilter as string,
       strippedUrl: stripUrl(rule.condition.regexFilter as string),
       blockDomain: rule.condition.regexFilter ? rule.condition.regexFilter[rule.condition.regexFilter.length - 1] === '*' : true,
-      // isActive: storedRules.find(el => el.id === rule.id)?.isActive ?? true
       isActive: rule.action.redirect ? true : false
     }));
     return blackList;
@@ -213,9 +208,9 @@ async function getCurrentUrl() {
 
 // client-side redirection (when no new requests are sent)
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  const strictModeOn = await chrome.storage.local.get([storageStrictModeKey]);
-  // console.log(`strictModeOn.strictMode: ${strictModeOn.strictMode}`);
-  if (strictModeOn) {
+  const {strictMode} = await chrome.storage.local.get([storageStrictModeKey]);
+  if (strictMode) {
+    console.log(strictMode);
     checkInactiveRules();
   }
 
@@ -238,17 +233,18 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 async function checkInactiveRules() {
   const result = await chrome.storage.local.get([storageRulesKey]);
   const inactiveRules = result.inactiveRules as RuleInStorage[];
-  console.log(inactiveRules);
+  
+  // if there's no inactive rules
   if (!inactiveRules || inactiveRules.length === 0 || Object.keys(inactiveRules).length === 0) {
     console.log('no inactive rules');
     return;
   };
 
-  const date = new Date().getTime();
+  const currTime = new Date().getTime();
   const rulesToUpdate: NewRule[] = [];
   const expiredRulesSet = new Set<number>();
   inactiveRules.forEach(rule => {
-    if (rule.unblockDate < date) {
+    if (rule.unblockDate < currTime) {
       const updatedRule: NewRule = {
         id: rule.id,
         priority: 1,
@@ -273,6 +269,7 @@ async function checkInactiveRules() {
   })
     .then(() => {
       // remove rules with expired block time from the storage 
+      console.log('updateRules 5');
       const updatedRules = inactiveRules.filter(rule => !expiredRulesSet.has(rule.id));
       chrome.storage.local.set({ inactiveRules: updatedRules });
     })

@@ -32,7 +32,9 @@ async function showPopup() {
             <label for="domain">Block entire domain</label>
           </div>
           
-          <button id="close-form-btn" type="button">X</button>
+          <div class="extension-popup-wrapper">
+            <button id="close-form-btn" type="button">X</button>
+          </div>
     
           <div>
             <button id="submit-btn" type="submit">Submit</button>
