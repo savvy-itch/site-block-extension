@@ -1,14 +1,25 @@
 .extension-popup-form {
+  --pale-text: #574f59;
+  --form-bg: #f0f0f0;
+  --highlight-color: #789DBC;
+  --text-color: #1E201E;
+  --dark-highlight: #3767a9;
+  --dark-highlight2: hsl(215, 51%, 37%);
+  --font-size: 16px;
+  --bg-transition: transition: background-color .1s ease-in-out;
+  --checkbox-size: 25px;
+  --gap-between-checkbox-and-text: calc(var(--checkbox-size) + 10px);
+
   position: fixed;
   top: 50dvh;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 1.5rem;
   padding: 2rem;
-  border: 2px solid gray;
+  border: 2px solid var(--highlight-color);
   border-radius: 10px;
-  background-color: white;
-  color: black;
+  background-color: var(--form-bg);
+  color: var(--text-color);
   width: 45vw;
   font-size: 16px;
   z-index: 500;
@@ -17,17 +28,17 @@
 .url-input-label {
   display: flex;
   flex-direction: column;
-  font-size: 1.5rem;
+  gap: 5px;
+  font-size: 1.3em;
+  color: var(--text-color);
 }
 
 .url-input {
   padding: 5px;
-  font-size: 1.5rem;
-}
-
-.extension-popup-form button {
-  padding: 10px;
-  font-size: 1.4rem;
+  font-size: 1em;
+  border-radius: 5px;
+  background-color: white;
+  color: var(--text-color);
 }
 
 .extension-popup-form button:hover {
@@ -41,13 +52,150 @@
   color: darkred;
 }
 
-.extension-popup-wrapper > btn {
+.extension-close-btn-container {
   position: absolute;
-  right: 20px;
-  top: 20px;
-  border-radius: 50%;
+  right: 12px;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
-.extension-popup-wrapper > btn:hover {
-  background-color: lightslategray;
+.extension-close-btn-container > p {
+  font-size: .9em;
+  margin: 0;
+}
+
+.extension-close-btn-container .extension-close-form-btn {
+  border-radius: 50%;
+  padding: 5px;
+  border: none;
+  display: flex;
+  background-color: transparent;
+  transition: var(--bg-transition);
+}
+
+.extension-close-form-btn:hover {
+  background-color: hsl(288, 6%, 80%);
+}
+
+.extension-close-form-btn img {
+  width: 20px;
+  height: 20px;
+}
+
+.extension-block-domain-label {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  position: relative;
+  padding-left: var(--gap-between-checkbox-and-text);
+  cursor: pointer;
+  font-size: 1.2em;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* CUSTOM CHECKBOX */
+.extension-block-domain-label input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.extension-domain-checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: var(--checkbox-size);
+  width: var(--checkbox-size);
+  border: 1px solid var(--text-color);
+  border-radius: 4px;
+  background-color: #eee;
+  transition: var(--bg-transition);
+}
+
+.extension-block-domain-label:hover input ~ .extension-domain-checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.extension-block-domain-label input:checked ~ .extension-domain-checkmark {
+  background-color: var(--dark-highlight);
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.extension-domain-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.extension-block-domain-label input:checked ~ .extension-domain-checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.extension-block-domain-label .extension-domain-checkmark:after {
+  left: 8px;
+  top: 4px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+/* -------------  */
+
+.extension-block-domain-label:hover {
+  cursor: pointer;
+}
+
+/* .extension-block-domain-checkbox {
+  width: 1.5em;
+  height: 1.5em;
+  border-radius: 4px;
+  background-color: var(--dark-highlight);
+} */
+
+.extension-form-btn-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.extension-form-btn-container button {
+  font-size: 1.1em;
+  padding: 7px 15px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+}
+
+.extension-submit-btn {
+  background-color: hsl(160, 100%, 35%);
+  transition: var(--bg-transition);
+}
+
+.extension-submit-btn:hover,
+.extension-submit-btn:focus {
+  background-color: hsl(160, 100%, 26%);
+}
+
+.extension-options-btn {
+  background-color: var(--dark-highlight);
+  transition: var(--bg-transition);
+}
+
+.extension-options-btn:hover,
+.extension-options-btn:focus {
+  background-color: var(--dark-highlight2);
 }

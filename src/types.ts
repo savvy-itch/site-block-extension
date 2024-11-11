@@ -1,15 +1,17 @@
+import { DeclarativeNetRequest } from "webextension-polyfill"
+
 export interface NewRule {
   id: number,
   priority: number,
   action: {
-    type: chrome.declarativeNetRequest.RuleActionType,
+    type: DeclarativeNetRequest.RuleActionTypeEnum,
     redirect?: {
       regexSubstitution: string
     }
   },
   condition: {
     regexFilter: string,
-    resourceTypes: chrome.declarativeNetRequest.ResourceType[]
+    resourceTypes: DeclarativeNetRequest.ResourceType[]
   }
 }
 

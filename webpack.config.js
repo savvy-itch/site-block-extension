@@ -1,6 +1,8 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
 
+const targetBrowser = process.env.TARGET_BROWSER || 'chrome';
+
 module.exports = {
   mode: "development",
   entry: {
@@ -29,9 +31,19 @@ module.exports = {
   plugins: [
     new CopyPlugin({
       patterns: [
-        {from: 'static'}
-        // { from: 'blocked.html', to: '.' },
-        // { from: 'popup.css', to: '.' },
+        {
+          from: `static/manifest.${targetBrowser}.json`,
+          to: 'manifest.json'
+        },
+        {
+          from: 'static',
+          globOptions: {
+            ignore: ['**/manifest.*.json']
+          }
+        },
+        {
+          from: 'node_modules/webextension-polyfill/dist/browser-polyfill.js'
+        }
       ],
     })
   ]

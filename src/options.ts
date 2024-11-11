@@ -1,6 +1,7 @@
+import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
 import { forbiddenUrls, storageKey, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
-import { deleteRules } from "./helpers";
-import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
+// import { deleteRules } from "./helpers";
+import { DeleteAction, DeleteAllAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
 
 /*
 Edge cases:
@@ -44,23 +45,27 @@ clearBtn?.addEventListener('click', () => {
   deleteRules();
   editedRulesIds.clear();
   toggleEditMode(false);
-  displayUrlList();
-  syncStrictMode();
+  // without timeout the changes cannot come into effect before re-rendering
+  setTimeout(() => {
+    displayUrlList();
+    syncStrictMode();
+  }, 100);
 });
 
 strictModeSwitch?.addEventListener('change', () => {
   console.log(`change event triggered: ${strictModeSwitch.checked}`);
   const isStrictModeOn = strictModeSwitch.checked;
-  chrome.storage.local.set({ strictMode: isStrictModeOn });
+  browser.storage.local.set({ strictMode: isStrictModeOn });
   handleInactiveRules(isStrictModeOn);
 });
 
-function handleInactiveRules(isStrictModeOn: boolean) {
+async function handleInactiveRules(isStrictModeOn: boolean) {
   if (!isStrictModeOn) {
-    chrome.storage.local.set({ inactiveRules: [] });
+    browser.storage.local.set({ inactiveRules: [] });
   } else {
     const msg: GetAllAction = { action: 'getRules' };
-    chrome.runtime.sendMessage(msg, (res: ResToSend) => {
+    const res: ResToSend = await browser.runtime.sendMessage(msg);
+    try {
       if (res.success && res.rules) {
         const inactiveRulesToStore: RuleInStorage[] = [];
         const date = new Date();
@@ -69,9 +74,11 @@ function handleInactiveRules(isStrictModeOn: boolean) {
           const urlToBlock = `^https?:\/\/${rule.strippedUrl}${rule.blockDomain ? '.*' : '$'}`;
           inactiveRulesToStore.push({ id: rule.id, unblockDate: unblockDate, urlToBlock })
         });
-        chrome.storage.local.set({ inactiveRules: inactiveRulesToStore });
+        browser.storage.local.set({ inactiveRules: inactiveRulesToStore });
       }
-    })
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 
@@ -86,9 +93,12 @@ function toggleEditMode(bool: boolean) {
   }
 }
 
-function displayUrlList() {
+async function displayUrlList() {
+  console.log('displayUrlList()');
   const msg: GetAllAction = { action: 'getRules' };
-  chrome.runtime.sendMessage(msg, (res: ResToSend) => {
+  const res: ResToSend = await browser.runtime.sendMessage(msg);
+  console.log(res);
+  try {
     if (res.success) {
       if (res.rules) {
         console.log(res.rules);
@@ -137,7 +147,7 @@ function displayUrlList() {
             editBtn.addEventListener('click', () => {
               if (!showEditInput) {
                 showEditInput = true;
-                editedRulesIds.add(rule.id)
+                editedRulesIds.add(rule.id);
                 disableOtherBtns(rule.id);
                 toggleEditMode(true);
                 const urlCell = updateRuleRow?.querySelector('.row-url');
@@ -174,30 +184,44 @@ function displayUrlList() {
             updateRuleRow?.classList.toggle('inactive-url');
             toggleEditMode(true);
             editedRulesIds.add(rule.id);
-            // console.log(`active checkbox toggled`, editedRulesIds);
           });
         });
       }
-    } else {
-      alert('An error occured. Check the console.');
-      console.error(res.error);
     }
-  })
+  } catch (error) {
+    console.error(error);
+    alert('An error occured. Check the console.');
+  }
 }
 
-function deleteRule(id: number) {
+async function deleteRule(id: number) {
   console.log(`Called deleteRule for ID: ${id}`);
   const msg: DeleteAction = { action: "deleteRule", deleteRuleId: id };
-  chrome.runtime.sendMessage(msg, (res: ResToSend) => {
+  const res: ResToSend = await browser.runtime.sendMessage(msg);
+  try {
     if (res.success) {
       editedRulesIds.delete(id);
       displayUrlList();
       syncStrictMode();
-    } else {
-      alert('Error: Could not delete the rule')
-      console.error(res.error);
     }
-  });
+  } catch (error) {
+    console.error(res.error);
+    alert('Error: Could not delete the rule')
+  }
+}
+
+async function deleteRules() {
+  console.log('deleteRules()');
+  const msg: DeleteAllAction = { action: 'deleteAll' };
+  try {
+    const res: ResToSend = await browser.runtime.sendMessage(msg);
+    if (res.success) {
+      alert('All rules have been deleted');
+    }
+  } catch (error) {
+    alert('An error occured. Check the console.');
+    console.error(error);
+  }
 }
 
 async function saveChanges() {
@@ -211,21 +235,22 @@ async function saveChanges() {
     return;
   }
 
-  // console.log({editedRulesIds});
-
   const rulesToStore: RuleInStorage[] = [];
-  const strictModeOn = await chrome.storage.local.get(['strictMode']);
+  const strictModeOn = await browser.storage.local.get(['strictMode']);
   const date = new Date();
   const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
   for (const elem of editedRulesIds) {
     const editedRow = document.getElementById(`row-${elem}`);
     if (editedRow) {
-      console.log('editedRow exists');
       const rowId = Number(editedRow.querySelector('.row-id')?.textContent);
       const urlInput = editedRow.querySelector('.row-url > input') as HTMLInputElement;
-      const strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent;
+      let strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent;
+      // remove "/" at the end
+      if (strippedUrl?.endsWith('/')) {
+        strippedUrl = strippedUrl?.substring(0, strippedUrl.length - 1);
+      }
       const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
-      const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '.*' : '$'}`;
+      const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '\/?.*' : '\/?$'}`;
       const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;
 
       if (!strippedUrl || forbiddenUrls.some(url => url.test(strippedUrl))) {
@@ -243,17 +268,17 @@ async function saveChanges() {
         priority: 1,
         action: {
           type: isActive
-            ? chrome.declarativeNetRequest.RuleActionType.REDIRECT
-            : chrome.declarativeNetRequest.RuleActionType.ALLOW,
+            ? 'redirect'
+            : 'allow',
           ...(isActive && {
             redirect: {
-              regexSubstitution: chrome.runtime.getURL("blocked.html")
+              regexSubstitution: browser.runtime.getURL("blocked.html")
             }
           })
         },
         condition: {
           regexFilter: urlToBlock,
-          resourceTypes: ["main_frame" as chrome.declarativeNetRequest.ResourceType]
+          resourceTypes: ["main_frame" as DeclarativeNetRequest.ResourceType]
         }
       };
       updatedRules.push(updatedRule);
@@ -264,19 +289,20 @@ async function saveChanges() {
   console.log({ updatedRules });
 
   const msg: UpdateAction = { action: 'updateRules', updatedRules };
-  chrome.runtime.sendMessage(msg, (res: ResToSend) => {
+  const res: ResToSend = await browser.runtime.sendMessage(msg);
+  try {
     if (res.success && res.rules) {
       isEdited = false;
-      chrome.storage.local.set({ inactiveRules: rulesToStore });
+      browser.storage.local.set({ inactiveRules: rulesToStore });
       editedRulesIds.clear();
       displayUrlList();
       toggleEditMode(false);
       alert('Changes have been saved');
-    } else {
-      console.error(res.error);
-      alert('Could not save changes. Check the console.');
     }
-  });
+  } catch (error) {
+    console.error(res.error);
+    alert('Could not save changes. Check the console.');
+  }
 }
 
 function disableOtherBtns(ruleId: number) {
@@ -297,9 +323,21 @@ function disableOtherBtns(ruleId: number) {
 }
 
 async function syncStrictMode() {
-  const {strictMode} = await chrome.storage.local.get([storageStrictModeKey]);
-  console.log(`strictModeOn.strictMode: ${strictMode}`);
-  if (strictMode) {
-    strictModeSwitch.checked = strictMode;
+  console.log('syncStrictMode()');
+  try {
+    const result = await browser.storage.local.get(storageStrictModeKey);
+    // console.log(`strictModeOn.strictMode: ${strictMode}`);
+    if (storageStrictModeKey in result) {
+      const strictMode = result[storageStrictModeKey];
+      if (typeof strictMode === 'boolean'){
+        strictModeSwitch.checked = strictMode;
+      } else {
+        console.warn('strictMode is not a boolean');
+      }
+    } else {
+      console.warn('strictMode key doesn\'t exist');
+    }
+  } catch (error) {
+    console.error(error);
   }
 }

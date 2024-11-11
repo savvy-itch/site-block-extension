@@ -1,9 +1,9 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Website Blocker",
   "description": "Extension for blocking unwanted websites",
   "version": "1.0",
-  "action": {
+  "browser_action": {
     "default_title": "Click to show the form"
   },
   "permissions": [
@@ -12,12 +12,23 @@
     "declarativeNetRequestWithHostAccess",
     "scripting", 
     "storage",
-    "tabs"
+    "tabs",
+    "*://*/"
   ],
-  "host_permissions": ["*://*/"],
   "background": {
-    "service_worker": "background.js"
+    "scripts": [
+      "browser-polyfill.js",
+      "background.js"
+    ],
+    "persistent": false
   },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": [
+      "browser-polyfill.js",
+      "options.js"
+    ]
+  }],
   "commands": {
     "trigger_form": {
       "suggested_key": {
@@ -28,13 +39,10 @@
     }
   },
   "web_accessible_resources": [
-    {
-      "resources": ["blocked.html", "options.html"],
-      "matches": ["<all_urls>"]
-    }
+    "blocked.html",
+    "options.html", 
+    "icons/*.svg"
   ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
-  },
+  "content_security_policy": "script-src 'self'; object-src 'self'",
   "options_page": "options.html"
 }

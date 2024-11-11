@@ -1,18 +1,22 @@
-import { storageRulesKey, storageStrictModeKey } from "./globals";
+import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
+import { maxUrlLength, storageRulesKey, storageStrictModeKey } from "./globals";
 import { stripUrl } from "./helpers";
 import { Action, NewRule, ResToSend, Site, RuleInStorage } from "./types";
 import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
-  - customize form
+  ! make cross-browser version
+    - check subdomain blocking
+    - check active toggle
+    - check strict mode
   - customize block page
   - customize options page
-  - make cross browser versions
   - add more custom messages for failed and successful actions 
   - add more dialogs for actions
   - add tooltips
   - store strictMode state in a variable to eliminate redundant requests
+  - optimize by using sets and maps where possible
   ? sort/filter rules by alphabet/active/domain
   ? block URLs with specific words in them
   ? allow blocking a list of URLs
@@ -24,164 +28,166 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
   + don't display popup on options and blocked page
   + don't allow adding block page to the list
   + adding an existing URL (when one is temporarily disabled)
+
+  Bugs:
 */
 
 // on icon click
-chrome.action.onClicked.addListener(tab => {
-  triggerPopup(tab);
+const action = chrome.action ?? browser.browserAction;
+action.onClicked.addListener(tab => {
+  console.log('click');
+  triggerPopup(tab as browser.Tabs.Tab);
 });
 
-// on shortcut key press
-chrome.commands.onCommand.addListener(command => {
+// on shortcut key press 
+browser.commands.onCommand.addListener(command => {
+  console.log('command');
   if (command === 'trigger_form') {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const tab = tabs[0];
-      if (tab) {
-        triggerPopup(tab);
-      }
-    })
+    browser.tabs.query({ active: true, currentWindow: true })
+      .then((tabs) => {
+        const tab = tabs[0];
+        if (tab) {
+          triggerPopup(tab);
+        }
+      })
+      .catch(error => console.error(error));
   }
-})
+});
 
-function triggerPopup(tab: chrome.tabs.Tab) {
+function triggerPopup(tab: browser.Tabs.Tab) {
+  console.log('triggerPopup');
   if (tab.id) {
+    console.log('tab.id exists');
     const tabId = tab.id;
-    chrome.scripting.insertCSS(({
+    browser.scripting.insertCSS(({
       target: { tabId },
       files: ['./popup.css'],
     }))
       .then(() => {
-        chrome.scripting.executeScript({
-          target: { tabId },
-          files: ['./content.js'],
-        })
+        console.log('goint to execute script next...');
+        browser.scripting.executeScript
+          ? browser.scripting.executeScript({
+            target: { tabId },
+            files: ['./content.js'],
+          })
+          : browser.tabs.executeScript({
+            file: './content.js',
+          });
       })
       .catch(error => console.error(error));
   }
 }
 
-chrome.runtime.onMessage.addListener((msg: Action, sender, sendResponse: (response: ResToSend) => void) => {
-  (async () => {
-    if (msg.action === 'blockUrl') {
-      const blackList = await getRules();
-      const normalizedUrl = msg.url?.replace(/^https?:\/\//, '').replace(/\/$/, ''); // remove the protocol and the last slash
-      const urlToBlock = `^https?:\/\/${normalizedUrl}\/${msg.blockDomain ? '.*' : '$'}`;
+browser.runtime.onMessage.addListener(async (message, sender) => {
+  const msg = message as Action;
+  if (msg.action === 'blockUrl') {
+    const blackList = await getRules();
+    const normalizedUrl = msg.url?.replace(/^https?:\/\//, '').replace(/\/$/, ''); // remove the protocol and the last slash
+    const urlToBlock = `^https?:\/\/${normalizedUrl}\/?${msg.blockDomain ? '.*' : '$'}`;
 
-      if (blackList.some(site => site.url === urlToBlock)) {
-        sendResponse({ success: true, status: "duplicate", msg: 'URL is already blocked' });
-        return;
-      }
+    if (blackList.some(site => site.url === urlToBlock)) {
+      return { success: true, status: "duplicate", msg: 'URL is already blocked' };
+    }
 
-      let newId = Number(nanoid());
-      let isUnique = !blackList.some(rule => rule.id === newId);
-      while (isUnique === false) {
-        newId = Number(nanoid());
-        isUnique = !blackList.some(rule => rule.id === newId);
-      }
+    let newId = Number(nanoid());
+    let isUnique = !blackList.some(rule => rule.id === newId);
+    while (isUnique === false) {
+      newId = Number(nanoid());
+      isUnique = !blackList.some(rule => rule.id === newId);
+    }
 
-      const newRule: NewRule = {
-        id: newId,
-        priority: 1,
-        action: {
-          type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
-          redirect: {
-            regexSubstitution: chrome.runtime.getURL("blocked.html")
-          }
-        },
-        condition: {
-          regexFilter: urlToBlock,
-          resourceTypes: ["main_frame" as chrome.declarativeNetRequest.ResourceType]
+    const newRule: NewRule = {
+      id: newId,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: {
+          regexSubstitution: browser.runtime.getURL("blocked.html")
         }
-      };
+      },
+      condition: {
+        regexFilter: urlToBlock,
+        resourceTypes: ["main_frame" as DeclarativeNetRequest.ResourceType]
+      }
+    };
 
-      console.log({ newRule });
-
-      chrome.declarativeNetRequest.updateDynamicRules({
+    console.log('should add new rule', newRule);
+    try {
+      browser.declarativeNetRequest.updateDynamicRules({
         addRules: [newRule],
         removeRuleIds: []
-      })
-        .then(() => {
-          console.log('updateRules 1');
-          sendResponse({ success: true, status: "added", msg: 'URL has been saved' });
-        })
-        .catch(error => {
-          console.error('Error updating rules:', error);
-          sendResponse({ success: false, error });
-        })
-        .finally(() => console.log(`Updated rules: ${blackList}`))
-    } else if (msg.action === 'getRules') {
-      const blackList = await getRules();
-      // console.log({ blackList });
-      sendResponse({ success: true, status: "getRules", rules: blackList });
-    } else if (msg.action === 'deleteRule') {
-      // delete single rule
-      chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: [msg.deleteRuleId],
-        addRules: []
-      })
-      console.log('updateRules 2');
-      sendResponse({ success: true, status: "deletedRule", msg: `Rule ${msg.deleteRuleId} have been deleted` });
-    } else if (msg.action === 'deleteAll') {
-      const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
-      // delete rules
-      chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: existingRules.map(rule => rule.id),
-        addRules: []
       });
-      console.log('updateRules 3');
-      sendResponse({ success: true, status: "deleted", msg: 'All rules have been deleted' });
-    } else if (msg.action === 'updateRules') {
-      const uniqueFilters = new Map<string, number>();
-      const filteredRules: NewRule[] = [];
-      const blackList = await getRules();
-
-      // console.log({ updatedRules: msg.updatedRules });
-
-      // NOTE: if getRules() is going to return map instead of array, this loop can be removed
-      blackList.forEach(rule => {
-        if (!uniqueFilters.has(rule.url)) {
-          uniqueFilters.set(rule.url, rule.id);
-        }
-      });
-
-      // remove updated rules that became duplicates
-      const rulesToRemove: number[] = [];
-      msg.updatedRules.forEach(rule => {
-        if (uniqueFilters.has(rule.condition.regexFilter)) {
-          // if a duplicate occurs
-          if (uniqueFilters.get(rule.condition.regexFilter) === rule.id) {
-            // remove the new duplicate rule
-            filteredRules.push(rule);
-          }
-        }
-        rulesToRemove.push(rule.id);
-      });
-
-      // console.log({ filteredRules });
-
-      chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: rulesToRemove,
-        addRules: filteredRules
-      })
-        .then(() => getRules())
-        .then((storedRules) => {
-          console.log('updateRules 4');
-          sendResponse({ success: true, status: "updated", msg: 'Rules updated', rules: storedRules });
-        });
-    } else if (msg.action === 'getCurrentUrl') {
-      const currUrl = await getCurrentUrl();
-      sendResponse({ success: true, status: "currUrl", url: currUrl ?? '' });
-    } else {
-      // will throw error if type doesn't match the existing actions
-      const exhaustiveCheck: never = msg;
+      const res: ResToSend = { success: true, status: "added", msg: 'URL has been saved' };
+      return res;
+    } catch (error) {
+      console.error('Error updating rules:', error);
+      return { success: false, error };
     }
-  })();
-  return true;
+  } else if (msg.action === 'getRules') {
+    const blackList = await getRules();
+    return { success: true, status: "getRules", rules: blackList };
+  } else if (msg.action === 'deleteRule') {
+    // delete single rule
+    await browser.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: [msg.deleteRuleId],
+      addRules: []
+    })
+    return { success: true, status: "deletedRule", msg: `Rule ${msg.deleteRuleId} have been deleted` };
+  } else if (msg.action === 'deleteAll') {
+    const existingRules = await browser.declarativeNetRequest.getDynamicRules();
+    await browser.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: existingRules.map(rule => rule.id),
+      addRules: []
+    });
+    return { success: true, status: "deleted", msg: 'All rules have been deleted' };
+  } else if (msg.action === 'updateRules') {
+    const uniqueFilters = new Map<string, number>();
+    const filteredRules: NewRule[] = [];
+    const blackList = await getRules();
+
+    // NOTE: if getRules() is going to return map instead of array, this loop can be removed
+    blackList.forEach(rule => {
+      if (!uniqueFilters.has(rule.url)) {
+        uniqueFilters.set(rule.url, rule.id);
+      }
+    });
+
+    // remove updated rules that became duplicates
+    const rulesToRemove: number[] = [];
+    msg.updatedRules.forEach(rule => {
+      if (uniqueFilters.has(rule.condition.regexFilter)) {
+        // if a duplicate occurs
+        if (uniqueFilters.get(rule.condition.regexFilter) === rule.id) {
+          // remove the new duplicate rule
+          filteredRules.push(rule);
+        }
+      } else {
+        filteredRules.push(rule);
+      }
+      rulesToRemove.push(rule.id);
+    });
+    console.log({filteredRules});
+
+    await browser.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: rulesToRemove,
+      addRules: filteredRules
+    });
+    const storedRules = await getRules();
+    return { success: true, status: "updated", msg: 'Rules updated', rules: storedRules };
+  } else if (msg.action === 'getCurrentUrl') {
+    let currUrl = await getCurrentUrl();
+    currUrl = currUrl?.substring(0, maxUrlLength - 1);
+    return { success: true, status: "currUrl", url: currUrl ?? '' };
+  } else {
+    // will throw error if type doesn't match the existing actions
+    const exhaustiveCheck: never = msg;
+    throw new Error('Unhandled action');
+  }
 });
 
 async function getRules(): Promise<Site[]> {
   try {
-    const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+    const existingRules = await browser.declarativeNetRequest.getDynamicRules();
 
     console.log({ dynamicRules: existingRules });
 
@@ -201,14 +207,14 @@ async function getRules(): Promise<Site[]> {
 
 async function getCurrentUrl() {
   const queryOptions = { active: true, lastFocusedWindow: true };
-  const [tab] = await chrome.tabs.query(queryOptions);
+  const [tab] = await browser.tabs.query(queryOptions);
   console.log(tab.url);
   return tab.url;
 }
 
 // client-side redirection (when no new requests are sent)
-chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  const {strictMode} = await chrome.storage.local.get([storageStrictModeKey]);
+browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  const { strictMode } = await browser.storage.local.get([storageStrictModeKey]);
   if (strictMode) {
     console.log(strictMode);
     checkInactiveRules();
@@ -221,7 +227,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       const regex = new RegExp(rule.url);
       // block request if the URL is in the list and is active
       if (regex.test(url) && rule.isActive) {
-        chrome.tabs.update(tabId, { url: chrome.runtime.getURL('blocked.html') });
+        browser.tabs.update(tabId, { url: browser.runtime.getURL('blocked.html') });
         console.log('redirected through tabs');
         return;
       }
@@ -231,9 +237,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 async function checkInactiveRules() {
-  const result = await chrome.storage.local.get([storageRulesKey]);
+  const result = await browser.storage.local.get([storageRulesKey]);
   const inactiveRules = result.inactiveRules as RuleInStorage[];
-  
+
   // if there's no inactive rules
   if (!inactiveRules || inactiveRules.length === 0 || Object.keys(inactiveRules).length === 0) {
     console.log('no inactive rules');
@@ -249,21 +255,21 @@ async function checkInactiveRules() {
         id: rule.id,
         priority: 1,
         action: {
-          type: chrome.declarativeNetRequest.RuleActionType.REDIRECT,
+          type: 'redirect',
           redirect: {
-            regexSubstitution: chrome.runtime.getURL("blocked.html")
+            regexSubstitution: browser.runtime.getURL("blocked.html")
           }
         },
         condition: {
           regexFilter: rule.urlToBlock,
-          resourceTypes: ["main_frame" as chrome.declarativeNetRequest.ResourceType]
+          resourceTypes: ["main_frame" as DeclarativeNetRequest.ResourceType]
         }
       };
       rulesToUpdate.push(updatedRule);
       expiredRulesSet.add(rule.id);
     }
   });
-  chrome.declarativeNetRequest.updateDynamicRules({
+  browser.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: rulesToUpdate.map(rule => rule.id),
     addRules: rulesToUpdate
   })
@@ -271,13 +277,13 @@ async function checkInactiveRules() {
       // remove rules with expired block time from the storage 
       console.log('updateRules 5');
       const updatedRules = inactiveRules.filter(rule => !expiredRulesSet.has(rule.id));
-      chrome.storage.local.set({ inactiveRules: updatedRules });
+      browser.storage.local.set({ inactiveRules: updatedRules });
     })
     .catch(error => console.error(error));
   // console.log(inactiveRules);
 }
 
-chrome.storage.onChanged.addListener((changes, namespace) => {
+browser.storage.onChanged.addListener((changes, namespace) => {
   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
     console.log(newValue);
   }

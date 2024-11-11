@@ -6,3 +6,5 @@ export const forbiddenUrls: RegExp[] = [
 ];
 // export const strictModeBlockPeriod = 1 * 60 * 60 * 1000; // 1h 
 export const strictModeBlockPeriod = 1 * 10 * 1000; // 10s
+export const minUrlLength = 4;
+export const maxUrlLength = 75;

@@ -1,17 +1,20 @@
+import browser from 'webextension-polyfill';
 import { DeleteAllAction, ResToSend } from "./types";
 
 export function stripUrl(url: string): string {
-  return url.replace(/^\^https\?:\/\//, '').replace(/\.\*|\$$/, '');
+  return url.replace(/^\^https\?:\/\//, '').replace(/\?\.\*|\?\$$/, '');
 }
 
-export function deleteRules() {
+export async function deleteRules() {
+  console.log('deleteRules()');
   const msg: DeleteAllAction = { action: 'deleteAll' };
-  chrome.runtime.sendMessage(msg, (res: ResToSend) => {
+  try {
+    const res: ResToSend = await browser.runtime.sendMessage(msg);
     if (res.success) {
       alert('All rules have been deleted');
-    } else {
-      alert('An error occured. Check the console.');
-      console.error(res.error);
     }
-  })
+  } catch (error) {
+    alert('An error occured. Check the console.');
+    console.error(error);
+  }
 }
