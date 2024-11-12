@@ -112,9 +112,9 @@ async function displayUrlList() {
           !rule.isActive && ruleElem.classList.add('inactive-url');
           const content = `
             <td>${i + 1}</td>
-            <td class="row-id">${rule.id}</td>
+            <!-- <td class="row-id">${rule.id}</td> -->
             <td class="row-url">${rule.strippedUrl}</td>
-            <td>${rule.url}</td>
+            <!-- <td>${rule.url}</td> -->
             <td class="row-domain">
               <input 
                 class="domain-checkbox"
@@ -124,18 +124,32 @@ async function displayUrlList() {
               />
             </td>
             <td>
-              <button class="edit-rule-btn" ${showEditInput ? 'disabled' : ''}>Edit</button>
+              <button class="edit-rule-btn" ${showEditInput ? 'disabled' : ''}
+              >
+                <img src="./icons/edit.svg" alt="edit URL button">
+              </button>
             </td>
             <td>
-              <button class="delete-rule-btn" ${showEditInput ? 'disabled' : ''}>Delete</button>
+              <button class="delete-rule-btn" ${showEditInput ? 'disabled' : ''}
+              >
+                <img src="./icons/delete.svg" alt="delete URL button">
+              </button>
             </td>
             <td>
-              <input 
+              <label class="active-switch">
+                <input 
+                  type="checkbox"
+                  class="active-checkbox ${!rule.isActive ? 'inactive-url' : ''}"
+                  ${rule.isActive && 'checked'}
+                />
+                <span class="active-slider round"></span>
+              </label>
+              <!-- <input 
                 class="active-checkbox ${!rule.isActive ? 'inactive-url' : ''}"
                 name="active"
                 type="checkbox"
                 ${rule.isActive && 'checked'}
-              />
+              /> -->
             </td>
           `;
           ruleElem.innerHTML = content;
@@ -236,7 +250,7 @@ async function saveChanges() {
   }
 
   const rulesToStore: RuleInStorage[] = [];
-  const strictModeOn = await browser.storage.local.get(['strictMode']);
+  const strictModeOn = await browser.storage.local.get([storageStrictModeKey]);
   const date = new Date();
   const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
   for (const elem of editedRulesIds) {

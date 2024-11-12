@@ -9,40 +9,45 @@
 </head>
 
 <body>
-  <h1>Extension Settings</h1>
-  <button id="clear-btn">Delete all rules</button>
-  <section id="settings-section">
-    <h2>Active rules</h2>
-    <table class="blacklist-table table">
-      <thead>
-        <th>No.</th>
-        <th class="test-col">ID</th>
-        <th>URL</th>
-        <th class="test-col">URL Filter</th>
-        <th>Block all subdomains</th>
-        <th></th>
-        <th></th>
-        <th>Active</th>
-      </thead>
-      <tbody id="url-table">
-      </tbody>
-    </table>
-  </section>
-  <div>
-    <button id="save-btn" class="btn">Save Changes</button>
-    <button id="cancel-btn" class="btn">Cancel</button>
-  </div>
+  <header class="extension-options-header">
+    <h1>Extension Settings</h1>
+    <button id="clear-btn" class="clear-btn">Delete all rules</button>
+  </header>
 
-  <section>
-    <label for="strict-mode-switch">
-      Strict mode
-      <input 
-        id="strict-mode-switch"
-        type="checkbox" 
-        name="strict-mode"
-      />
-    </label>
-  </section>
+  <main>
+    <section id="settings-section" class="table-section">
+      <h2>Active rules</h2>
+      <table class="blacklist-table table">
+        <thead>
+          <th>No.</th>
+          <!-- <th class="test-col">ID</th> -->
+          <th>URL</th>
+          <!-- <th class="test-col">URL Filter</th> -->
+          <th class="domain-th">Block all subdomains</th>
+          <th></th>
+          <th></th>
+          <th>Active</th>
+        </thead>
+        <tbody id="url-table">
+        </tbody>
+      </table>
+    </section>
+    <div>
+      <button id="save-btn" class="btn">Save Changes</button>
+      <button id="cancel-btn" class="btn">Cancel</button>
+    </div>
+  
+    <section>
+      <label for="strict-mode-switch">
+        Strict mode
+        <input 
+          id="strict-mode-switch"
+          type="checkbox" 
+          name="strict-mode"
+        />
+      </label>
+    </section>
+  </main>
 
   <footer>Footer</footer>
   <script src="./options.js"></script>

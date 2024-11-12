@@ -6,14 +6,13 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
-  - optimize by using sets and maps where possible
-  - store strictMode state in a variable to eliminate redundant requests
-  ? replace nanoid with Math.random
-  - customize block page
-  - customize options page
+  ! customize block page
   - add more custom messages for failed and successful actions 
   - add more dialogs for actions
   - add tooltips
+  - optimize by using sets and maps where possible
+  - customize options page
+  - accessability
   ? sort/filter rules by alphabet/active/domain
   ? block URLs with specific words in them
   ? allow blocking a list of URLs
@@ -31,13 +30,11 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 // on icon click
 const action = chrome.action ?? browser.browserAction;
 action.onClicked.addListener(tab => {
-  console.log('click');
   triggerPopup(tab as browser.Tabs.Tab);
 });
 
 // on shortcut key press 
 browser.commands.onCommand.addListener(command => {
-  console.log('command');
   if (command === 'trigger_form') {
     browser.tabs.query({ active: true, currentWindow: true })
       .then((tabs) => {
@@ -51,16 +48,13 @@ browser.commands.onCommand.addListener(command => {
 });
 
 function triggerPopup(tab: browser.Tabs.Tab) {
-  console.log('triggerPopup');
   if (tab.id) {
-    console.log('tab.id exists');
     const tabId = tab.id;
     browser.scripting.insertCSS(({
       target: { tabId },
       files: ['./popup.css'],
     }))
       .then(() => {
-        console.log('goint to execute script next...');
         browser.scripting.executeScript
           ? browser.scripting.executeScript({
             target: { tabId },
@@ -107,7 +101,6 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       }
     };
 
-    console.log('should add new rule', newRule);
     try {
       browser.declarativeNetRequest.updateDynamicRules({
         addRules: [newRule],
@@ -162,7 +155,6 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       }
       rulesToRemove.push(rule.id);
     });
-    console.log({filteredRules});
 
     await browser.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: rulesToRemove,
@@ -185,8 +177,6 @@ async function getRules(): Promise<Site[]> {
   try {
     const existingRules = await browser.declarativeNetRequest.getDynamicRules();
 
-    console.log({ dynamicRules: existingRules });
-
     const blackList: Site[] = existingRules.map(rule => ({
       id: rule.id,
       url: rule.condition.regexFilter as string,
@@ -204,7 +194,6 @@ async function getRules(): Promise<Site[]> {
 async function getCurrentUrl() {
   const queryOptions = { active: true, lastFocusedWindow: true };
   const [tab] = await browser.tabs.query(queryOptions);
-  console.log(tab.url);
   return tab.url;
 }
 
@@ -213,7 +202,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' || changeInfo.url) {
     const { strictMode } = await browser.storage.local.get([storageStrictModeKey]);
     if (strictMode) {
-      console.log(strictMode);
       checkInactiveRules();
     }
   
@@ -225,7 +213,6 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
         // block request if the URL is in the list and is active
         if (regex.test(url) && rule.isActive) {
           browser.tabs.update(tabId, { url: browser.runtime.getURL('blocked.html') });
-          console.log('redirected through tabs');
           return;
         }
       })
@@ -240,7 +227,6 @@ async function checkInactiveRules() {
 
   // if there's no inactive rules
   if (!inactiveRules || inactiveRules.length === 0 || Object.keys(inactiveRules).length === 0) {
-    console.log('no inactive rules');
     return;
   };
 
@@ -273,12 +259,10 @@ async function checkInactiveRules() {
   })
     .then(() => {
       // remove rules with expired block time from the storage 
-      console.log('updateRules 5');
       const updatedRules = inactiveRules.filter(rule => !expiredRulesSet.has(rule.id));
       browser.storage.local.set({ inactiveRules: updatedRules });
     })
     .catch(error => console.error(error));
-  // console.log(inactiveRules);
 }
 
 browser.storage.onChanged.addListener((changes, namespace) => {
