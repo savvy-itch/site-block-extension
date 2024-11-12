@@ -245,10 +245,7 @@ async function saveChanges() {
       const rowId = Number(editedRow.querySelector('.row-id')?.textContent);
       const urlInput = editedRow.querySelector('.row-url > input') as HTMLInputElement;
       let strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent;
-      // remove "/" at the end
-      if (strippedUrl?.endsWith('/')) {
-        strippedUrl = strippedUrl?.substring(0, strippedUrl.length - 1);
-      }
+      strippedUrl = strippedUrl?.replace(/^https?:\/\//, '').replace(/\/$/, '');
       const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
       const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '\/?.*' : '\/?$'}`;
       const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;

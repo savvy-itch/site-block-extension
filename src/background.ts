@@ -6,21 +6,17 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
-  ! make cross-browser version
-    - check subdomain blocking
-    - check active toggle
-    - check strict mode
+  - optimize by using sets and maps where possible
+  - store strictMode state in a variable to eliminate redundant requests
+  ? replace nanoid with Math.random
   - customize block page
   - customize options page
   - add more custom messages for failed and successful actions 
   - add more dialogs for actions
   - add tooltips
-  - store strictMode state in a variable to eliminate redundant requests
-  - optimize by using sets and maps where possible
   ? sort/filter rules by alphabet/active/domain
   ? block URLs with specific words in them
   ? allow blocking a list of URLs
-  ? replace nanoid with Math.random
   ? testing
 
   Edge cases:
@@ -214,26 +210,28 @@ async function getCurrentUrl() {
 
 // client-side redirection (when no new requests are sent)
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  const { strictMode } = await browser.storage.local.get([storageStrictModeKey]);
-  if (strictMode) {
-    console.log(strictMode);
-    checkInactiveRules();
+  if (changeInfo.status === 'complete' || changeInfo.url) {
+    const { strictMode } = await browser.storage.local.get([storageStrictModeKey]);
+    if (strictMode) {
+      console.log(strictMode);
+      checkInactiveRules();
+    }
+  
+    const url = changeInfo.url;
+    if (url) {
+      const blackList = await getRules();
+      blackList.forEach(rule => {
+        const regex = new RegExp(rule.url);
+        // block request if the URL is in the list and is active
+        if (regex.test(url) && rule.isActive) {
+          browser.tabs.update(tabId, { url: browser.runtime.getURL('blocked.html') });
+          console.log('redirected through tabs');
+          return;
+        }
+      })
+    }
+    return true;
   }
-
-  const url = changeInfo.url;
-  if (url) {
-    const blackList = await getRules();
-    blackList.forEach(rule => {
-      const regex = new RegExp(rule.url);
-      // block request if the URL is in the list and is active
-      if (regex.test(url) && rule.isActive) {
-        browser.tabs.update(tabId, { url: browser.runtime.getURL('blocked.html') });
-        console.log('redirected through tabs');
-        return;
-      }
-    })
-  }
-  return true;
 });
 
 async function checkInactiveRules() {
