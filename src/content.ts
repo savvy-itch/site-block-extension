@@ -50,7 +50,6 @@ async function showPopup() {
       
             <div class="extension-form-btn-container">
               <button id="submit-btn" class="extension-submit-btn" type="submit">Submit</button>
-              <!-- <button id="clear-btn" type="button">Clear All Rules</button> -->
               <button id="go-to-options" class="extension-options-btn" type="button">Go to options</button>
             </div>
           `;

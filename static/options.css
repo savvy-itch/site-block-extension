@@ -4,6 +4,14 @@ body {
   --danger-color: hsl(348, 95%, 56%);
   --danger-hover: hsl(348, 90%, 50%);
   --dark-highlight: hsl(215, 51%, 37%);
+  --switch-width: 40px;
+  --switch-height: 24px;
+  --switch-padding: 4px;
+  --slider-height: calc(var(--switch-height) - (var(--switch-padding) * 2));
+  --success-color: hsl(160, 100%, 35%);
+  --success-dark-color: hsl(160, 100%, 26%);
+  --dim-color: hsl(231, 28%, 35%);
+  --darker-dim-color: hsl(231, 28%, 30%);
 
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   background-color: #F5EDED;
@@ -26,7 +34,7 @@ h1 {
 
 .clear-btn {
   font-size: 1.2rem;
-  padding: 7px 15px;
+  padding: 10px 15px;
   border: none;
   border-radius: 5px;
   color: white;
@@ -41,7 +49,6 @@ h1 {
 }
 
 /*============= TABLE SECTION ============== */
-
 .table-section {
   display: flex;
   flex-direction: column;
@@ -50,8 +57,14 @@ h1 {
   margin: 2rem 0;
 }
 
+
 .table-section > h2 {
   font-size: 1.5rem;
+}
+
+.table-wrapper {
+  max-height: 50dvh;
+  overflow: auto;
 }
 
 .table {
@@ -71,7 +84,7 @@ h1 {
   padding: 12px 15px;
   text-align: left;
   /* delete this before production: */
-  border: 1px solid darkslategrey; 
+  border: none; 
 }
 
 .table td {
@@ -116,9 +129,21 @@ h1 {
   font-size: 1.1rem;
 }
 
+.btn {
+  font-size: 1.1rem;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  transition: var(--bg-transition);
+}
+
 .btn:disabled {
-  color: hsl(0, 0%, 30%);
-  background-color: lightgray;
+  color: hsl(0, 0%, 70%);
+}
+
+.btn:hover {
+  cursor: pointer;
 }
 
 .btn:disabled:hover {
@@ -160,8 +185,8 @@ h1 {
 .active-switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: var(--switch-width);
+  height: var(--switch-height); 
 }
 
 /* Hide default HTML checkbox */
@@ -180,17 +205,16 @@ h1 {
   right: 0;
   bottom: 0;
   background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
+  padding: var(--switch-padding);
+  -webkit-transition: .3s;
+  transition: .3s;
 }
 
 .active-slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
+  height: var(--slider-height);
+  aspect-ratio: 1/1;
   background-color: white;
   -webkit-transition: .3s;
   transition: .3s;
@@ -205,16 +229,36 @@ h1 {
 }
 
 .active-checkbox:checked + .active-slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
+  transform: translateX(16px);
 }
 
-/* Rounded sliders */
 .active-slider.round {
-  border-radius: 34px;
+  border-radius: var(--switch-height);
 }
 
 .active-slider.round:before {
   border-radius: 50%;
+}
+
+/* ============= */
+
+.save-btn {
+  background-color: var(--success-color);
+  margin-right: 10px;
+}
+
+.save-btn:hover,
+.save-btn:disabled {
+  background-color: var(--success-dark-color);
+}
+
+.cancel-btn {
+  background-color: var(--dim-color);
+}
+
+.cancel-btn:hover,
+.cancel-btn:disabled {
+  background-color: var(--darker-dim-color);
 }

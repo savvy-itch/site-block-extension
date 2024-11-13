@@ -16,25 +16,27 @@
 
   <main>
     <section id="settings-section" class="table-section">
-      <h2>Active rules</h2>
-      <table class="blacklist-table table">
-        <thead>
-          <th>No.</th>
-          <!-- <th class="test-col">ID</th> -->
-          <th>URL</th>
-          <!-- <th class="test-col">URL Filter</th> -->
-          <th class="domain-th">Block all subdomains</th>
-          <th></th>
-          <th></th>
-          <th>Active</th>
-        </thead>
-        <tbody id="url-table">
-        </tbody>
-      </table>
+      <h2>Blocked URLs</h2>
+      <div class="table-wrapper">
+        <table class="blacklist-table table">
+          <thead>
+            <th>No.</th>
+            <!-- <th class="test-col">ID</th> -->
+            <th>URL</th>
+            <!-- <th class="test-col">URL Filter</th> -->
+            <th class="domain-th">Block all subdomains</th>
+            <th></th>
+            <th></th>
+            <th>Active</th>
+          </thead>
+          <tbody id="url-table">
+          </tbody>
+        </table>
+      </div>
     </section>
     <div>
-      <button id="save-btn" class="btn">Save Changes</button>
-      <button id="cancel-btn" class="btn">Cancel</button>
+      <button id="save-btn" class="save-btn btn">Save Changes</button>
+      <button id="cancel-btn" class="cancel-btn btn">Cancel</button>
     </div>
   
     <section>

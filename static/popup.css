@@ -9,6 +9,8 @@
   --bg-transition: transition: background-color .1s ease-in-out;
   --checkbox-size: 25px;
   --gap-between-checkbox-and-text: calc(var(--checkbox-size) + 10px);
+  --success-color: hsl(160, 100%, 35%);
+  --success-dark-color: hsl(160, 100%, 26%);
 
   position: fixed;
   top: 50dvh;
@@ -181,13 +183,13 @@
 }
 
 .extension-submit-btn {
-  background-color: hsl(160, 100%, 35%);
+  background-color: var(--success-color);
   transition: var(--bg-transition);
 }
 
 .extension-submit-btn:hover,
 .extension-submit-btn:focus {
-  background-color: hsl(160, 100%, 26%);
+  background-color: var(--success-dark-color);
 }
 
 .extension-options-btn {

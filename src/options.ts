@@ -1,7 +1,6 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
-import { forbiddenUrls, storageKey, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
-// import { deleteRules } from "./helpers";
-import { DeleteAction, DeleteAllAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
+import { forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
+import { DeleteAction, DeleteAllAction, GetAllAction, NewRule, ResToSend, RuleInStorage, UpdateAction } from "./types";
 
 /*
 Edge cases:
@@ -20,6 +19,7 @@ const strictModeSwitch = document.getElementById('strict-mode-switch') as HTMLIn
 let isEdited = false;
 let showEditInput = false;
 let editedRulesIds: Set<number> = new Set();
+const rowIdPrefix = 'row-';
 // let isStrictModeOn = false;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -107,7 +107,7 @@ async function displayUrlList() {
         const urlList = res.rules.sort((a, b) => a.strippedUrl.localeCompare(b.strippedUrl));
         urlList.map((rule, i) => {
           const ruleElem = document.createElement('tr');
-          ruleElem.id = `row-${rule.id}`;
+          ruleElem.id = `${rowIdPrefix}${rule.id}`;
           ruleElem.classList.add('row');
           !rule.isActive && ruleElem.classList.add('inactive-url');
           const content = `
@@ -140,6 +140,7 @@ async function displayUrlList() {
                 <input 
                   type="checkbox"
                   class="active-checkbox ${!rule.isActive ? 'inactive-url' : ''}"
+                  name="active"
                   ${rule.isActive && 'checked'}
                 />
                 <span class="active-slider round"></span>
@@ -256,13 +257,14 @@ async function saveChanges() {
   for (const elem of editedRulesIds) {
     const editedRow = document.getElementById(`row-${elem}`);
     if (editedRow) {
-      const rowId = Number(editedRow.querySelector('.row-id')?.textContent);
+      const rowId = Number(editedRow.id.substring(rowIdPrefix.length)); // e.g. "row-1"
       const urlInput = editedRow.querySelector('.row-url > input') as HTMLInputElement;
       let strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent;
       strippedUrl = strippedUrl?.replace(/^https?:\/\//, '').replace(/\/$/, '');
       const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
       const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '\/?.*' : '\/?$'}`;
       const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;
+      console.log(editedRow.querySelector('.active-checkbox'));
 
       if (!strippedUrl || forbiddenUrls.some(url => url.test(strippedUrl))) {
         alert('Invalid URL');

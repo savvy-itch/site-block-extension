@@ -13,6 +13,7 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
   - optimize by using sets and maps where possible
   - customize options page
   - accessability
+  - responsiveness
   ? sort/filter rules by alphabet/active/domain
   ? block URLs with specific words in them
   ? allow blocking a list of URLs
@@ -155,6 +156,10 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       }
       rulesToRemove.push(rule.id);
     });
+
+    console.log(msg.updatedRules);
+    console.log({rulesToRemove});
+    console.log({filteredRules});
 
     await browser.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: rulesToRemove,
