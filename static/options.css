@@ -1,5 +1,5 @@
 body {
-  --text-color: #1E201E;
+  --text-color: #272835;
   --bg-transition: transition: background-color .1s ease-in-out;
   --danger-color: hsl(348, 95%, 56%);
   --danger-hover: hsl(348, 90%, 50%);
@@ -8,14 +8,22 @@ body {
   --switch-height: 24px;
   --switch-padding: 4px;
   --slider-height: calc(var(--switch-height) - (var(--switch-padding) * 2));
+  --slider-width: calc(var(--switch-width) - (var(--switch-padding) * 2));
   --success-color: hsl(160, 100%, 35%);
   --success-dark-color: hsl(160, 100%, 26%);
   --dim-color: hsl(231, 28%, 35%);
   --darker-dim-color: hsl(231, 28%, 30%);
+  --highlight-color: #FC8F54;
+  --footer-bg: #222831;
+  --footer-highlight: hsl(216, 18%, 26%);
+  --main-highlight: #6495ed;
 
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   background-color: #F5EDED;
-  margin: 0 2rem;
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
 }
 
 /* =========== HEADER ============ */
@@ -30,6 +38,8 @@ h1 {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
+  padding: 0 2rem;
+  min-height: 20dvh;
 }
 
 .clear-btn {
@@ -49,6 +59,11 @@ h1 {
 }
 
 /*============= TABLE SECTION ============== */
+.options-main {
+  padding: 0 2rem;
+  min-height: 60dvh;
+}
+
 .table-section {
   display: flex;
   flex-direction: column;
@@ -110,7 +125,7 @@ h1 {
 }
 
 .table th {
-  background-color: cornflowerblue;
+  background-color: var(--main-highlight);
   color: white;
   font-weight: bold;
 }
@@ -261,4 +276,178 @@ h1 {
 .cancel-btn:hover,
 .cancel-btn:disabled {
   background-color: var(--darker-dim-color);
+}
+
+.strict-mode-switch {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 1.5rem 0;
+  position: relative;
+  display: flex;
+  gap: 12px;
+  width: fit-content;
+}
+
+.strict-mode-switch:hover {
+  cursor: pointer;
+}
+
+/* Hide default HTML checkbox */
+.strict-mode-switch input {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.strict-mode-slider {
+  position: relative;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-sizing: border-box;
+  background-color: hsl(0, 0%, 60%);
+  padding: var(--switch-padding);
+  width: var(--switch-width);
+  height: var(--switch-height);
+  -webkit-transition: .3s;
+  transition: .3s;
+}
+
+.strict-mode-slider:before {
+  position: absolute;
+  content: "";
+  height: var(--slider-height);
+  aspect-ratio: 1/1;
+  background-color: white;
+  -webkit-transition: .3s;
+  transition: .3s;
+}
+
+.strict-mode-checkbox:checked + .strict-mode-slider {
+  background-color: var(--highlight-color);
+}
+
+.strict-mode-checkbox:focus + .strict-mode-slider {
+  box-shadow: 0 0 1px var(--highlight-color);
+}
+
+.strict-mode-checkbox:checked + .strict-mode-slider:before {
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
+  transform: translateX(16px);
+}
+
+.strict-mode-slider.round {
+  border-radius: var(--switch-height);
+}
+
+.strict-mode-slider.round:before {
+  border-radius: 50%;
+}
+
+/* ========= Footer ========== */
+.options-footer {
+  background-color: var(--footer-bg);
+  color: white;
+  border-top: 2px solid var(--main-highlight);
+  padding: 1.5rem;
+  min-height: 20dvh;
+}
+
+.options-footer a {
+  color: white;
+  display: block;
+}
+
+.options-footer p {
+  margin: 0;
+}
+
+.footer-wrapper {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-around;
+}
+
+.footer-wrapper ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-wrapper img {
+  width: 1.3rem;
+}
+
+.footer-general-col {
+  font-size:  1rem;
+}
+
+.footer-general-col > p:nth-child(2) {
+  margin-top: 1.5rem;
+}
+
+.footer-general-col > a:first-of-type {
+  margin-bottom: 1.5rem;
+}
+
+.options-footer .footer-developer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: .9rem;
+}
+
+.footer-developer a {
+  display: inline;
+}
+
+.footer-general-col > a:last-of-type {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.footer-list-col h3 {
+  font-size: 1.2rem;
+}
+
+.footer-list-col h3:last-of-type {
+  text-align: center;
+}
+
+.footer-list-col ul {
+  font-size: 1.1rem;
+}
+
+.footer-list-col a {
+  display: flex;
+  gap: 4px;
+}
+
+.footer-list-col img {
+  width: 1rem;
+}
+
+.contact-list {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.contact-list a {
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.contact-list a:hover {
+  background-color: var(--footer-highlight);
+}
+
+.contact-list img {
+  width: 1.5rem;
 }

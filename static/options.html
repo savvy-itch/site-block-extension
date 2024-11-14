@@ -14,7 +14,7 @@
     <button id="clear-btn" class="clear-btn">Delete all rules</button>
   </header>
 
-  <main>
+  <main class="options-main">
     <section id="settings-section" class="table-section">
       <h2>Blocked URLs</h2>
       <div class="table-wrapper">
@@ -38,20 +38,62 @@
       <button id="save-btn" class="save-btn btn">Save Changes</button>
       <button id="cancel-btn" class="cancel-btn btn">Cancel</button>
     </div>
-  
-    <section>
-      <label for="strict-mode-switch">
-        Strict mode
-        <input 
-          id="strict-mode-switch"
-          type="checkbox" 
-          name="strict-mode"
-        />
-      </label>
-    </section>
+
+    <!-- <label for="strict-mode-switch">
+      Strict mode:
+      <input id="strict-mode-switch" type="checkbox" name="strict-mode" />
+    </label> -->
+    <label for="strict-mode-switch" class="strict-mode-switch">
+      Strict mode:
+      <input 
+        id="strict-mode-switch"
+        type="checkbox"
+        class="strict-mode-checkbox"
+        name="strict-mode"
+      />
+      <span class="strict-mode-slider round"></span>
+    </label>
   </main>
 
-  <footer>Footer</footer>
+  <footer class="options-footer">
+    <div class="footer-wrapper">
+      <div class="footer-general-col">
+        <p>Website blocker v <span>0.0.0</span></p>
+        <p>Found a bug?</p>
+        <a href="">Report via Email</a>
+        <a href="">
+          Rate the extension
+          <img src="./icons/star.svg" alt="rate icon">
+        </a>
+      </div>
+      <div class="footer-list-col">
+        <h3>References</h3>
+        <ul>
+          <li>
+            <a href="">Lucide <img src="./icons/link.svg" alt="link icon"></a>
+          </li>
+          <li>
+            <a href="">Undraw <img src="./icons/link.svg" alt="link icon"></a>
+          </li>
+        </ul>
+      </div>
+      <div class="footer-list-col">
+        <h3>Contact</h3>
+        <ul class="contact-list">
+          <li>
+            <a href=""><img src="./icons/linkedin.svg" alt="Linkedin icon"></a>
+          </li>
+          <li>
+            <a href=""><img src="./icons/threads.svg" alt="Threads icon"></a>
+          </li>
+          <li>
+            <a href=""><img src="./icons/github.svg" alt="GitHub icon"></a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <p class="footer-developer">Developed by <a href="https://www.linkedin.com/in/mykhailo-savych-a31366248/" target="_blank">Michael Savych</a></p>
+  </footer>
   <script src="./options.js"></script>
 </body>
 

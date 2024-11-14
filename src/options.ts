@@ -145,12 +145,6 @@ async function displayUrlList() {
                 />
                 <span class="active-slider round"></span>
               </label>
-              <!-- <input 
-                class="active-checkbox ${!rule.isActive ? 'inactive-url' : ''}"
-                name="active"
-                type="checkbox"
-                ${rule.isActive && 'checked'}
-              /> -->
             </td>
           `;
           ruleElem.innerHTML = content;
