@@ -10,7 +10,7 @@
 
 <body>
   <header class="extension-options-header">
-    <h1>Extension Settings</h1>
+    <h1>Website blocker settings</h1>
     <button id="clear-btn" class="clear-btn">Delete all rules</button>
   </header>
 
@@ -58,22 +58,44 @@
   <footer class="options-footer">
     <div class="footer-wrapper">
       <div class="footer-general-col">
-        <p>Website blocker v <span>0.0.0</span></p>
+        <p>Website blocker v<span id="ext-version"></span></p>
         <p>Found a bug?</p>
-        <a href="">Report via Email</a>
+        <a href="mailto:sprone3@gmail.com" target="_blank">Report via Email</a>
         <a href="">
           Rate the extension
           <img src="./icons/star.svg" alt="rate icon">
         </a>
+        <p>You can find Website blocker in these stores:</p>
+        <ul class="stores-list">
+          <!-- Not yet! -->
+          <!-- <li>
+            <a href="https://chromewebstore.google.com/category/extensions" target="_blank">Chrome Web Store</a>
+          </li> -->
+          <li>
+            <a href="addons.opera.com/" target="_blank">
+              <img src="./icons/opera.svg" alt="Opera addons">
+            </a>
+          </li>
+          <li>
+            <a href="https://addons.mozilla.org/en-US/firefox/" target="_blank">
+              <img src="./icons/firefox.svg" alt="Firefox browser add-ons">
+            </a>
+          </li>
+          <li>
+            <a href="https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home?" target="_blank">
+              <img src="./icons/edge.svg" alt="Microsoft Edge Extensions">
+            </a>
+          </li>
+        </ul>
       </div>
       <div class="footer-list-col">
         <h3>References</h3>
-        <ul>
+        <ul class="ref-list">
           <li>
-            <a href="">Lucide <img src="./icons/link.svg" alt="link icon"></a>
+            Icons by <a href="https://lucide.dev/" target="_blank">Lucide</a> and <a href="https://www.svgrepo.com" target="_blank">SVG Repo <img src="./icons/link.svg" alt="link icon"></a>
           </li>
           <li>
-            <a href="">Undraw <img src="./icons/link.svg" alt="link icon"></a>
+            Images by <a href="https://undraw.co/" target="_blank">Undraw <img src="./icons/link.svg" alt="link icon"></a>
           </li>
         </ul>
       </div>
@@ -81,13 +103,13 @@
         <h3>Contact</h3>
         <ul class="contact-list">
           <li>
-            <a href=""><img src="./icons/linkedin.svg" alt="Linkedin icon"></a>
+            <a href="#" target="_blank"><img src="./icons/linkedin.svg" alt="Linkedin icon"></a>
           </li>
           <li>
-            <a href=""><img src="./icons/threads.svg" alt="Threads icon"></a>
+            <a href="#" target="_blank"><img src="./icons/bluesky.svg" alt="Bluesky icon"></a>
           </li>
           <li>
-            <a href=""><img src="./icons/github.svg" alt="GitHub icon"></a>
+            <a href="#" target="_blank"><img src="./icons/github.svg" alt="GitHub icon"></a>
           </li>
         </ul>
       </div>

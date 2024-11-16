@@ -1,0 +1,77 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  --text-color: #272835;
+  --disabled-btn: hsl(236, 15%, 28%);
+  --dark-highlight: hsl(215, 51%, 37%);
+  --font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+
+  font-family: var(--font-family);
+  /* background-color: #E5D9F2; */
+  background-image: linear-gradient(to right bottom, #e5d9f2, #d7d3eb, #abb7c9);
+  color: var(--text-color);
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.blocked-url {
+  font-size: 1.4rem;
+  color: var(--dark-highlight);
+}
+
+.hero-img {
+  max-height: 50dvh;
+}
+
+.block-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  justify-items: center;
+  width: 100%;
+}
+
+.block-footer a,
+.block-footer p {
+  font-size: 1rem;
+  color: var(--text-color);
+}
+
+.block-footer a {
+  text-decoration: none;
+}
+
+.block-footer a:hover,
+.delete-btn:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.action-btns-wrapper {
+  display: flex;
+  gap: 15px;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.delete-btn {
+  font-family: var(--font-family);
+  font-size: 1rem;
+  color: var(--text-color);
+  background-color: transparent;
+  border: none;
+}
+
+.delete-btn:disabled {
+  color: var(--disabled-btn);
+}
+
+.delete-btn:disabled:hover {
+  cursor: not-allowed;
+}

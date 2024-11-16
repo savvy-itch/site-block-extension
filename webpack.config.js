@@ -8,7 +8,8 @@ module.exports = {
   entry: {
     background: './src/background.ts',
     content: './src/content.ts',
-    options: './src/options.ts'
+    options: './src/options.ts',
+    blocked: './src/blocked.ts'
   },
   output: {
     path: path.resolve(__dirname, "dist"),

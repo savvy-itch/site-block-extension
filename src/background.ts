@@ -6,14 +6,14 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
+  + customize options page
   ! customize block page
+  - add tooltips
   - add more custom messages for failed and successful actions 
   - add more dialogs for actions
-  - add tooltips
-  - optimize by using sets and maps where possible
-  - customize options page
   - accessability
   - responsiveness
+  - optimize by using sets and maps where possible
   ? sort/filter rules by alphabet/active/domain
   ? block URLs with specific words in them
   ? allow blocking a list of URLs
@@ -93,7 +93,7 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       action: {
         type: 'redirect',
         redirect: {
-          regexSubstitution: browser.runtime.getURL("blocked.html")
+          regexSubstitution: `${browser.runtime.getURL("blocked.html")}?id=${newId}`
         }
       },
       condition: {
@@ -199,7 +199,12 @@ async function getRules(): Promise<Site[]> {
 async function getCurrentUrl() {
   const queryOptions = { active: true, lastFocusedWindow: true };
   const [tab] = await browser.tabs.query(queryOptions);
+  console.log({tab});
   return tab.url;
+}
+
+function getUrlBeforeBlock() {
+
 }
 
 // client-side redirection (when no new requests are sent)
@@ -246,7 +251,7 @@ async function checkInactiveRules() {
         action: {
           type: 'redirect',
           redirect: {
-            regexSubstitution: browser.runtime.getURL("blocked.html")
+            regexSubstitution: `${browser.runtime.getURL("blocked.html")}?id=${rule.id}`
           }
         },
         condition: {

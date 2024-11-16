@@ -26,7 +26,8 @@
     "matches": ["<all_urls>"],
     "js": [
       "browser-polyfill.js",
-      "options.js"
+      "options.js",
+      "blocked.js"
     ]
   }],
   "commands": {

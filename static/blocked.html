@@ -4,8 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Page Blocked</title>
+  <link rel="stylesheet" href="./blocked.css">
 </head>
 <body>
   <h1>This page is blocked!</h1>
+  <h2>You tried accessing: <span id="blocked-url" class="blocked-url"></span></h2>
+  <h3>"Remember to stay focused and achieve your goals!"</h3>
+  <img class="hero-img" src="./icons/block-hero.svg" alt="block hero">
+  <footer class="block-footer">
+    <div><!-- spacer --></div>
+    <div class="action-btns-wrapper">
+      <button id="delete-btn" class="delete-btn" type="button">Delete URL from list</button>
+      <a href="./options.html">Unblock the URL</a>
+    </div>
+    <p>Website blocker 2024</p>
+  </footer>
+  <script src="./blocked.js"></script>
 </body>
 </html>

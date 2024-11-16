@@ -14,6 +14,7 @@ const saveBtn = document.getElementById('save-btn');
 const cancelBtn = document.getElementById('cancel-btn');
 const tbody = document.getElementById('url-table');
 const clearBtn = document.getElementById('clear-btn');
+const versionElem = document.getElementById('ext-version');
 const strictModeSwitch = document.getElementById('strict-mode-switch') as HTMLInputElement;
 
 let isEdited = false;
@@ -27,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
   saveBtn?.setAttribute('disabled', '');
   cancelBtn?.setAttribute('disabled', '');
   syncStrictMode();
+  if (versionElem) {
+    versionElem.innerText = getExtVersion() ?? '';
+  }
 });
 
 cancelBtn?.addEventListener('click', () => {
@@ -347,4 +351,9 @@ async function syncStrictMode() {
   } catch (error) {
     console.error(error);
   }
+}
+
+function getExtVersion() {
+  const v = browser.runtime.getManifest().version;
+  return v;
 }
