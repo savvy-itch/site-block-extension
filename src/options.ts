@@ -1,6 +1,7 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
 import { forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
 import { DeleteAction, DeleteAllAction, GetAllAction, NewRule, ResToSend, RuleInStorage, UpdateAction } from "./types";
+import { handleFormSubmission } from './helpers';
 
 /*
 Edge cases:
@@ -10,16 +11,34 @@ Options page:
   + adding an existing URL (when one is temporarily disabled)
 */
 
+const urlForm = document.getElementById('url-input-form') as HTMLFormElement;
+const errorPara = document.getElementById('extension-error-para') as HTMLParagraphElement;
 const saveBtn = document.getElementById('save-btn');
 const cancelBtn = document.getElementById('cancel-btn');
 const tbody = document.getElementById('url-table');
 const clearBtn = document.getElementById('clear-btn');
+// delete all rules dialog
+const clearAllDialog = document.getElementById('clear-all-dialog') as HTMLDialogElement;
+const clearDialogOkBtn = document.getElementById('dialog-clear-ok-btn');
+const clearDialogCancelBtn = document.getElementById('dialog-clear-cancel-btn');
+// delete rule dialog
+const deleteDialog = document.getElementById('delete-dialog') as HTMLDialogElement;
+const deleteDialogOkBtn = document.getElementById('dialog-delete-ok-btn');
+const deleteDialogCancelBtn = document.getElementById('dialog-delete-cancel-btn');
 const versionElem = document.getElementById('ext-version');
 const strictModeSwitch = document.getElementById('strict-mode-switch') as HTMLInputElement;
+const webStoreLink = document.getElementById('web-store-link') as HTMLAnchorElement;
+const webStores = {
+  // chrome: "https://chromewebstore.google.com/category/extensions",
+  edge: "https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home?",
+  firefox: "https://addons.mozilla.org/en-US/firefox/",
+  opera: "https://addons.opera.com/en/extensions/"
+};
 
 let isEdited = false;
 let showEditInput = false;
 let editedRulesIds: Set<number> = new Set();
+let idToDelete: number | null;
 const rowIdPrefix = 'row-';
 // let isStrictModeOn = false;
 
@@ -30,6 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
   syncStrictMode();
   if (versionElem) {
     versionElem.innerText = getExtVersion() ?? '';
+  }
+  if (webStoreLink) {
+    assignStoreLink();
   }
 });
 
@@ -45,15 +67,34 @@ saveBtn?.addEventListener('click', async () => {
   await saveChanges();
 });
 
+// Clear All Rules dialog
 clearBtn?.addEventListener('click', () => {
-  deleteRules();
+  clearAllDialog.showModal();
+});
+
+clearDialogCancelBtn?.addEventListener('click', () => {
+  clearAllDialog.close();
+});
+
+clearDialogOkBtn?.addEventListener('click', async () => {
+  await deleteRules();
+  clearAllDialog.close();
   editedRulesIds.clear();
   toggleEditMode(false);
-  // without timeout the changes cannot come into effect before re-rendering
-  setTimeout(() => {
-    displayUrlList();
-    syncStrictMode();
-  }, 100);
+  await displayUrlList();
+  syncStrictMode();
+});
+
+// Delete rule dialog
+deleteDialogOkBtn?.addEventListener('click', () => {
+  if (idToDelete) {
+    deleteRule(idToDelete);
+    deleteDialog.close();
+  }
+});
+
+deleteDialogCancelBtn?.addEventListener('click', () => {
+  deleteDialog.close();
 });
 
 strictModeSwitch?.addEventListener('change', () => {
@@ -62,6 +103,19 @@ strictModeSwitch?.addEventListener('change', () => {
   browser.storage.local.set({ strictMode: isStrictModeOn });
   handleInactiveRules(isStrictModeOn);
 });
+
+urlForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  await handleFormSubmission(urlForm, errorPara, handleSuccessfulFormSubmission);
+  await displayUrlList();
+  editedRulesIds.clear();
+  toggleEditMode(false);
+});
+
+function handleSuccessfulFormSubmission() {
+  console.log('URL has been saved');
+  errorPara.textContent = '';
+}
 
 async function handleInactiveRules(isStrictModeOn: boolean) {
   if (!isStrictModeOn) {
@@ -181,7 +235,8 @@ async function displayUrlList() {
           const deleteBtn = updateRuleRow?.querySelector('.delete-rule-btn');
           if (deleteBtn) {
             deleteBtn.addEventListener('click', () => {
-              deleteRule(rule.id);
+              idToDelete = rule.id;
+              deleteDialog.showModal();
             });
           }
 
@@ -216,6 +271,7 @@ async function deleteRule(id: number) {
       editedRulesIds.delete(id);
       displayUrlList();
       syncStrictMode();
+      idToDelete = null;
     }
   } catch (error) {
     console.error(res.error);
@@ -229,7 +285,7 @@ async function deleteRules() {
   try {
     const res: ResToSend = await browser.runtime.sendMessage(msg);
     if (res.success) {
-      alert('All rules have been deleted');
+      console.log('All rules have been deleted');
     }
   } catch (error) {
     alert('An error occured. Check the console.');
@@ -340,7 +396,7 @@ async function syncStrictMode() {
     // console.log(`strictModeOn.strictMode: ${strictMode}`);
     if (storageStrictModeKey in result) {
       const strictMode = result[storageStrictModeKey];
-      if (typeof strictMode === 'boolean'){
+      if (typeof strictMode === 'boolean') {
         strictModeSwitch.checked = strictMode;
       } else {
         console.warn('strictMode is not a boolean');
@@ -356,4 +412,23 @@ async function syncStrictMode() {
 function getExtVersion() {
   const v = browser.runtime.getManifest().version;
   return v;
+}
+
+/*
+Brave:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+Chrome:  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+Opera:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 OPR/114.0.0.0'
+Firefox: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0'
+Edge:    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0'
+*/
+
+function assignStoreLink() {
+  const browser = navigator.userAgent;
+  if (browser.includes('OPR/')) {
+    webStoreLink.href = webStores.opera;
+  } else if (browser.includes('Firefox/')) {
+    webStoreLink.href = webStores.firefox;
+  } else if (browser.includes('Edg/')) {
+    webStoreLink.href = webStores.edge;
+  }
 }

@@ -9,6 +9,8 @@ body {
   --disabled-btn: hsl(236, 15%, 28%);
   --dark-highlight: hsl(215, 51%, 37%);
   --font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  --dim-color: hsl(231, 28%, 35%);
+  --highlight-color: hsl(21, 87%, 56%);
 
   font-family: var(--font-family);
   /* background-color: #E5D9F2; */
@@ -21,9 +23,19 @@ body {
   justify-content: space-around;
 }
 
+h1 {
+  font-size: 1.8rem;
+}
+
 .blocked-url {
   font-size: 1.4rem;
   color: var(--dark-highlight);
+}
+
+.motivation-heading {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--dim-color);
 }
 
 .hero-img {
@@ -49,7 +61,7 @@ body {
 
 .block-footer a:hover,
 .delete-btn:hover {
-  text-decoration: underline;
+  /* text-decoration: underline; */
   cursor: pointer;
 }
 
@@ -74,4 +86,33 @@ body {
 
 .delete-btn:disabled:hover {
   cursor: not-allowed;
+}
+
+.hover-underline-animation {
+  display: inline-block;
+  position: relative;
+}
+
+.hover-underline-animation::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--highlight-color);
+  transition: transform 0.25s ease-out;
+}
+
+.hover-underline-animation:hover::after {
+  transform: scaleX(1);
+}
+
+.hover-underline-animation.left::after {
+  transform-origin: bottom right;
+}
+
+.hover-underline-animation.left:hover::after {
+  transform-origin: bottom left;
 }

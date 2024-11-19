@@ -6,18 +6,26 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
-  + customize options page
-  ! customize block page
-  - add tooltips
-  - add more custom messages for failed and successful actions 
-  - add more dialogs for actions
-  - accessability
+  ! add more dialogs for actions
+    - style dialog
+  - put reused CSS into a separate file
+  - add more custom messages for failed and successful actions
+    - notification about a newly added rule
+    - notification about rules deletion
+  - add about page:
+    - Functionality
+    - FAQ section
+    - Contacts section
+  - accessibility
   - responsiveness
   - optimize by using sets and maps where possible
+  ? localization
+  ? add and display timestamp for each rule
   ? sort/filter rules by alphabet/active/domain
   ? block URLs with specific words in them
   ? allow blocking a list of URLs
   ? testing
+  ? add tooltips
 
   Edge cases:
   Popup:

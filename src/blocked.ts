@@ -5,17 +5,37 @@ const para = document.getElementById('blocked-url');
 const deleteBtn = document.getElementById('delete-btn');
 const params = new URLSearchParams(location.search);
 const urlId = Number(params.get('id'));
+const motivationHeading = document.getElementById('motivation-heading');
+const deleteDialog = document.getElementById('delete-dialog') as HTMLDialogElement;
+const deleteDialogOkBtn = document.getElementById('dialog-delete-ok-btn');
+const deleteDialogCancelBtn = document.getElementById('dialog-delete-cancel-btn');
+const motivanionalMsgs = [
+  "Remember to stay focused and achieve your goals!",
+  "Distractions are temporary, but your goals are forever. Keep going!",
+  "Great things take time. Stay focused and make progress today!",
+  "The time you invest now will pay off in the future. Keep it up!"
+];
 let blockedUrl: string | undefined = '';
 
 document.addEventListener('DOMContentLoaded', () => {
   if (para && urlId) {
     getBlockedUrl();
   }
+  displayMotivationMsg();
 });
 
 deleteBtn?.addEventListener('click', () => {
+  deleteDialog.showModal();
+});
+
+deleteDialogOkBtn?.addEventListener('click', () => {
   deleteRule(urlId);
-})
+  deleteDialog.close();
+});
+
+deleteDialogCancelBtn?.addEventListener('click', () => {
+  deleteDialog.close();
+});
 
 async function  getBlockedUrl() {
   const msg:GetAllAction = { action: 'getRules' };
@@ -50,5 +70,12 @@ async function deleteRule(id: number) {
   } catch (error) {
     console.error(res.error);
     alert('Error: Could not delete the rule')
+  }
+}
+
+function displayMotivationMsg() {
+  if (motivationHeading) {
+    const idx = Math.floor(Math.random() * motivanionalMsgs.length);
+    motivationHeading.innerText = motivanionalMsgs[idx];
   }
 }

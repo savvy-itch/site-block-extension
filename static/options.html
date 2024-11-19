@@ -11,10 +11,40 @@
 <body>
   <header class="extension-options-header">
     <h1>Website blocker settings</h1>
+    <dialog id="clear-all-dialog" class="dialog">
+      <p>Are you sure you want to delete all URLs from the block list?</p>
+      <p>This action cannot be undone.</p>
+      <button id="dialog-clear-ok-btn" type="button" autofocus>Ok</button>
+      <button id="dialog-clear-cancel-btn" type="button">Cancel</button>
+    </dialog>
     <button id="clear-btn" class="clear-btn">Delete all rules</button>
   </header>
 
   <main class="options-main">
+    <form id="url-input-form">
+      <div class="form-input-wrapper">
+        <label for="url" class="url-input-label">
+          Enter URL of the website you want to block:
+          <input 
+            class="url-input" 
+            name="url" 
+            type="text" 
+            placeholder="example.com"
+            required
+          />
+        </label>
+
+        <label for="block-domain" class="extension-block-domain-label">
+          Block entire domain
+          <input type="checkbox" id="block-domain" class="extension-block-domain-checkbox" name="block-domain"
+            value="blockDomain" checked />
+          <span class="extension-domain-checkmark"></span>
+        </label>
+      </div>
+      <p id="extension-error-para" class="extension-error-para"></p>
+      <button id="submit-btn" class="extension-submit-btn btn" type="submit">Submit</button>
+    </form>
+
     <section id="settings-section" class="table-section">
       <h2>Blocked URLs</h2>
       <div class="table-wrapper">
@@ -24,7 +54,15 @@
             <!-- <th class="test-col">ID</th> -->
             <th>URL</th>
             <!-- <th class="test-col">URL Filter</th> -->
-            <th class="domain-th">Block all subdomains</th>
+            <th class="domain-th">
+              Block subdomains
+              <!-- <div class="tooltip-icon">
+                <img src="./icons/help.svg" alt="tooltip icon">
+                <div class="tooltip">
+                  Enable to block all subdomains of URL, e.g., www.example.com, www.example.com/123, etc. Disable to block only the saved URL.
+                </div>
+              </div> -->
+            </th>
             <th></th>
             <th></th>
             <th>Active</th>
@@ -32,6 +70,13 @@
           <tbody id="url-table">
           </tbody>
         </table>
+
+        <dialog id="delete-dialog" class="dialog">
+          <p>Are you sure you want to delete this URL?</p>
+          <p>This action cannot be undone.</p>
+          <button id="dialog-delete-ok-btn" type="button" autofocus>Ok</button>
+          <button id="dialog-delete-cancel-btn" type="button">Cancel</button>
+        </dialog>
       </div>
     </section>
     <div>
@@ -39,20 +84,18 @@
       <button id="cancel-btn" class="cancel-btn btn">Cancel</button>
     </div>
 
-    <!-- <label for="strict-mode-switch">
-      Strict mode:
-      <input id="strict-mode-switch" type="checkbox" name="strict-mode" />
-    </label> -->
+    <!-- <div class="tooltip-wrapper"> -->
     <label for="strict-mode-switch" class="strict-mode-switch">
       Strict mode:
-      <input 
-        id="strict-mode-switch"
-        type="checkbox"
-        class="strict-mode-checkbox"
-        name="strict-mode"
-      />
+      <input id="strict-mode-switch" type="checkbox" class="strict-mode-checkbox" name="strict-mode" />
       <span class="strict-mode-slider round"></span>
     </label>
+
+    <!-- <img src="./icons/help.svg" alt="tooltip icon">
+      <div class="tooltip">
+        When enabled, resets all inactive rules in 1 hour after disabling
+      </div>
+    </div> -->
   </main>
 
   <footer class="options-footer">
@@ -60,8 +103,8 @@
       <div class="footer-general-col">
         <p>Website blocker v<span id="ext-version"></span></p>
         <p>Found a bug?</p>
-        <a href="mailto:sprone3@gmail.com" target="_blank">Report via Email</a>
-        <a href="">
+        <a class="link-to-highlight" href="mailto:#" target="_blank">Report via Email</a>
+        <a id="web-store-link" class="link-to-highlight" href="#" target="_blank">
           Rate the extension
           <img src="./icons/star.svg" alt="rate icon">
         </a>
@@ -72,7 +115,7 @@
             <a href="https://chromewebstore.google.com/category/extensions" target="_blank">Chrome Web Store</a>
           </li> -->
           <li>
-            <a href="addons.opera.com/" target="_blank">
+            <a href="https://addons.opera.com/en/extensions/" target="_blank">
               <img src="./icons/opera.svg" alt="Opera addons">
             </a>
           </li>
@@ -92,10 +135,13 @@
         <h3>References</h3>
         <ul class="ref-list">
           <li>
-            Icons by <a href="https://lucide.dev/" target="_blank">Lucide</a> and <a href="https://www.svgrepo.com" target="_blank">SVG Repo <img src="./icons/link.svg" alt="link icon"></a>
+            Icons by <a class="link-to-highlight" href="https://lucide.dev/" target="_blank">Lucide</a> and <a
+              class="link-to-highlight" href="https://www.svgrepo.com" target="_blank">SVG Repo <img
+                src="./icons/link.svg" alt="link icon"></a>
           </li>
           <li>
-            Images by <a href="https://undraw.co/" target="_blank">Undraw <img src="./icons/link.svg" alt="link icon"></a>
+            Images by <a class="link-to-highlight" href="https://undraw.co/" target="_blank">Undraw <img
+                src="./icons/link.svg" alt="link icon"></a>
           </li>
         </ul>
       </div>
@@ -114,7 +160,8 @@
         </ul>
       </div>
     </div>
-    <p class="footer-developer">Developed by <a href="https://www.linkedin.com/in/mykhailo-savych-a31366248/" target="_blank">Michael Savych</a></p>
+    <p class="footer-developer">Developed by <a href="https://www.linkedin.com/in/mykhailo-savych-a31366248/"
+        target="_blank">Michael Savych</a></p>
   </footer>
   <script src="./options.js"></script>
 </body>

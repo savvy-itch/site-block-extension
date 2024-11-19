@@ -9,13 +9,20 @@
 <body>
   <h1>This page is blocked!</h1>
   <h2>You tried accessing: <span id="blocked-url" class="blocked-url"></span></h2>
-  <h3>"Remember to stay focused and achieve your goals!"</h3>
+  <h3 id="motivation-heading" class="motivation-heading">"Remember to stay focused and achieve your goals!"</h3>
   <img class="hero-img" src="./icons/block-hero.svg" alt="block hero">
   <footer class="block-footer">
     <div><!-- spacer --></div>
     <div class="action-btns-wrapper">
-      <button id="delete-btn" class="delete-btn" type="button">Delete URL from list</button>
-      <a href="./options.html">Unblock the URL</a>
+      <dialog id="delete-dialog" class="dialog">
+        <p>Are you sure you want to delete this URL?</p>
+        <p>This action cannot be undone.</p>
+        <button id="dialog-delete-ok-btn" type="button" autofocus>Ok</button>
+        <button id="dialog-delete-cancel-btn" type="button">Cancel</button>
+      </dialog>
+      <button id="delete-btn" class="delete-btn hover-underline-animation left" type="button">Delete URL from list</button>
+      <a class="hover-underline-animation left" href="./options.html">Unblock the URL</a>
+      <a class="hover-underline-animation left" href="./options.html">Settings</a>
     </div>
     <p>Website blocker 2024</p>
   </footer>
