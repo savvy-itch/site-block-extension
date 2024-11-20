@@ -1,0 +1,91 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  --text-color: #272835;
+  --page-px: 2rem; 
+
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  background-image: linear-gradient(to right bottom, #e5d9f2, #d7d3eb, #abb7c9);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.about-nav {
+  padding: 2rem var(--page-px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.about-nav a {
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-color);
+}
+
+.about-nav-subdiv {
+  display: flex;
+  gap: 15px;
+  justify-content: space-between;
+}
+
+.hover-underline-animation {
+  display: inline-block;
+  position: relative;
+}
+
+.hover-underline-animation::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 2px;
+  bottom: 0;
+  left: 0;
+  background-color: var(--highlight-color);
+  transition: transform 0.25s ease-out;
+}
+
+.hover-underline-animation:hover::after {
+  transform: scaleX(1);
+}
+
+.hover-underline-animation.left::after {
+  transform-origin: bottom right;
+}
+
+.hover-underline-animation.left:hover::after {
+  transform-origin: bottom left;
+}
+
+/* ======== Main ========= */
+.about-main {
+  padding: 1rem var(--page-px);
+  max-width: 65%;
+  margin: 0 auto;
+}
+
+.about-main h2 {
+  font-size: 1.4rem;
+  margin: 1.5rem 0;
+}
+
+.about-main h3 {
+  font-size: 1.25rem;
+  margin: 1rem 0;
+}
+
+.about-main p {
+  font-size: 1.1rem;
+}

@@ -3,14 +3,14 @@
   --form-bg: #f0f0f0;
   --highlight-color: #789DBC;
   --text-color: #1E201E;
-  --dark-highlight: #3767a9;
-  --dark-highlight2: hsl(215, 51%, 37%);
+  /* --dark-highlight: #3767a9; */
+  /* --dark-highlight2: hsl(215, 51%, 37%); */
   --font-size: 16px;
-  --bg-transition: transition: background-color .1s ease-in-out;
+  /* --bg-transition: transition: background-color .1s ease-in-out; */
   --checkbox-size: 25px;
   --gap-between-checkbox-and-text: calc(var(--checkbox-size) + 10px);
-  --success-color: hsl(160, 100%, 35%);
-  --success-dark-color: hsl(160, 100%, 26%);
+  /* --success-color: hsl(160, 100%, 35%);
+  --success-dark-color: hsl(160, 100%, 26%); */
 
   position: fixed;
   top: 50dvh;
@@ -52,6 +52,7 @@
   height: 14px;
   margin: 12px 0;
   color: darkred;
+  font-style: italic;
 }
 
 .extension-close-btn-container {
@@ -121,28 +122,24 @@
   transition: var(--bg-transition);
 }
 
-.extension-block-domain-label:hover input ~ .extension-domain-checkmark {
+/* .extension-block-domain-label:hover input ~ .extension-domain-checkmark {
   background-color: #ccc;
 }
 
-/* When the checkbox is checked, add a blue background */
 .extension-block-domain-label input:checked ~ .extension-domain-checkmark {
   background-color: var(--dark-highlight);
 }
 
-/* Create the checkmark/indicator (hidden when not checked) */
 .extension-domain-checkmark:after {
   content: "";
   position: absolute;
   display: none;
 }
 
-/* Show the checkmark when checked */
 .extension-block-domain-label input:checked ~ .extension-domain-checkmark:after {
   display: block;
 }
 
-/* Style the checkmark/indicator */
 .extension-block-domain-label .extension-domain-checkmark:after {
   left: 8px;
   top: 4px;
@@ -153,20 +150,11 @@
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
-}
-
-/* -------------  */
+} */
 
 .extension-block-domain-label:hover {
   cursor: pointer;
 }
-
-/* .extension-block-domain-checkbox {
-  width: 1.5em;
-  height: 1.5em;
-  border-radius: 4px;
-  background-color: var(--dark-highlight);
-} */
 
 .extension-form-btn-container {
   margin-top: 20px;
@@ -182,7 +170,7 @@
   color: white;
 }
 
-.extension-submit-btn {
+/* .extension-submit-btn {
   background-color: var(--success-color);
   transition: var(--bg-transition);
 }
@@ -190,7 +178,7 @@
 .extension-submit-btn:hover,
 .extension-submit-btn:focus {
   background-color: var(--success-dark-color);
-}
+} */
 
 .extension-options-btn {
   background-color: var(--dark-highlight);

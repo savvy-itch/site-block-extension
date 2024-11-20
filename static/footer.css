@@ -1,0 +1,125 @@
+/* ========= Footer ========== */
+.options-footer {
+  background-color: var(--footer-bg);
+  color: white;
+  border-top: 2px solid var(--main-highlight);
+  padding: 1rem;
+  margin-top: 2rem;
+  min-height: 20dvh;
+}
+
+.options-footer a {
+  color: white;
+  display: block;
+  transition: color .3s;
+}
+
+.options-footer p {
+  margin: 0;
+}
+
+.footer-wrapper {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-around;
+}
+
+.footer-wrapper ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-wrapper img {
+  width: 1.3rem;
+}
+
+.footer-general-col {
+  font-size:  1rem;
+}
+
+.footer-general-col > p:nth-child(2) {
+  margin-top: 1.5rem;
+}
+
+.footer-general-col > a:last-of-type {
+  margin: 1.5rem 0;
+}
+
+.options-footer .footer-developer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: .9rem;
+}
+
+.footer-developer a {
+  display: inline;
+}
+
+.footer-general-col > a:last-of-type {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.footer-list-col h3 {
+  font-size: 1.2rem;
+}
+
+.footer-list-col h3:last-of-type {
+  text-align: center;
+}
+
+.footer-list-col ul {
+  font-size: 1.1rem;
+}
+
+.footer-list-col a {
+  display: flex;
+  gap: 4px;
+}
+
+.footer-list-col img {
+  width: 1rem;
+}
+
+.contact-list {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.contact-list a {
+  padding: 6px;
+  border-radius: 50%;
+}
+
+.contact-list a:hover {
+  background-color: var(--footer-highlight);
+}
+
+.contact-list img {
+  width: 1.5rem;
+}
+
+.stores-list {
+  display: flex;
+  gap: 25px;
+  margin: 0;
+}
+
+.stores-list li {
+ margin-top: .8rem;
+}
+
+.stores-list img {
+  width: 27px;
+  height: 27px;
+}
+
+.ref-list a {
+  display: inline;
+}
+
+.link-to-highlight:hover {
+  color: var(--highlight-color);
+}

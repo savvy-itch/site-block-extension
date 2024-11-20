@@ -4,18 +4,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Extension Settings</title>
+  <title>Settings | Website Blocker Extension</title>
+  <link rel="stylesheet" href="./global.css">
   <link rel="stylesheet" href="./options.css">
+  <link rel="stylesheet" href="./footer.css">
 </head>
 
 <body>
   <header class="extension-options-header">
     <h1>Website blocker settings</h1>
+    <a class="about-link" href="./about.html">
+      <img src="./icons/help.svg" alt="about page icon">
+    </a>
     <dialog id="clear-all-dialog" class="dialog">
       <p>Are you sure you want to delete all URLs from the block list?</p>
       <p>This action cannot be undone.</p>
-      <button id="dialog-clear-ok-btn" type="button" autofocus>Ok</button>
-      <button id="dialog-clear-cancel-btn" type="button">Cancel</button>
+      <div class="dialog-btn-container">
+        <button id="dialog-clear-ok-btn" class="dialog-ok-btn dialog-btn" type="button">Ok</button>
+        <button id="dialog-clear-cancel-btn" class="dialog-cancel-btn dialog-btn" type="button">Cancel</button>
+      </div>
     </dialog>
     <button id="clear-btn" class="clear-btn">Delete all rules</button>
   </header>
@@ -47,7 +54,12 @@
 
     <section id="settings-section" class="table-section">
       <h2>Blocked URLs</h2>
-      <div class="table-wrapper">
+      
+      <!-- <p>Loading...</p>
+
+      <h3>No URLs to block.</h3> -->
+
+      <div id="table-wrapper" class="table-wrapper">
         <table class="blacklist-table table">
           <thead>
             <th>No.</th>
@@ -71,13 +83,15 @@
           </tbody>
         </table>
 
-        <dialog id="delete-dialog" class="dialog">
-          <p>Are you sure you want to delete this URL?</p>
-          <p>This action cannot be undone.</p>
-          <button id="dialog-delete-ok-btn" type="button" autofocus>Ok</button>
-          <button id="dialog-delete-cancel-btn" type="button">Cancel</button>
-        </dialog>
       </div>
+      <dialog id="delete-dialog" class="dialog">
+        <p>Are you sure you want to delete this URL?</p>
+        <p>This action cannot be undone.</p>
+        <div class="dialog-btn-container">
+          <button id="dialog-delete-ok-btn" class="dialog-ok-btn dialog-btn" type="button">Ok</button>
+          <button id="dialog-delete-cancel-btn" class="dialog-cancel-btn dialog-btn" type="button">Cancel</button>
+        </div>
+      </dialog>
     </section>
     <div>
       <button id="save-btn" class="save-btn btn">Save Changes</button>

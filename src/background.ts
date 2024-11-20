@@ -6,13 +6,7 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
-  ! add more dialogs for actions
-    - style dialog
-  - put reused CSS into a separate file
-  - add more custom messages for failed and successful actions
-    - notification about a newly added rule
-    - notification about rules deletion
-  - add about page:
+  ! add about page:
     - Functionality
     - FAQ section
     - Contacts section
@@ -26,6 +20,9 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
   ? allow blocking a list of URLs
   ? testing
   ? add tooltips
+  ? add more custom messages for failed and successful actions
+    - notification about a newly added rule
+    - notification about rules deletion
 
   Edge cases:
   Popup:
@@ -61,7 +58,7 @@ function triggerPopup(tab: browser.Tabs.Tab) {
     const tabId = tab.id;
     browser.scripting.insertCSS(({
       target: { tabId },
-      files: ['./popup.css'],
+      files: ['global.css', './popup.css'],
     }))
       .then(() => {
         browser.scripting.executeScript

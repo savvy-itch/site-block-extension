@@ -6,6 +6,7 @@
   "action": {
     "default_title": "Click to show the form"
   },
+  "incognito": "split",
   "permissions": [
     "activeTab",
     "declarativeNetRequest",
@@ -35,7 +36,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["blocked.html", "options.html", "icons/*.svg"],
+      "resources": ["blocked.html", "options.html", "about.html", "icons/*.svg"],
       "matches": ["<all_urls>"]
     }
   ],

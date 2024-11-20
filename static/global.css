@@ -1,0 +1,147 @@
+body {
+  --text-color: #272835;
+  --success-color: hsl(160, 100%, 35%);
+  --success-dark-color: hsl(160, 100%, 26%);
+  --dark-highlight: #3767a9;
+  --dark-highlight2: hsl(215, 51%, 37%);
+  --bg-transition: background-color .2s ease-in-out;
+  --dialog-transition: .3s;
+  --footer-bg: #222831;
+}
+
+.extension-block-domain-label:hover input~.extension-domain-checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.extension-block-domain-label input:checked~.extension-domain-checkmark {
+  background-color: var(--dark-highlight);
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.extension-domain-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.extension-block-domain-label input:checked~.extension-domain-checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.extension-block-domain-label .extension-domain-checkmark:after {
+  left: 8px;
+  top: 4px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+
+.extension-submit-btn {
+  background-color: var(--success-color);
+  transition: var(--bg-transition);
+}
+
+.extension-submit-btn:hover,
+.extension-submit-btn:focus {
+  background-color: var(--success-dark-color);
+}
+
+/* ===== Dialog ====== */
+.dialog[open] {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.dialog {
+  width: 40%;
+  opacity: 0;
+  transform: scale(0);
+  border-radius: 10px;
+  background-color: #f0f0f0;
+  color: var(--text-color);
+  border: 2px solid #6495ed;
+  padding: 1rem;
+  margin: auto;
+  transition: 
+    opacity var(--dialog-transition) ease-out,
+    transform var(--dialog-transition) ease-out,
+    overlay var(--dialog-transition) ease-out allow-discrete,
+    display var(--dialog-transition) ease-out allow-discrete;
+}
+
+.dialog > p {
+  font-size: 1.1rem;
+  margin: 1.5rem 0;
+}
+
+@starting-style {
+  .dialog[open] {
+    opacity: 0;
+    transform: scale(0);
+  }
+}
+
+.dialog::backdrop {
+  background-color: rgb(0 0 0 / 0%);
+  opacity: .7;
+  transition:
+  display var(--dialog-transition) allow-discrete,
+  overlay var(--dialog-transition) allow-discrete,
+  background-color var(--dialog-transition);
+}
+
+.dialog[open]::backdrop {
+  background-color: var(--footer-bg);
+}
+
+@starting-style {
+  .dialog[open]::backdrop {
+    background-color: rgb(0 0 0 / 0%);
+  }
+}
+
+.dialog-btn-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+}
+
+.dialog-btn {
+  padding: 8px 14px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  min-width: 20%;
+}
+
+.dialog-btn:hover {
+  cursor: pointer;
+}
+
+.dialog-ok-btn {
+  background-color: var(--success-color);
+  transition: var(--bg-transition);
+}
+
+.dialog-ok-btn:hover,
+.dialog-ok-btn:focus {
+  background-color: var(--success-dark-color);
+}
+
+.dialog-cancel-btn {
+  background-color: var(--dark-highlight);
+  transition: var(--bg-transition);
+}
+
+.dialog-cancel-btn:hover,
+.dialog-cancel-btn:focus {
+  background-color: var(--dark-highlight2);
+}

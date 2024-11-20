@@ -25,6 +25,7 @@ const clearDialogCancelBtn = document.getElementById('dialog-clear-cancel-btn');
 const deleteDialog = document.getElementById('delete-dialog') as HTMLDialogElement;
 const deleteDialogOkBtn = document.getElementById('dialog-delete-ok-btn');
 const deleteDialogCancelBtn = document.getElementById('dialog-delete-cancel-btn');
+const wrapperElem = document.getElementById('table-wrapper');
 const versionElem = document.getElementById('ext-version');
 const strictModeSwitch = document.getElementById('strict-mode-switch') as HTMLInputElement;
 const webStoreLink = document.getElementById('web-store-link') as HTMLAnchorElement;
@@ -39,6 +40,7 @@ let isEdited = false;
 let showEditInput = false;
 let editedRulesIds: Set<number> = new Set();
 let idToDelete: number | null;
+let isLoading = false;
 const rowIdPrefix = 'row-';
 // let isStrictModeOn = false;
 
@@ -63,7 +65,6 @@ cancelBtn?.addEventListener('click', () => {
 });
 
 saveBtn?.addEventListener('click', async () => {
-  console.log('before saving changes', editedRulesIds);
   await saveChanges();
 });
 
@@ -98,7 +99,6 @@ deleteDialogCancelBtn?.addEventListener('click', () => {
 });
 
 strictModeSwitch?.addEventListener('change', () => {
-  console.log(`change event triggered: ${strictModeSwitch.checked}`);
   const isStrictModeOn = strictModeSwitch.checked;
   browser.storage.local.set({ strictMode: isStrictModeOn });
   handleInactiveRules(isStrictModeOn);
@@ -113,7 +113,6 @@ urlForm?.addEventListener('submit', async (e) => {
 });
 
 function handleSuccessfulFormSubmission() {
-  console.log('URL has been saved');
   errorPara.textContent = '';
 }
 
@@ -152,118 +151,150 @@ function toggleEditMode(bool: boolean) {
 }
 
 async function displayUrlList() {
-  console.log('displayUrlList()');
+  isLoading = true;
+  displayLoader();
   const msg: GetAllAction = { action: 'getRules' };
   const res: ResToSend = await browser.runtime.sendMessage(msg);
-  console.log(res);
   try {
-    if (res.success) {
+    if (res.success && wrapperElem) {
       if (res.rules) {
-        console.log(res.rules);
         showEditInput = false;
-        tbody!.innerHTML = '';
-        const urlList = res.rules.sort((a, b) => a.strippedUrl.localeCompare(b.strippedUrl));
-        urlList.map((rule, i) => {
-          const ruleElem = document.createElement('tr');
-          ruleElem.id = `${rowIdPrefix}${rule.id}`;
-          ruleElem.classList.add('row');
-          !rule.isActive && ruleElem.classList.add('inactive-url');
-          const content = `
-            <td>${i + 1}</td>
-            <!-- <td class="row-id">${rule.id}</td> -->
-            <td class="row-url">${rule.strippedUrl}</td>
-            <!-- <td>${rule.url}</td> -->
-            <td class="row-domain">
-              <input 
-                class="domain-checkbox"
-                name="domain"
-                type="checkbox"
-                ${rule.blockDomain && 'checked'}
-              />
-            </td>
-            <td>
-              <button class="edit-rule-btn" ${showEditInput ? 'disabled' : ''}
-              >
-                <img src="./icons/edit.svg" alt="edit URL button">
-              </button>
-            </td>
-            <td>
-              <button class="delete-rule-btn" ${showEditInput ? 'disabled' : ''}
-              >
-                <img src="./icons/delete.svg" alt="delete URL button">
-              </button>
-            </td>
-            <td>
-              <label class="active-switch">
-                <input 
-                  type="checkbox"
-                  class="active-checkbox ${!rule.isActive ? 'inactive-url' : ''}"
-                  name="active"
-                  ${rule.isActive && 'checked'}
-                />
-                <span class="active-slider round"></span>
-              </label>
-            </td>
+        wrapperElem.innerHTML = '';
+        if (res.rules.length === 0) {
+          const noRulesElem = document.createElement('h3');
+          noRulesElem.innerText = 'No URLs to block.';
+          wrapperElem.appendChild(noRulesElem); 
+        } else {
+          const urlList = res.rules.sort((a, b) => a.strippedUrl.localeCompare(b.strippedUrl));
+          const urlTable = document.createElement('table');
+          urlTable.classList.add("blacklist-table", "table");
+          urlTable.innerHTML = `
+            <thead>
+              <th>No.</th>
+              <th>URL</th>
+              <th class="domain-th">
+                Block subdomains
+              </th>
+              <th></th>
+              <th></th>
+              <th>Active</th>
+            </thead>
+            <tbody id="url-table">
+            </tbody>
           `;
-          ruleElem.innerHTML = content;
-          tbody!.appendChild(ruleElem);
-
-          const updateRuleRow = document.getElementById(`row-${rule.id}`);
-          const editBtn = updateRuleRow?.querySelector('.edit-rule-btn');
-          if (editBtn) {
-            editBtn.addEventListener('click', () => {
-              if (!showEditInput) {
-                showEditInput = true;
-                editedRulesIds.add(rule.id);
-                disableOtherBtns(rule.id);
-                toggleEditMode(true);
-                const urlCell = updateRuleRow?.querySelector('.row-url');
-                if (urlCell) {
-                  urlCell.innerHTML = `
-                    <input
-                      name="url"
-                      type="text"
-                      value=${rule.strippedUrl}
-                      required
-                    />
-                  `;
+          wrapperElem.appendChild(urlTable);
+          const tbody = document.getElementById('url-table');
+          tbody && urlList.map((rule, i) => {
+            const ruleElem = document.createElement('tr');
+            ruleElem.id = `${rowIdPrefix}${rule.id}`;
+            ruleElem.classList.add('row');
+            !rule.isActive && ruleElem.classList.add('inactive-url');
+            const content = `
+              <td>${i + 1}</td>
+              <!-- <td class="row-id">${rule.id}</td> -->
+              <td class="row-url">${rule.strippedUrl}</td>
+              <!-- <td>${rule.url}</td> -->
+              <td class="row-domain">
+                <input 
+                  class="domain-checkbox"
+                  name="domain"
+                  type="checkbox"
+                  ${rule.blockDomain && 'checked'}
+                />
+              </td>
+              <td>
+                <button class="edit-rule-btn" ${showEditInput ? 'disabled' : ''}
+                >
+                  <img src="./icons/edit.svg" alt="edit URL button">
+                </button>
+              </td>
+              <td>
+                <button class="delete-rule-btn" ${showEditInput ? 'disabled' : ''}
+                >
+                  <img src="./icons/delete.svg" alt="delete URL button">
+                </button>
+              </td>
+              <td>
+                <label class="active-switch">
+                  <input 
+                    type="checkbox"
+                    class="active-checkbox ${!rule.isActive ? 'inactive-url' : ''}"
+                    name="active"
+                    ${rule.isActive && 'checked'}
+                  />
+                  <span class="active-slider round"></span>
+                </label>
+              </td>
+            `;
+            ruleElem.innerHTML = content;
+            tbody.appendChild(ruleElem);
+  
+            const updateRuleRow = document.getElementById(`row-${rule.id}`);
+            const editBtn = updateRuleRow?.querySelector('.edit-rule-btn');
+            if (editBtn) {
+              editBtn.addEventListener('click', () => {
+                if (!showEditInput) {
+                  showEditInput = true;
+                  editedRulesIds.add(rule.id);
+                  disableOtherBtns(rule.id);
+                  toggleEditMode(true);
+                  const urlCell = updateRuleRow?.querySelector('.row-url');
+                  if (urlCell) {
+                    urlCell.innerHTML = `
+                      <input
+                        name="url"
+                        type="text"
+                        value=${rule.strippedUrl}
+                        required
+                      />
+                    `;
+                  }
                 }
-              }
-            })
-          }
-
-          const deleteBtn = updateRuleRow?.querySelector('.delete-rule-btn');
-          if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => {
-              idToDelete = rule.id;
-              deleteDialog.showModal();
+              })
+            }
+  
+            const deleteBtn = updateRuleRow?.querySelector('.delete-rule-btn');
+            if (deleteBtn) {
+              deleteBtn.addEventListener('click', () => {
+                idToDelete = rule.id;
+                deleteDialog.showModal();
+              });
+            }
+  
+            const domainToggle = updateRuleRow?.querySelector('.domain-checkbox');
+            domainToggle?.addEventListener('change', () => {
+              toggleEditMode(true);
+              editedRulesIds.add(rule.id);
             });
-          }
-
-          const domainToggle = updateRuleRow?.querySelector('.domain-checkbox');
-          domainToggle?.addEventListener('change', () => {
-            console.log('domain checkbox toggled');
-            toggleEditMode(true);
-            editedRulesIds.add(rule.id);
+  
+            const activeToggle = updateRuleRow?.querySelector('.active-checkbox');
+            activeToggle?.addEventListener('change', () => {
+              updateRuleRow?.classList.toggle('inactive-url');
+              toggleEditMode(true);
+              editedRulesIds.add(rule.id);
+            });
           });
-
-          const activeToggle = updateRuleRow?.querySelector('.active-checkbox');
-          activeToggle?.addEventListener('change', () => {
-            updateRuleRow?.classList.toggle('inactive-url');
-            toggleEditMode(true);
-            editedRulesIds.add(rule.id);
-          });
-        });
+        }
       }
     }
   } catch (error) {
     console.error(error);
     alert('An error occured. Check the console.');
+  } finally {
+    isLoading = false;
+  }
+}
+
+function displayLoader() {
+  if (wrapperElem) {
+    const loader = document.createElement('div');
+    loader.classList.add('loader');
+    wrapperElem.innerHTML = '';
+    wrapperElem.appendChild(loader);
   }
 }
 
 async function deleteRule(id: number) {
-  console.log(`Called deleteRule for ID: ${id}`);
   const msg: DeleteAction = { action: "deleteRule", deleteRuleId: id };
   const res: ResToSend = await browser.runtime.sendMessage(msg);
   try {
@@ -280,7 +311,6 @@ async function deleteRule(id: number) {
 }
 
 async function deleteRules() {
-  console.log('deleteRules()');
   const msg: DeleteAllAction = { action: 'deleteAll' };
   try {
     const res: ResToSend = await browser.runtime.sendMessage(msg);
@@ -318,7 +348,6 @@ async function saveChanges() {
       const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
       const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '\/?.*' : '\/?$'}`;
       const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;
-      console.log(editedRow.querySelector('.active-checkbox'));
 
       if (!strippedUrl || forbiddenUrls.some(url => url.test(strippedUrl))) {
         alert('Invalid URL');
@@ -352,8 +381,6 @@ async function saveChanges() {
       strictModeOn && !isActive && rulesToStore.push({ id: rowId, unblockDate, urlToBlock });
     }
   }
-
-  console.log({ updatedRules });
 
   const msg: UpdateAction = { action: 'updateRules', updatedRules };
   const res: ResToSend = await browser.runtime.sendMessage(msg);
@@ -390,10 +417,8 @@ function disableOtherBtns(ruleId: number) {
 }
 
 async function syncStrictMode() {
-  console.log('syncStrictMode()');
   try {
     const result = await browser.storage.local.get(storageStrictModeKey);
-    // console.log(`strictModeOn.strictMode: ${strictMode}`);
     if (storageStrictModeKey in result) {
       const strictMode = result[storageStrictModeKey];
       if (typeof strictMode === 'boolean') {

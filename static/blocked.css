@@ -50,7 +50,7 @@ h1 {
 }
 
 .block-footer a,
-.block-footer p {
+.block-footer > p {
   font-size: 1rem;
   color: var(--text-color);
 }

@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page Blocked</title>
+  <title>Blocked | Website Blocker Extension</title>
+  <link rel="stylesheet" href="./global.css">
   <link rel="stylesheet" href="./blocked.css">
 </head>
 <body>
@@ -17,8 +18,10 @@
       <dialog id="delete-dialog" class="dialog">
         <p>Are you sure you want to delete this URL?</p>
         <p>This action cannot be undone.</p>
-        <button id="dialog-delete-ok-btn" type="button" autofocus>Ok</button>
-        <button id="dialog-delete-cancel-btn" type="button">Cancel</button>
+        <div class="dialog-btn-container">
+          <button id="dialog-delete-ok-btn" class="dialog-ok-btn dialog-btn" type="button" autofocus>Ok</button>
+          <button id="dialog-delete-cancel-btn" class="dialog-cancel-btn dialog-btn" type="button">Cancel</button>
+        </div>
       </dialog>
       <button id="delete-btn" class="delete-btn hover-underline-animation left" type="button">Delete URL from list</button>
       <a class="hover-underline-animation left" href="./options.html">Unblock the URL</a>
