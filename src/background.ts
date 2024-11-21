@@ -10,9 +10,8 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
     - Functionality
     - FAQ section
     - Contacts section
-  - accessibility
+    ! style the page
   - responsiveness
-  - optimize by using sets and maps where possible
   ? localization
   ? add and display timestamp for each rule
   ? sort/filter rules by alphabet/active/domain

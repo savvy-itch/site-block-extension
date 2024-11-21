@@ -13,7 +13,7 @@
 <body>
   <header class="extension-options-header">
     <h1>Website blocker settings</h1>
-    <a class="about-link" href="./about.html">
+    <a class="about-link" href="./about.html" title="About" aria-label="About page">
       <img src="./icons/help.svg" alt="about page icon">
     </a>
     <dialog id="clear-all-dialog" class="dialog">
@@ -68,12 +68,6 @@
             <!-- <th class="test-col">URL Filter</th> -->
             <th class="domain-th">
               Block subdomains
-              <!-- <div class="tooltip-icon">
-                <img src="./icons/help.svg" alt="tooltip icon">
-                <div class="tooltip">
-                  Enable to block all subdomains of URL, e.g., www.example.com, www.example.com/123, etc. Disable to block only the saved URL.
-                </div>
-              </div> -->
             </th>
             <th></th>
             <th></th>
@@ -97,19 +91,11 @@
       <button id="save-btn" class="save-btn btn">Save Changes</button>
       <button id="cancel-btn" class="cancel-btn btn">Cancel</button>
     </div>
-
-    <!-- <div class="tooltip-wrapper"> -->
     <label for="strict-mode-switch" class="strict-mode-switch">
       Strict mode:
       <input id="strict-mode-switch" type="checkbox" class="strict-mode-checkbox" name="strict-mode" />
       <span class="strict-mode-slider round"></span>
     </label>
-
-    <!-- <img src="./icons/help.svg" alt="tooltip icon">
-      <div class="tooltip">
-        When enabled, resets all inactive rules in 1 hour after disabling
-      </div>
-    </div> -->
   </main>
 
   <footer class="options-footer">
@@ -129,18 +115,18 @@
             <a href="https://chromewebstore.google.com/category/extensions" target="_blank">Chrome Web Store</a>
           </li> -->
           <li>
-            <a href="https://addons.opera.com/en/extensions/" target="_blank">
-              <img src="./icons/opera.svg" alt="Opera addons">
+            <a href="https://addons.opera.com/en/extensions/" target="_blank" title="Opera addons" aria-label="Opera addons link">
+              <img src="./icons/opera.svg" alt="Opera addons" />
             </a>
           </li>
           <li>
-            <a href="https://addons.mozilla.org/en-US/firefox/" target="_blank">
-              <img src="./icons/firefox.svg" alt="Firefox browser add-ons">
+            <a href="https://addons.mozilla.org/en-US/firefox/" target="_blank" title="Firefox browser add-ons" title="Firefox browser add-ons link">
+              <img src="./icons/firefox.svg" alt="Firefox browser add-ons" />
             </a>
           </li>
           <li>
-            <a href="https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home?" target="_blank">
-              <img src="./icons/edge.svg" alt="Microsoft Edge Extensions">
+            <a href="https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home?" target="_blank" title="Microsoft Edge Extensions" aria-label="Microsoft Edge Extensions link">
+              <img src="./icons/edge.svg" alt="Microsoft Edge Extensions" />
             </a>
           </li>
         </ul>
@@ -151,11 +137,11 @@
           <li>
             Icons by <a class="link-to-highlight" href="https://lucide.dev/" target="_blank">Lucide</a> and <a
               class="link-to-highlight" href="https://www.svgrepo.com" target="_blank">SVG Repo <img
-                src="./icons/link.svg" alt="link icon"></a>
+                src="./icons/link.svg" alt="link icon" /></a>
           </li>
           <li>
             Images by <a class="link-to-highlight" href="https://undraw.co/" target="_blank">Undraw <img
-                src="./icons/link.svg" alt="link icon"></a>
+                src="./icons/link.svg" alt="link icon" /></a>
           </li>
         </ul>
       </div>
@@ -163,18 +149,18 @@
         <h3>Contact</h3>
         <ul class="contact-list">
           <li>
-            <a href="#" target="_blank"><img src="./icons/linkedin.svg" alt="Linkedin icon"></a>
+            <a href="#" target="_blank" title="Linkedin" aria-label="Linkedin link"><img src="./icons/linkedin.svg" alt="Linkedin icon" /></a>
           </li>
           <li>
-            <a href="#" target="_blank"><img src="./icons/bluesky.svg" alt="Bluesky icon"></a>
+            <a href="#" target="_blank" title="Bluesky" aria-label="Bluesky link"><img src="./icons/bluesky.svg" alt="Bluesky icon" /></a>
           </li>
           <li>
-            <a href="#" target="_blank"><img src="./icons/github.svg" alt="GitHub icon"></a>
+            <a href="#" target="_blank" title="GitHub" aria-label="GitHib link"><img src="./icons/github.svg" alt="GitHub icon" /></a>
           </li>
         </ul>
       </div>
     </div>
-    <p class="footer-developer">Developed by <a href="https://www.linkedin.com/in/mykhailo-savych-a31366248/"
+    <p class="footer-developer">Developed by <a href="#"
         target="_blank">Michael Savych</a></p>
   </footer>
   <script src="./options.js"></script>

@@ -28,7 +28,8 @@
     "js": [
       "browser-polyfill.js",
       "options.js",
-      "blocked.js"
+      "blocked.js",
+      "about.js"
     ]
   }],
   "commands": {

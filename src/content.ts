@@ -43,8 +43,8 @@ async function showPopup() {
           
           <div class="extension-close-btn-container">
             <p>Esc</p>
-            <button id="close-form-btn" class="extension-close-form-btn" type="button">
-              <img src="${browser.runtime.getURL('icons/x.svg')}" />
+            <button id="close-form-btn" class="extension-close-form-btn" title="Close button" aria-label="Close button" type="button">
+              <img src="${browser.runtime.getURL('icons/x.svg')}" alt="close icon" />
             </button>
           </div>
     

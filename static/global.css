@@ -7,6 +7,7 @@ body {
   --bg-transition: background-color .2s ease-in-out;
   --dialog-transition: .3s;
   --footer-bg: #222831;
+  --highlight-color: #FC8F54;
 }
 
 .extension-block-domain-label:hover input~.extension-domain-checkmark {

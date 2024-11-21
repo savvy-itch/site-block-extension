@@ -203,13 +203,13 @@ async function displayUrlList() {
                 />
               </td>
               <td>
-                <button class="edit-rule-btn" ${showEditInput ? 'disabled' : ''}
+                <button class="edit-rule-btn" ${showEditInput ? 'disabled' : ''} title="edit URL button"
                 >
                   <img src="./icons/edit.svg" alt="edit URL button">
                 </button>
               </td>
               <td>
-                <button class="delete-rule-btn" ${showEditInput ? 'disabled' : ''}
+                <button class="delete-rule-btn" ${showEditInput ? 'disabled' : ''} title="delete URL button"
                 >
                   <img src="./icons/delete.svg" alt="delete URL button">
                 </button>

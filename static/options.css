@@ -13,7 +13,7 @@ body {
   --success-dark-color: hsl(160, 100%, 26%); */
   --dim-color: hsl(231, 28%, 35%);
   --darker-dim-color: hsl(231, 28%, 30%);
-  --highlight-color: #FC8F54;
+  /* --highlight-color: #FC8F54; */
   /* --footer-bg: #222831; */
   --footer-highlight: hsl(216, 18%, 26%);
   --main-highlight: #6495ed;

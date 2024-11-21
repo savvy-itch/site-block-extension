@@ -15,9 +15,9 @@
     <nav class="about-nav">
       <a class="hover-underline-animation left" href="./options.html">Extension Settings</a>
       <div class="about-nav-subdiv">
-        <a class="hover-underline-animation left" href="#functionality">Functionality</a>
-        <a class="hover-underline-animation left" href="#faq">FAQ</a>
-        <a class="hover-underline-animation left" href="#contacts">Contacts</a>
+        <a class="hover-underline-animation left sublink" href="#functionality">Functionality</a>
+        <a class="hover-underline-animation left sublink" href="#faq">FAQ</a>
+        <a class="hover-underline-animation left sublink" href="#contacts">Contacts</a>
       </div>
     </nav>
   </header>
@@ -25,12 +25,55 @@
   <main class="about-main">
     <section>
       <h2 id="functionality">Functionality</h2>
-      <p>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Amet beatae excepturi est corrupti odit nemo vero vitae at. Expedita consequuntur eligendi ut illum tempora hic exercitationem distinctio ex commodi eum.</p>
+      <dl>
+        <dt>Adding new URLs</dt>
+        <dd>
+          <p>You can add new URLs to the blacklist either from the current open tab or from the options page. To open the extension in the current tab, click the extension icon in your browser.</p>
+          <img src="" alt="extension icon">
+          <p>You can also open the extension by using <b>Ctrl+Q</b> key shortcut</p>
+        </dd>
+        <dt>Edit/delete URLs</dt>
+        <dd>
+          <p>You can edit URLs in the options page. If you attempt to update URL with the an already existing URL, the extension will only save one.</p>
+          <p>You can delete an individual URL or delete all URLs. Be careful as this action is unrevertable.</p>
+        </dd>
+        <dt>Subdomains block</dt>
+        <dd>
+          <p>By toggling block subdomains checkbox you you can decide for each URL whether to block all the subdomains of the URL, or to just block the specified one.</p>
+          <p>For example:</p>
+          <div class="about-example">
+            <p><span>URL:</span> "www.example.com",</p>
+            <p><span>Block subdomains:</span> ON,</p>
+            <p><span>Result:</span> will block "www.example.com", "www.example.com/abc", "www.example.com/abc/123", etc.</p>
+          </div>
+          <div class="about-example">
+            <p><span>URL:</span> "www.example.com",</p>
+            <p><span>Block subdomains:</span> OFF,</p>
+            <p><span>Result:</span> will block "www.example.com", but allow "www.example.com/abc", "www.example.com/abc/123", etc.</p>
+          </div>
+        </dd>
+        <dt>Disabling rules</dt>
+        <dd>
+          <p>
+            If you don't want to delete an URL, but still need to get access to that website, you can disable it by turning of the "Active" switch on options page. This will allow the website to bypass the extension without deleting it from the blacklist. You can enable it back when you need to restict it again.
+          </p>
+          <p>
+            Important! Disabling rules behaves differently when "Strict mode" is on.
+          </p>
+        </dd>
+        <dt>Strict Mode</dt>
+        <dd>
+          <p>
+            "Strict mode" is a feature made for users who experience difficulties focusing on work and get easily distracted and those suffering from ADHD. Strict mode adds an additional layer restriction by enforcing URLs enabling. If you disable URL with strict mode on, it will be automatically enabled back in 1 hour.
+          </p>
+          <img src="" alt="enable the extension in incognito mode">
+        </dd>
+      </dl>
     </section>
     <section>
       <h2 id="faq">FAQ</h2>
-      <h3>The extension doesn't work in incognito mode</h3>
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Cupiditate omnis repudiandae, praesentium neque maiores laborum ea ipsa facilis et ad.</p>
+      <h3>The extension doesn't work in incognito mode. How to fix it?</h3>
+      <p>Make sure that you have allowed to use the extension to work in incognito mode. To do that go to browser -> Extensions -> Extensions settings -> Website Blocker -> turn on the "Allow in incognito mode" switch</p>
     </section>
     <section>
       <h2 id="contacts">Contacts</h2>
@@ -56,18 +99,18 @@
             <a href="https://chromewebstore.google.com/category/extensions" target="_blank">Chrome Web Store</a>
           </li> -->
           <li>
-            <a href="https://addons.opera.com/en/extensions/" target="_blank">
-              <img src="./icons/opera.svg" alt="Opera addons">
+            <a href="https://addons.opera.com/en/extensions/" target="_blank" title="Opera addons link" aria-label="Opera addons link">
+              <img src="./icons/opera.svg" alt="Opera addons" />
             </a>
           </li>
           <li>
-            <a href="https://addons.mozilla.org/en-US/firefox/" target="_blank">
-              <img src="./icons/firefox.svg" alt="Firefox browser add-ons">
+            <a href="https://addons.mozilla.org/en-US/firefox/" target="_blank" title="Firefox browser add-ons link" aria-label="Firefox browser add-ons link">
+              <img src="./icons/firefox.svg" alt="Firefox browser add-ons" />
             </a>
           </li>
           <li>
-            <a href="https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home?" target="_blank">
-              <img src="./icons/edge.svg" alt="Microsoft Edge Extensions">
+            <a href="https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home?" target="_blank" title="Microsoft Edge Extensions" aria-label="Microsoft Edge Extensions link">
+              <img src="./icons/edge.svg" alt="Microsoft Edge Extensions" />
             </a>
           </li>
         </ul>
@@ -78,11 +121,11 @@
           <li>
             Icons by <a class="link-to-highlight" href="https://lucide.dev/" target="_blank">Lucide</a> and <a
               class="link-to-highlight" href="https://www.svgrepo.com" target="_blank">SVG Repo <img
-                src="./icons/link.svg" alt="link icon"></a>
+                src="./icons/link.svg" alt="link icon" /></a>
           </li>
           <li>
             Images by <a class="link-to-highlight" href="https://undraw.co/" target="_blank">Undraw <img
-                src="./icons/link.svg" alt="link icon"></a>
+                src="./icons/link.svg" alt="link icon" /></a>
           </li>
         </ul>
       </div>
@@ -90,20 +133,21 @@
         <h3>Contact</h3>
         <ul class="contact-list">
           <li>
-            <a href="#" target="_blank"><img src="./icons/linkedin.svg" alt="Linkedin icon"></a>
+            <a href="#" target="_blank" title="Linkedin" aria-label="Linkedin link"><img src="./icons/linkedin.svg" alt="Linkedin icon" /></a>
           </li>
           <li>
-            <a href="#" target="_blank"><img src="./icons/bluesky.svg" alt="Bluesky icon"></a>
+            <a href="#" target="_blank" title="Bluesky" aria-label="Bluesky link"><img src="./icons/bluesky.svg" alt="Bluesky icon" /></a>
           </li>
           <li>
-            <a href="#" target="_blank"><img src="./icons/github.svg" alt="GitHub icon"></a>
+            <a href="#" target="_blank" title="GitHub" aria-label="GitHib link"><img src="./icons/github.svg" alt="GitHub icon" /></a>
           </li>
         </ul>
       </div>
     </div>
-    <p class="footer-developer">Developed by <a href="https://www.linkedin.com/in/mykhailo-savych-a31366248/"
+    <p class="footer-developer">Developed by <a href="#"
         target="_blank">Michael Savych</a></p>
   </footer>
+  <script src="./about.js"></script>
 </body>
 
 </html>

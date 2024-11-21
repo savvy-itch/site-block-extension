@@ -77,15 +77,26 @@ body {
 }
 
 .about-main h2 {
-  font-size: 1.4rem;
-  margin: 1.5rem 0;
+  font-size: 1.5rem;
+  margin: 2.5rem 0 1.5rem 0;
+  text-align: center;
 }
 
+.about-main dt,
 .about-main h3 {
+  font-weight: 600;
   font-size: 1.25rem;
   margin: 1rem 0;
 }
 
 .about-main p {
   font-size: 1.1rem;
+}
+
+.about-example {
+  background-color: hsl(0, 0%, 93%);
+  padding: 15px;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  margin: .7rem 0;
 }

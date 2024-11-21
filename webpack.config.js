@@ -9,7 +9,8 @@ module.exports = {
     background: './src/background.ts',
     content: './src/content.ts',
     options: './src/options.ts',
-    blocked: './src/blocked.ts'
+    blocked: './src/blocked.ts',
+    about: './src/about.ts'
   },
   output: {
     path: path.resolve(__dirname, "dist"),
