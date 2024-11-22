@@ -28,57 +28,64 @@
       <dl>
         <dt>Adding new URLs</dt>
         <dd>
-          <p>You can add new URLs to the blacklist either from the current open tab or from the options page. To open the extension in the current tab, click the extension icon in your browser.</p>
+          <p>You can add new URLs to the blacklist either from the current open tab or from the options page. To open the extension in the current tab, click the extension icon in your browser:</p>
           <img src="" alt="extension icon">
-          <p>You can also open the extension by using <b>Ctrl+Q</b> key shortcut</p>
+          <p>You can also open the extension by using <b>Ctrl+Q</b> key shortcut.</p>
         </dd>
         <dt>Edit/delete URLs</dt>
         <dd>
-          <p>You can edit URLs in the options page. If you attempt to update URL with the an already existing URL, the extension will only save one.</p>
-          <p>You can delete an individual URL or delete all URLs. Be careful as this action is unrevertable.</p>
+          <p>You can edit URLs from the options page. If you try to update a URL to one that already exists, the extension will save only one instance of it.</p>
+          <p>You can delete an individual URL or delete all URLs at once. Be careful, as this action is irreversible.</p>
         </dd>
         <dt>Subdomains block</dt>
         <dd>
-          <p>By toggling block subdomains checkbox you you can decide for each URL whether to block all the subdomains of the URL, or to just block the specified one.</p>
+          <p>By toggling the "Block Subdomains" checkbox, you can choose whether to block all subdomains of a URL or just the specified one.</p>
           <p>For example:</p>
           <div class="about-example">
-            <p><span>URL:</span> "www.example.com",</p>
-            <p><span>Block subdomains:</span> ON,</p>
-            <p><span>Result:</span> will block "www.example.com", "www.example.com/abc", "www.example.com/abc/123", etc.</p>
+            <p><span class="example-span">URL:</span> "www.example.com",</p>
+            <p><span class="example-span">Block subdomains:</span> ON,</p>
+            <p><span class="example-span">Result:</span> blocks "www.example.com", "www.example.com/abc", "www.example.com/abc/123", etc.</p>
           </div>
           <div class="about-example">
-            <p><span>URL:</span> "www.example.com",</p>
-            <p><span>Block subdomains:</span> OFF,</p>
-            <p><span>Result:</span> will block "www.example.com", but allow "www.example.com/abc", "www.example.com/abc/123", etc.</p>
+            <p><span class="example-span">URL:</span> "www.example.com",</p>
+            <p><span class="example-span">Block subdomains:</span> OFF,</p>
+            <p><span class="example-span">Result:</span> blocks "www.example.com", but allows "www.example.com/abc", "www.example.com/abc/123", etc.</p>
           </div>
         </dd>
         <dt>Disabling rules</dt>
         <dd>
           <p>
-            If you don't want to delete an URL, but still need to get access to that website, you can disable it by turning of the "Active" switch on options page. This will allow the website to bypass the extension without deleting it from the blacklist. You can enable it back when you need to restict it again.
+            If you don&#39;t want to delete a URL but still need access to the website, you can disable it by toggling the "Active" switch on the options page. This temporarily bypasses the blacklist without deleting the URL. You can re-enable it later if needed.
           </p>
           <p>
-            Important! Disabling rules behaves differently when "Strict mode" is on.
-          </p>
+            <strong>Important:</strong> Disabling rules behaves differently when "Strict Mode" is enabled.
         </dd>
         <dt>Strict Mode</dt>
         <dd>
           <p>
-            "Strict mode" is a feature made for users who experience difficulties focusing on work and get easily distracted and those suffering from ADHD. Strict mode adds an additional layer restriction by enforcing URLs enabling. If you disable URL with strict mode on, it will be automatically enabled back in 1 hour.
+            "Strict Mode" is designed for users who struggle to focus, get easily distracted, or have ADHD. This feature adds an additional layer of restriction by enforcing time-based reactivation. If you disable a URL with Strict Mode enabled, it will be automatically re-enabled after one hour.
           </p>
-          <img src="" alt="enable the extension in incognito mode">
         </dd>
       </dl>
     </section>
     <section>
       <h2 id="faq">FAQ</h2>
-      <h3>The extension doesn't work in incognito mode. How to fix it?</h3>
-      <p>Make sure that you have allowed to use the extension to work in incognito mode. To do that go to browser -> Extensions -> Extensions settings -> Website Blocker -> turn on the "Allow in incognito mode" switch</p>
+      <h3>The extension doesn&#39;t work in incognito mode. How can I fix it?</h3>
+      <p>Ensure the extension is allowed to run in incognito mode. To enable this:</p>
+      <ol>
+        <li>Go to your browser settings.</li>
+        <li>Navigate to <b>Extensions</b>, then <b>Manage Extensions</b>.</li>
+        <li>Locate <b>Website Blocker</b> and click <b>Details</b>.</li>
+        <li>Turn on the <b>Allow in Incognito Mode</b> switch.</li>
+      </ol>
+      <div class="about-img-wrapper">
+        <img src="./icons/incognito2.webp" alt="allow in incognito">
+      </div>
     </section>
     <section>
       <h2 id="contacts">Contacts</h2>
       <p>If you have any questions, issues or other type of feedback, please email to <a href="mailto:#"
-          target="_blank">example@mail.com</a></p>
+          target="_blank">example@mail.com</a>.</p>
     </section>
   </main>
 

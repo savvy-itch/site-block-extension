@@ -2,15 +2,9 @@
   --pale-text: #574f59;
   --form-bg: #f0f0f0;
   --highlight-color: #789DBC;
-  --text-color: #1E201E;
-  /* --dark-highlight: #3767a9; */
-  /* --dark-highlight2: hsl(215, 51%, 37%); */
   --font-size: 16px;
-  /* --bg-transition: transition: background-color .1s ease-in-out; */
   --checkbox-size: 25px;
   --gap-between-checkbox-and-text: calc(var(--checkbox-size) + 10px);
-  /* --success-color: hsl(160, 100%, 35%);
-  --success-dark-color: hsl(160, 100%, 26%); */
 
   position: fixed;
   top: 50dvh;
@@ -23,24 +17,27 @@
   background-color: var(--form-bg);
   color: var(--text-color);
   width: 45vw;
+  max-width: 600px;
   font-size: 16px;
   z-index: 500;
 }
 
-.url-input-label {
+.extension-popup-form .url-input-label {
   display: flex;
   flex-direction: column;
   gap: 5px;
   font-size: 1.3em;
   color: var(--text-color);
+  margin: 0;
 }
 
-.url-input {
+.url-input-label .url-input {
   padding: 5px;
   font-size: 1em;
   border-radius: 5px;
   background-color: white;
   color: var(--text-color);
+  border: 1px solid var(--pale-text);
 }
 
 .extension-popup-form button:hover {
@@ -99,6 +96,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  color: var(--text-color)
 }
 
 /* CUSTOM CHECKBOX */
@@ -183,9 +181,33 @@
 .extension-options-btn {
   background-color: var(--dark-highlight);
   transition: var(--bg-transition);
+  height: auto;
 }
 
 .extension-options-btn:hover,
 .extension-options-btn:focus {
   background-color: var(--dark-highlight2);
+}
+
+@media screen and (max-width: 1024px) {
+  .extension-popup-form {
+    width: 60%;
+    max-width: 650px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .extension-popup-form {
+    width: 70%;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .extension-popup-form {
+    --font-size: 14px;
+
+    width: 85%;
+    max-width: 100%;
+    padding: 2rem 1rem 1rem 1rem;
+  }
 }

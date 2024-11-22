@@ -6,7 +6,6 @@
   "browser_action": {
     "default_title": "Click to show the form"
   },
-  "incognito": "split",
   "permissions": [
     "activeTab",
     "declarativeNetRequest",

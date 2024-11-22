@@ -1,6 +1,30 @@
 import browser from 'webextension-polyfill';
 import { AddAction, DeleteAllAction, ResToSend } from "./types";
-import { forbiddenUrls, maxUrlLength, minUrlLength } from './globals';
+import { forbiddenUrls, maxUrlLength, minUrlLength, webStores } from './globals';
+
+/*
+Brave:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+Chrome:  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+Opera:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 OPR/114.0.0.0'
+Firefox: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0'
+Edge:    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0'
+*/
+
+export function assignStoreLink(webStoreLink: HTMLAnchorElement) {
+  const browser = navigator.userAgent;
+  if (browser.includes('OPR/')) {
+    webStoreLink.href = webStores.opera;
+  } else if (browser.includes('Firefox/')) {
+    webStoreLink.href = webStores.firefox;
+  } else if (browser.includes('Edg/')) {
+    webStoreLink.href = webStores.edge;
+  }
+}
+
+export function getExtVersion() {
+  const v = browser.runtime.getManifest().version;
+  return v;
+}
 
 export function stripUrl(url: string): string {
   return url.replace(/^\^https\?:\/\//, '').replace(/\?\.\*|\?\$$/, '');

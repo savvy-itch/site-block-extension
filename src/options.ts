@@ -1,7 +1,7 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
-import { forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
+import { forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod, webStores } from "./globals";
 import { DeleteAction, DeleteAllAction, GetAllAction, NewRule, ResToSend, RuleInStorage, UpdateAction } from "./types";
-import { handleFormSubmission } from './helpers';
+import { assignStoreLink, getExtVersion, handleFormSubmission } from './helpers';
 
 /*
 Edge cases:
@@ -29,12 +29,6 @@ const wrapperElem = document.getElementById('table-wrapper');
 const versionElem = document.getElementById('ext-version');
 const strictModeSwitch = document.getElementById('strict-mode-switch') as HTMLInputElement;
 const webStoreLink = document.getElementById('web-store-link') as HTMLAnchorElement;
-const webStores = {
-  // chrome: "https://chromewebstore.google.com/category/extensions",
-  edge: "https://microsoftedge.microsoft.com/addons/Microsoft-Edge-Extensions-Home?",
-  firefox: "https://addons.mozilla.org/en-US/firefox/",
-  opera: "https://addons.opera.com/en/extensions/"
-};
 
 let isEdited = false;
 let showEditInput = false;
@@ -42,7 +36,6 @@ let editedRulesIds: Set<number> = new Set();
 let idToDelete: number | null;
 let isLoading = false;
 const rowIdPrefix = 'row-';
-// let isStrictModeOn = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   displayUrlList();
@@ -53,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     versionElem.innerText = getExtVersion() ?? '';
   }
   if (webStoreLink) {
-    assignStoreLink();
+    assignStoreLink(webStoreLink);
   }
 });
 
@@ -431,29 +424,5 @@ async function syncStrictMode() {
     }
   } catch (error) {
     console.error(error);
-  }
-}
-
-function getExtVersion() {
-  const v = browser.runtime.getManifest().version;
-  return v;
-}
-
-/*
-Brave:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-Chrome:  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-Opera:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 OPR/114.0.0.0'
-Firefox: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0'
-Edge:    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0'
-*/
-
-function assignStoreLink() {
-  const browser = navigator.userAgent;
-  if (browser.includes('OPR/')) {
-    webStoreLink.href = webStores.opera;
-  } else if (browser.includes('Firefox/')) {
-    webStoreLink.href = webStores.firefox;
-  } else if (browser.includes('Edg/')) {
-    webStoreLink.href = webStores.edge;
   }
 }

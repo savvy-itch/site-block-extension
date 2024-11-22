@@ -28,7 +28,7 @@ body {
 }
 
 .about-nav a {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 600;
   text-decoration: none;
   color: var(--text-color);
@@ -77,7 +77,7 @@ body {
 }
 
 .about-main h2 {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   margin: 2.5rem 0 1.5rem 0;
   text-align: center;
 }
@@ -89,8 +89,22 @@ body {
   margin: 1rem 0;
 }
 
-.about-main p {
+.about-main p,
+.about-main ol {
   font-size: 1.1rem;
+}
+
+.about-img-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.about-main img {
+  margin: 1.5rem auto;
+  width: 50%;
+  max-width: 500px;
 }
 
 .about-example {
@@ -99,4 +113,21 @@ body {
   border-radius: 6px;
   font-size: 1.1rem;
   margin: .7rem 0;
+}
+
+.example-span {
+  font-weight: bold;
+}
+
+.about-main ol {
+  list-style-position: inside;
+}
+
+.about-main a {
+  color: var(--text-color);
+  transition: color .2s;
+}
+
+.about-main a:hover {
+  color: var(--highlight-color);
 }

@@ -1,20 +1,14 @@
 body {
   --text-color: #272835;
-  /* --bg-transition: transition: background-color .1s ease-in-out; */
   --danger-color: hsl(348, 95%, 56%);
   --danger-hover: hsl(348, 90%, 50%);
-  /* --dark-highlight: hsl(215, 51%, 37%); */
   --switch-width: 40px;
   --switch-height: 24px;
   --switch-padding: 4px;
   --slider-height: calc(var(--switch-height) - (var(--switch-padding) * 2));
   --slider-width: calc(var(--switch-width) - (var(--switch-padding) * 2));
-  /* --success-color: hsl(160, 100%, 35%);
-  --success-dark-color: hsl(160, 100%, 26%); */
   --dim-color: hsl(231, 28%, 35%);
   --darker-dim-color: hsl(231, 28%, 30%);
-  /* --highlight-color: #FC8F54; */
-  /* --footer-bg: #222831; */
   --footer-highlight: hsl(216, 18%, 26%);
   --main-highlight: #6495ed;
   --checkbox-size: 25px;
@@ -563,3 +557,60 @@ h1 {
     100% {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 0)}
 }
 
+@media screen and (max-width: 768px) {
+  .table-wrapper {
+    min-width: auto;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .table {
+    width: 100%;
+    min-width: auto;
+  }
+
+  .url-input {
+    padding: 7px;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .extension-options-header {
+    padding: 0 1rem;
+  }
+
+  .about-link {
+    top: 3.5rem;
+    right: 1rem;
+  }
+
+  .options-main {
+    padding: 0 1rem;
+  }
+
+  .form-input-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .url-input {
+    width: 80dvw;
+  }
+  
+  .btn {
+    min-width: 120px;
+  }
+
+  .table {
+    font-size: 1rem;
+  }
+
+  .table th, .table td {
+    padding: 6px;
+  }
+
+  .row-url {
+    width: auto;
+  }
+}

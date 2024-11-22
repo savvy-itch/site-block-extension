@@ -13,7 +13,6 @@ body {
   --highlight-color: hsl(21, 87%, 56%);
 
   font-family: var(--font-family);
-  /* background-color: #E5D9F2; */
   background-image: linear-gradient(to right bottom, #e5d9f2, #d7d3eb, #abb7c9);
   color: var(--text-color);
   min-height: 100dvh;
@@ -36,6 +35,7 @@ h1 {
   font-size: 1.1rem;
   font-style: italic;
   color: var(--dim-color);
+  text-align: center;
 }
 
 .hero-img {
@@ -115,4 +115,33 @@ h1 {
 
 .hover-underline-animation.left:hover::after {
   transform-origin: bottom left;
+}
+
+@media screen and (max-width: 1024px) {
+  .block-footer {
+    grid-template-columns: 1fr 3fr 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .block-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+}
+
+@media screen and (max-width: 640px) {
+  body {
+    padding: 1rem;
+  }
+
+  h2 {
+    text-align: center;
+  }
+
+  .hero-img {
+    width: 100%;
+  }
 }

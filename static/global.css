@@ -47,6 +47,7 @@ body {
 .extension-submit-btn {
   background-color: var(--success-color);
   transition: var(--bg-transition);
+  height: auto;
 }
 
 .extension-submit-btn:hover,

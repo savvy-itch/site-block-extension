@@ -6,12 +6,6 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
-  ! add about page:
-    - Functionality
-    - FAQ section
-    - Contacts section
-    ! style the page
-  - responsiveness
   ? localization
   ? add and display timestamp for each rule
   ? sort/filter rules by alphabet/active/domain
@@ -161,10 +155,6 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       rulesToRemove.push(rule.id);
     });
 
-    console.log(msg.updatedRules);
-    console.log({rulesToRemove});
-    console.log({filteredRules});
-
     await browser.declarativeNetRequest.updateDynamicRules({
       removeRuleIds: rulesToRemove,
       addRules: filteredRules
@@ -203,12 +193,7 @@ async function getRules(): Promise<Site[]> {
 async function getCurrentUrl() {
   const queryOptions = { active: true, lastFocusedWindow: true };
   const [tab] = await browser.tabs.query(queryOptions);
-  console.log({tab});
   return tab.url;
-}
-
-function getUrlBeforeBlock() {
-
 }
 
 // client-side redirection (when no new requests are sent)
@@ -281,6 +266,6 @@ async function checkInactiveRules() {
 
 browser.storage.onChanged.addListener((changes, namespace) => {
   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-    console.log(newValue);
+    // console.log(newValue);
   }
 });
