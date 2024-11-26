@@ -6,6 +6,7 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
 /* 
+  ? test extension on Android
   ? localization
   ? add and display timestamp for each rule
   ? sort/filter rules by alphabet/active/domain
@@ -22,8 +23,6 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
   + don't display popup on options and blocked page
   + don't allow adding block page to the list
   + adding an existing URL (when one is temporarily disabled)
-
-  Bugs:
 */
 
 // on icon click

@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About | Website Blocker Extension</title>
+  <title>About | On Pace Extension</title>
   <link rel="stylesheet" href="./global.css">
   <link rel="stylesheet" href="./about.css">
   <link rel="stylesheet" href="./footer.css">
@@ -13,7 +13,9 @@
 <body>
   <header>
     <nav class="about-nav">
-      <a class="hover-underline-animation left" href="./options.html">Extension Settings</a>
+      <a class="home-link" href="./options.html" title="On Pace Settings">
+        <img src="./icons/on-pace.png" alt="On Pace icon">
+      </a>
       <div class="about-nav-subdiv">
         <a class="hover-underline-animation left sublink" href="#functionality">Functionality</a>
         <a class="hover-underline-animation left sublink" href="#faq">FAQ</a>
@@ -24,12 +26,15 @@
 
   <main class="about-main">
     <section>
+      <p>Here you can find all the information about On Pace extension.</p>
       <h2 id="functionality">Functionality</h2>
       <dl>
         <dt>Adding new URLs</dt>
         <dd>
           <p>You can add new URLs to the blacklist either from the current open tab or from the options page. To open the extension in the current tab, click the extension icon in your browser:</p>
-          <img src="" alt="extension icon">
+          <div class="about-img-wrapper">
+            <img class="icon-example-img" src="./icons/on-space-icon-screenshot.jpg" alt="extension icon">
+          </div>
           <p>You can also open the extension by using <b>Ctrl+Q</b> key shortcut.</p>
         </dd>
         <dt>Edit/delete URLs</dt>
@@ -84,17 +89,17 @@
     </section>
     <section>
       <h2 id="contacts">Contacts</h2>
-      <p>If you have any questions, issues or other type of feedback, please email to <a href="mailto:#"
-          target="_blank">example@mail.com</a>.</p>
+      <p>If you have any questions, issues or other type of feedback, please email to <a href="mailto:msavprojects@gmail.com"
+          target="_blank">msavprojects@gmail.com</a>.</p>
     </section>
   </main>
 
   <footer class="options-footer">
     <div class="footer-wrapper">
       <div class="footer-general-col">
-        <p>Website blocker v<span id="ext-version"></span></p>
+        <p>On Pace v<span id="ext-version"></span> - website blocker extension.</p>
         <p>Found a bug?</p>
-        <a class="link-to-highlight" href="mailto:#" target="_blank">Report via Email</a>
+        <a class="link-to-highlight" href="mailto:msavprojects@gmail.com" target="_blank">Report via Email</a>
         <a id="web-store-link" class="link-to-highlight" href="#" target="_blank">
           Rate the extension
           <img src="./icons/star.svg" alt="rate icon">
@@ -140,18 +145,18 @@
         <h3>Contact</h3>
         <ul class="contact-list">
           <li>
-            <a href="#" target="_blank" title="Linkedin" aria-label="Linkedin link"><img src="./icons/linkedin.svg" alt="Linkedin icon" /></a>
+            <a href="https://www.linkedin.com/in/mykhailo-savych-a31366248/" target="_blank" title="Linkedin" aria-label="Linkedin link"><img src="./icons/linkedin.svg" alt="Linkedin icon" /></a>
           </li>
           <li>
-            <a href="#" target="_blank" title="Bluesky" aria-label="Bluesky link"><img src="./icons/bluesky.svg" alt="Bluesky icon" /></a>
+            <a href="https://bsky.app/profile/savvy-itch.bsky.social" target="_blank" title="Bluesky" aria-label="Bluesky link"><img src="./icons/bluesky.svg" alt="Bluesky icon" /></a>
           </li>
           <li>
-            <a href="#" target="_blank" title="GitHub" aria-label="GitHib link"><img src="./icons/github.svg" alt="GitHub icon" /></a>
+            <a href="https://github.com/savvy-itch" target="_blank" title="GitHub" aria-label="GitHib link"><img src="./icons/github.svg" alt="GitHub icon" /></a>
           </li>
         </ul>
       </div>
     </div>
-    <p class="footer-developer">Developed by <a href="#"
+    <p class="footer-developer">Developed by <a href="https://portfolio-website-sib.netlify.app"
         target="_blank">Michael Savych</a></p>
   </footer>
   <script src="./about.js"></script>

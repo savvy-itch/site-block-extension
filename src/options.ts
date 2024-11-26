@@ -5,7 +5,6 @@ import { assignStoreLink, getExtVersion, handleFormSubmission } from './helpers'
 
 /*
 Edge cases:
-Options page:
   + don't allow adding options page to the list
   + don't allow empty url string
   + adding an existing URL (when one is temporarily disabled)
@@ -34,7 +33,6 @@ let isEdited = false;
 let showEditInput = false;
 let editedRulesIds: Set<number> = new Set();
 let idToDelete: number | null;
-let isLoading = false;
 const rowIdPrefix = 'row-';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -144,7 +142,6 @@ function toggleEditMode(bool: boolean) {
 }
 
 async function displayUrlList() {
-  isLoading = true;
   displayLoader();
   const msg: GetAllAction = { action: 'getRules' };
   const res: ResToSend = await browser.runtime.sendMessage(msg);
@@ -156,7 +153,7 @@ async function displayUrlList() {
         if (res.rules.length === 0) {
           const noRulesElem = document.createElement('h3');
           noRulesElem.innerText = 'No URLs to block.';
-          wrapperElem.appendChild(noRulesElem); 
+          wrapperElem.appendChild(noRulesElem);
         } else {
           const urlList = res.rules.sort((a, b) => a.strippedUrl.localeCompare(b.strippedUrl));
           const urlTable = document.createElement('table');
@@ -182,48 +179,85 @@ async function displayUrlList() {
             ruleElem.id = `${rowIdPrefix}${rule.id}`;
             ruleElem.classList.add('row');
             !rule.isActive && ruleElem.classList.add('inactive-url');
-            const content = `
-              <td>${i + 1}</td>
-              <!-- <td class="row-id">${rule.id}</td> -->
-              <td class="row-url">${rule.strippedUrl}</td>
-              <!-- <td>${rule.url}</td> -->
-              <td class="row-domain">
-                <input 
-                  class="domain-checkbox"
-                  name="domain"
-                  type="checkbox"
-                  ${rule.blockDomain && 'checked'}
-                />
-              </td>
-              <td>
-                <button class="edit-rule-btn" ${showEditInput ? 'disabled' : ''} title="edit URL button"
-                >
-                  <img src="./icons/edit.svg" alt="edit URL button">
-                </button>
-              </td>
-              <td>
-                <button class="delete-rule-btn" ${showEditInput ? 'disabled' : ''} title="delete URL button"
-                >
-                  <img src="./icons/delete.svg" alt="delete URL button">
-                </button>
-              </td>
-              <td>
-                <label class="active-switch">
-                  <input 
-                    type="checkbox"
-                    class="active-checkbox ${!rule.isActive ? 'inactive-url' : ''}"
-                    name="active"
-                    ${rule.isActive && 'checked'}
-                  />
-                  <span class="active-slider round"></span>
-                </label>
-              </td>
-            `;
-            ruleElem.innerHTML = content;
+
+            const noCell = document.createElement('td');
+            noCell.textContent = `${i + 1}`;
+
+            const urlCell = document.createElement('td');
+            urlCell.classList.add('row-url');
+            urlCell.textContent = `${rule.strippedUrl}`;
+
+            const domainCell = document.createElement('td');
+            domainCell.classList.add('row-domain');
+            const domainCheckbox = document.createElement('input');
+            domainCheckbox.classList.add('domain-checkbox');
+            domainCheckbox.name = 'domain';
+            domainCheckbox.type = 'checkbox';
+            if (rule.blockDomain) {
+              domainCheckbox.checked = true;
+            }
+            domainCell.appendChild(domainCheckbox);
+
+            const editCell = document.createElement('td');
+            const editBtn = document.createElement('button');
+            editBtn.classList.add('edit-rule-btn');
+            if (showEditInput) {
+              editBtn.disabled = true;
+            }
+            editBtn.title = 'edit URL button';
+
+            const editIcon = document.createElement('img');
+            editIcon.src = './icons/edit.svg';
+            editIcon.alt = 'edit URL button';
+            editBtn.appendChild(editIcon);
+            editCell.appendChild(editBtn);
+
+            const deleteCell = document.createElement('td');
+            const deleteBtn = document.createElement('button');
+            deleteBtn.classList.add('delete-rule-btn');
+            if (showEditInput) {
+              deleteBtn.disabled = true;
+            }
+            deleteBtn.title = 'delete URL button';
+
+            const deleteIcon = document.createElement('img');
+            deleteIcon.src = './icons/delete.svg';
+            deleteIcon.alt = 'delete URL button';
+            deleteBtn.appendChild(deleteIcon);
+            deleteCell.appendChild(deleteBtn);
+
+            const activeCell = document.createElement('td');
+            const activeLabel = document.createElement('label');
+            activeLabel.classList.add('active-switch');
+
+            const activeCheckbox = document.createElement('input');
+            activeCheckbox.type = 'checkbox';
+            activeCheckbox.classList.add('active-checkbox');
+            if (!rule.isActive) {
+              activeCheckbox.classList.add('inactive-url');
+            }
+            activeCheckbox.name = 'active';
+            if (rule.isActive) {
+              activeCheckbox.checked = true;
+            }
+
+            const activeSlider = document.createElement('span');
+            activeSlider.classList.add('active-slider', 'round');
+
+            activeLabel.appendChild(activeCheckbox);
+            activeLabel.appendChild(activeSlider);
+            activeCell.appendChild(activeLabel);
+
+            ruleElem.appendChild(noCell);
+            ruleElem.appendChild(urlCell);
+            ruleElem.appendChild(domainCell);
+            ruleElem.appendChild(editCell);
+            ruleElem.appendChild(deleteCell);
+            ruleElem.appendChild(activeCell);
+
             tbody.appendChild(ruleElem);
-  
+
             const updateRuleRow = document.getElementById(`row-${rule.id}`);
-            const editBtn = updateRuleRow?.querySelector('.edit-rule-btn');
             if (editBtn) {
               editBtn.addEventListener('click', () => {
                 if (!showEditInput) {
@@ -233,35 +267,31 @@ async function displayUrlList() {
                   toggleEditMode(true);
                   const urlCell = updateRuleRow?.querySelector('.row-url');
                   if (urlCell) {
-                    urlCell.innerHTML = `
-                      <input
-                        name="url"
-                        type="text"
-                        value=${rule.strippedUrl}
-                        required
-                      />
-                    `;
+                    urlCell.textContent = '';
+                    const editInput = document.createElement('input');
+                    editInput.name = 'url';
+                    editInput.type = 'text';
+                    editInput.value = rule.strippedUrl;
+                    editInput.required = true;
+                    urlCell.appendChild(editInput);
                   }
                 }
               })
             }
-  
-            const deleteBtn = updateRuleRow?.querySelector('.delete-rule-btn');
+
             if (deleteBtn) {
               deleteBtn.addEventListener('click', () => {
                 idToDelete = rule.id;
                 deleteDialog.showModal();
               });
             }
-  
-            const domainToggle = updateRuleRow?.querySelector('.domain-checkbox');
-            domainToggle?.addEventListener('change', () => {
+
+            domainCheckbox?.addEventListener('change', () => {
               toggleEditMode(true);
               editedRulesIds.add(rule.id);
             });
-  
-            const activeToggle = updateRuleRow?.querySelector('.active-checkbox');
-            activeToggle?.addEventListener('change', () => {
+
+            activeCheckbox.addEventListener('change', () => {
               updateRuleRow?.classList.toggle('inactive-url');
               toggleEditMode(true);
               editedRulesIds.add(rule.id);
@@ -272,9 +302,10 @@ async function displayUrlList() {
     }
   } catch (error) {
     console.error(error);
-    alert('An error occured. Check the console.');
-  } finally {
-    isLoading = false;
+    const noRulesElem = document.createElement('h3');
+    noRulesElem.classList.add('error-heading');
+    noRulesElem.innerText = 'Something went wrong. Please restart the extension.';
+    wrapperElem?.appendChild(noRulesElem);
   }
 }
 
@@ -299,7 +330,7 @@ async function deleteRule(id: number) {
     }
   } catch (error) {
     console.error(res.error);
-    alert('Error: Could not delete the rule')
+    alert('Could not delete the URL.')
   }
 }
 
@@ -308,11 +339,11 @@ async function deleteRules() {
   try {
     const res: ResToSend = await browser.runtime.sendMessage(msg);
     if (res.success) {
-      console.log('All rules have been deleted');
+      // console.log('All rules have been deleted');
     }
   } catch (error) {
-    alert('An error occured. Check the console.');
     console.error(error);
+    alert('Could not delete the URLs.');
   }
 }
 
@@ -388,7 +419,7 @@ async function saveChanges() {
     }
   } catch (error) {
     console.error(res.error);
-    alert('Could not save changes. Check the console.');
+    alert('Could not save changes.');
   }
 }
 

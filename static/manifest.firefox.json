@@ -1,10 +1,17 @@
 {
   "manifest_version": 2,
-  "name": "Website Blocker",
+  "name": "On Pace",
+  "author": "msavprojects@gmail.com",
   "description": "Extension for blocking unwanted websites",
-  "version": "1.0",
+  "version": "1.0.0",
   "browser_action": {
     "default_title": "Click to show the form"
+  },
+  "icons": {
+    "16": "icons/on-pace-16.png",
+    "32": "icons/on-pace-32.png",
+    "48": "icons/on-pace-48.png",
+    "128": "icons/on-pace-128.png"
   },
   "permissions": [
     "activeTab",
@@ -22,15 +29,6 @@
     ],
     "persistent": false
   },
-  "content_scripts": [{
-    "matches": ["<all_urls>"],
-    "js": [
-      "browser-polyfill.js",
-      "options.js",
-      "blocked.js",
-      "about.js"
-    ]
-  }],
   "commands": {
     "trigger_form": {
       "suggested_key": {
@@ -40,6 +38,15 @@
       "description": "Show HTML form"
     }
   },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": [
+      "browser-polyfill.js",
+      "options.js",
+      "blocked.js",
+      "about.js"
+    ]
+  }],
   "web_accessible_resources": [
     "blocked.html",
     "options.html", 

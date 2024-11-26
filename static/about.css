@@ -34,6 +34,10 @@ body {
   color: var(--text-color);
 }
 
+.home-link img {
+  width: 4rem;
+}
+
 .about-nav-subdiv {
   display: flex;
   gap: 15px;
@@ -99,12 +103,15 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 1.5rem auto;
 }
 
 .about-main img {
-  margin: 1.5rem auto;
-  width: 50%;
-  max-width: 500px;
+  width: 70%;
+}
+
+.about-main .icon-example-img {
+  width: 35%;
 }
 
 .about-example {
@@ -130,4 +137,60 @@ body {
 
 .about-main a:hover {
   color: var(--highlight-color);
+}
+
+@media screen and (max-width: 1280px) {
+  .about-main {
+    max-width: 80%;
+  }
+
+  .about-img-wrapper img {
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .about-img-wrapper img {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .about-main {
+    max-width: 100%;
+  }
+
+  .about-main h2 {
+    font-size: 1.5rem;
+  }
+  
+  .about-main dt,
+  .about-main h3 {
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .about-main p,
+  .about-main ol {
+    font-size: 1rem;
+  }
+}
+
+@media screen and (max-width: 540px) {
+  .about-nav {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .about-nav > a {
+    font-size: 1.4rem;
+  }
+
+  .about-nav-subdiv {
+    gap: 25px;
+  }
+
+  .about-main h2 {
+    margin: 1.5rem 0;
+  }
 }

@@ -22,6 +22,27 @@
   z-index: 500;
 }
 
+.extension-popup-form * {
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
+  background-color: unset;
+}
+
+.extension-popup-form .extension-submit-btn {
+  background-color: var(--success-color);
+  transition: var(--bg-transition);
+  height: auto;
+}
+
+.extension-popup-form .extension-submit-btn:hover,
+.extension-popup-form .extension-submit-btn:focus {
+  background-color: var(--success-dark-color);
+}
+
 .extension-popup-form .url-input-label {
   display: flex;
   flex-direction: column;
@@ -120,36 +141,6 @@
   transition: var(--bg-transition);
 }
 
-/* .extension-block-domain-label:hover input ~ .extension-domain-checkmark {
-  background-color: #ccc;
-}
-
-.extension-block-domain-label input:checked ~ .extension-domain-checkmark {
-  background-color: var(--dark-highlight);
-}
-
-.extension-domain-checkmark:after {
-  content: "";
-  position: absolute;
-  display: none;
-}
-
-.extension-block-domain-label input:checked ~ .extension-domain-checkmark:after {
-  display: block;
-}
-
-.extension-block-domain-label .extension-domain-checkmark:after {
-  left: 8px;
-  top: 4px;
-  width: 5px;
-  height: 10px;
-  border: solid white;
-  border-width: 0 3px 3px 0;
-  -webkit-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  transform: rotate(45deg);
-} */
-
 .extension-block-domain-label:hover {
   cursor: pointer;
 }
@@ -167,16 +158,6 @@
   border-radius: 5px;
   color: white;
 }
-
-/* .extension-submit-btn {
-  background-color: var(--success-color);
-  transition: var(--bg-transition);
-}
-
-.extension-submit-btn:hover,
-.extension-submit-btn:focus {
-  background-color: var(--success-dark-color);
-} */
 
 .extension-options-btn {
   background-color: var(--dark-highlight);
