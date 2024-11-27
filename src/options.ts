@@ -392,7 +392,7 @@ async function saveChanges() {
             : 'allow',
           ...(isActive && {
             redirect: {
-              regexSubstitution: browser.runtime.getURL("blocked.html")
+              regexSubstitution: `${browser.runtime.getURL("blocked.html")}?id=${rowId}`
             }
           })
         },
