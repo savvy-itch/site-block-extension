@@ -31,7 +31,6 @@ export function stripUrl(url: string): string {
 }
 
 export async function deleteRules() {
-  console.log('deleteRules()');
   const msg: DeleteAllAction = { action: 'deleteAll' };
   try {
     const res: ResToSend = await browser.runtime.sendMessage(msg);

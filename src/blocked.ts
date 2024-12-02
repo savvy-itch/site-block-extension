@@ -18,7 +18,6 @@ const motivanionalMsgs = [
 let blockedUrl: string | undefined = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log(para, urlId);
   if (para && urlId) {
     getBlockedUrl();
   }
@@ -45,7 +44,6 @@ async function  getBlockedUrl() {
     const res: ResToSend = await browser.runtime.sendMessage(msg);
     if (res.success && res.rules) {
       blockedUrl = res.rules.find(rule => rule.id === urlId)?.strippedUrl;
-      console.log(blockedUrl);
       if (blockedUrl) {
         para!.textContent = blockedUrl;
         deleteBtn?.removeAttribute('disabled');
@@ -65,7 +63,6 @@ async function deleteRule(id: number) {
   try {
     if (res.success) {
       if (blockedUrl) {
-        console.log(blockedUrl);
         window.location.replace(`https://${blockedUrl}`);
       }
     }

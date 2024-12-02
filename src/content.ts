@@ -127,7 +127,7 @@ async function showPopup() {
           })
         }
       } else {
-        console.log('no response', res);
+        // console.log('no response', res);
       }
     } catch (error) {
       console.error(error);

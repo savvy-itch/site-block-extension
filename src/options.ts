@@ -119,8 +119,10 @@ async function handleInactiveRules(isStrictModeOn: boolean) {
         const date = new Date();
         const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
         res.rules.forEach(rule => {
-          const urlToBlock = `^https?:\/\/${rule.strippedUrl}${rule.blockDomain ? '.*' : '$'}`;
-          inactiveRulesToStore.push({ id: rule.id, unblockDate: unblockDate, urlToBlock })
+          if (!rule.isActive) {
+            const urlToBlock = `^https?:\/\/${rule.strippedUrl}?${rule.blockDomain ? '.*' : '$'}`;
+            inactiveRulesToStore.push({ id: rule.id, unblockDate: unblockDate, urlToBlock })
+          }
         });
         browser.storage.local.set({ inactiveRules: inactiveRulesToStore });
       }

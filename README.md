@@ -13,8 +13,6 @@ On Pace is a cross-browser extension for blocking websites. It supports Chromium
 To start the extension, simply click on its icon in your browser or use `Ctrl+Q` keyboard shortcut.
 
 ## Setup
-The extension was built using Windows 10.
-
 Install the dependencies by running:
 
 ```

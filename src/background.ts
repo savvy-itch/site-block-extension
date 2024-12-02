@@ -8,6 +8,7 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 /* 
   ? test extension on Android
   ? localization
+  ? display feedback page on extension deletion
   ? add and display timestamp for each rule
   ? sort/filter rules by alphabet/active/domain
   ? block URLs with specific words in them
@@ -19,7 +20,6 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
     - notification about rules deletion
 
   Edge cases:
-  Popup:
   + don't display popup on options and blocked page
   + don't allow adding block page to the list
   + adding an existing URL (when one is temporarily disabled)
