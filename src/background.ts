@@ -18,6 +18,7 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
   ? add more custom messages for failed and successful actions
     - notification about a newly added rule
     - notification about rules deletion
+  - when user clicks "Unblock URL", highlight that URL in the options page
 
   Edge cases:
   + don't display popup on options and blocked page

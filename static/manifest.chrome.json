@@ -16,9 +16,8 @@
   },
   "permissions": [
     "activeTab",
-    "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
-    "scripting", 
+    "scripting",
     "storage",
     "tabs"
   ],

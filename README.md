@@ -1,7 +1,17 @@
 # On Pace 
-On Pace is a cross-browser extension for blocking websites. It supports Chromium based browsers as well as Firefox. At the moment the extension is available in these web stores:
+<p align="center">
+  <a rel="noreferrer noopener" href="https://chromewebstore.google.com/detail/on-pace/kpniallfjagbbjigjigdlkoambcipoea?hl=en-US&utm_source=ext_sidebar">
+    <img alt="Chrome Web Store" src="https://img.shields.io/badge/Chrome-141e24.svg?&style=for-the-badge&logo=google-chrome&logoColor=white">
+  </a>  
+  <a rel="noreferrer noopener" href="https://addons.mozilla.org/en-US/firefox/addon/on-pace/">
+    <img alt="Firefox Add-ons" src="https://img.shields.io/badge/Firefox-141e24.svg?&style=for-the-badge&logo=firefox-browser&logoColor=white">
+  </a>
+  <a rel="noreferrer noopener" href="https://microsoftedge.microsoft.com/addons/detail/on-pace/oifamaadhbcefjhakfkojcomahfkchpi">
+    <img alt="Edge Addons" src="https://img.shields.io/badge/Edge-141e24.svg?&style=for-the-badge&logo=microsoft-edge&logoColor=white">
+  </a>
+</p>
 
-[to be added]
+On Pace is a cross-browser extension for blocking websites.
 
 ## Functionality
 - users can add/edit/delete websites to blacklist to restrain access to them.

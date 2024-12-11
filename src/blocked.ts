@@ -18,7 +18,9 @@ const motivanionalMsgs = [
 let blockedUrl: string | undefined = '';
 
 document.addEventListener('DOMContentLoaded', () => {
-  if (para && urlId) {
+  console.log('DOMContentLoaded');
+  console.log(window.location.search);
+  if (para) {
     getBlockedUrl();
   }
   displayMotivationMsg();
@@ -44,6 +46,7 @@ async function  getBlockedUrl() {
     const res: ResToSend = await browser.runtime.sendMessage(msg);
     if (res.success && res.rules) {
       blockedUrl = res.rules.find(rule => rule.id === urlId)?.strippedUrl;
+      console.log({blockedUrl});
       if (blockedUrl) {
         para!.textContent = blockedUrl;
         deleteBtn?.removeAttribute('disabled');
@@ -73,6 +76,7 @@ async function deleteRule(id: number) {
 }
 
 function displayMotivationMsg() {
+  console.log('displayMotivationMsg()');
   if (motivationHeading) {
     const idx = Math.floor(Math.random() * motivanionalMsgs.length);
     motivationHeading.innerText = motivanionalMsgs[idx];

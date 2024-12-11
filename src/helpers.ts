@@ -18,6 +18,8 @@ export function assignStoreLink(webStoreLink: HTMLAnchorElement) {
     webStoreLink.href = webStores.firefox;
   } else if (browser.includes('Edg/')) {
     webStoreLink.href = webStores.edge;
+  } else {
+    webStoreLink.href = webStores.chrome;
   }
 }
 
