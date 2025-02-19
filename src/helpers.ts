@@ -1,6 +1,6 @@
 import browser from 'webextension-polyfill';
-import { AddAction, DeleteAllAction, ResToSend } from "./types";
-import { forbiddenUrls, maxUrlLength, minUrlLength, webStores } from './globals';
+import { AddAction, DeleteAllAction, GetAllAction, ResToSend, RuleInStorage } from "./types";
+import { defaultDisableLimit, forbiddenUrls, maxUrlLength, minUrlLength, PREV_RESET_DATE, strictModeBlockPeriod, webStores } from './globals';
 
 /*
 Brave:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
@@ -87,4 +87,90 @@ export async function handleFormSubmission(urlForm: HTMLFormElement, errorPara: 
       console.error(error);
     }
   }
+}
+
+export function displayLoader(wrapperElem: HTMLDivElement) {
+  if (wrapperElem) {
+    const loader = document.createElement('div');
+    loader.classList.add('loader');
+    wrapperElem.innerHTML = '';
+    wrapperElem.appendChild(loader);
+  }
+}
+
+export async function handleInactiveRules(isStrictModeOn: boolean) {
+  if (!isStrictModeOn) {
+    browser.storage.local.set({ inactiveRules: [] });
+  } else {
+    const msg: GetAllAction = { action: 'getRules' };
+    const res: ResToSend = await browser.runtime.sendMessage(msg);
+    try {
+      if (res.success && res.rules) {
+        const inactiveRulesToStore: RuleInStorage[] = [];
+        const date = new Date();
+        const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
+        res.rules.forEach(rule => {
+          if (!rule.isActive) {
+            const urlToBlock = `^https?:\/\/${rule.strippedUrl}?${rule.blockDomain ? '\/?.*' : '\/?$'}`;
+            inactiveRulesToStore.push({ id: rule.id, unblockDate: unblockDate, urlToBlock })
+          }
+        });
+        browser.storage.local.set({ inactiveRules: inactiveRulesToStore });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+export function disableOtherBtns(tbody: HTMLTableSectionElement, ruleId: number) {
+  const allRows = tbody?.querySelectorAll('.row');
+
+  allRows?.forEach(r => {
+    if (r.id !== `row-${ruleId}`) {
+      const editBtn = r.querySelector('.edit-rule-btn');
+      if (editBtn) {
+        editBtn.setAttribute('disabled', '');
+      }
+      const deleteBtn = r?.querySelector('.delete-rule-btn');
+      if (deleteBtn) {
+        deleteBtn.setAttribute('disabled', '');
+      }
+    }
+  });
+}
+
+export async function checkLastLimitReset() {
+  const dateResult = await browser.storage.local.get(PREV_RESET_DATE);
+  console.log(dateResult[PREV_RESET_DATE]);
+  const rawDate = dateResult[PREV_RESET_DATE] as string;
+
+  // const prevDate = dateResult[PREV_RESET_DATE] ? new Date(dateResult[PREV_RESET_DATE] as string) : null;
+
+  if (!rawDate || isNaN(new Date(rawDate).getTime())) {
+    console.log('no prev date found');
+    await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
+  } else {
+    const prevDate = new Date(rawDate);
+    console.log(prevDate);
+    const currDate = new Date();
+    if (prevDate.getFullYear() < currDate.getFullYear() || 
+      prevDate.getMonth() < currDate.getMonth() || 
+      prevDate.getDate() < currDate.getDate()) {
+        console.log('should update the date');
+        await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
+        await browser.storage.local.set({ disableLimit: defaultDisableLimit });
+    }
+
+    // test update after 10 seconds
+    // if ((currDate.getTime() - prevDate.getTime()) > 10000) { // 10s
+    //     await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
+    //     await browser.storage.local.set({ disableLimit: defaultDisableLimit });
+    // }
+  }
+}
+
+export function getUrlToBlock(strippedUrl: string, blockDomain: boolean) {
+  // return `^https?:\/\/${strippedUrl}?${blockDomain ? '.*' : '$'}`;
+  return `^https?:\/\/${strippedUrl}${blockDomain ? '\/?.*' : '\/?$'}`
 }

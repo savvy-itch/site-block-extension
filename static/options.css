@@ -293,7 +293,7 @@ h1 {
 .strict-mode-switch {
   font-size: 1.2rem;
   font-weight: bold;
-  margin: 1.5rem 0;
+  margin: 1.5rem 0 1rem 0;
   position: relative;
   display: flex;
   gap: 12px;
@@ -420,12 +420,53 @@ h1 {
   max-width: 400px;
 }
 
+.search-form {
+  border-radius: 4px;
+  width: 30dvw;
+  max-width: 400px;
+  display: flex;
+  position: relative;
+}
+
+.search-form > input {
+  border: 1px solid var(--dark-highlight);
+  border-radius: 4px;
+  font-size: 1.2rem;
+  padding: 5px 2.5rem 5px 5px;
+  width: 100%;
+}
+
+.search-form > button {
+  position: absolute;
+  right: 1%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 2px;
+  padding: 1px;
+  background-color: transparent;
+  border: none;
+  display: flex;
+  transition: background-color .2s;
+}
+
+.search-form > button:hover {
+  background-color: var(--light-highlight);
+  cursor: pointer;
+} 
+
 .extension-error-para {
   font-size: 1rem;
   font-style: italic;
   height: 1rem;
   margin: .5rem 0;
   color: darkred;
+}
+
+.strict-mode-desc {
+  padding: 0;
+  font-style: italic;
+  font-size: 1rem;
+  list-style: inside;
 }
 
 /* ===== Loader ======= */

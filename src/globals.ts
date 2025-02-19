@@ -1,5 +1,6 @@
 export const storageRulesKey = 'inactiveRules';
 export const storageStrictModeKey = 'strictMode';
+export const PREV_RESET_DATE = 'prevResetDate';
 export const forbiddenUrls: RegExp[] = [
   /^chrome-extension:\/\//
 ];
@@ -13,3 +14,6 @@ export const webStores = {
   firefox: "https://addons.mozilla.org/en-US/firefox/addon/on-pace/",
   opera: "https://addons.opera.com/en/extensions/"
 };
+export const defaultDisableLimit = 3;
+// export const LIMIT_RESET_INTERVAL =  1 * 1000 * 60 * 60 * 24; // 24h
+// export const LIMIT_RESET_INTERVAL =  10 * 1000; // 10s

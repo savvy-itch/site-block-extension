@@ -4,6 +4,7 @@ body {
   --success-dark-color: hsl(160, 100%, 26%);
   --dark-highlight: #3767a9;
   --dark-highlight2: hsl(215, 51%, 37%);
+  --light-highlight: hsl(0, 0%, 78%);
   --bg-transition: background-color .2s ease-in-out;
   --dialog-transition: .3s;
   --footer-bg: #222831;

@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "On Pace",
+  "name": "On Pace (Dev)",
   "author": "msavprojects@gmail.com",
   "description": "Extension for blocking unwanted websites",
   "version": "1.0.1",
@@ -35,9 +35,9 @@
     "trigger_form": {
       "suggested_key": {
         "default": "Ctrl+Q",
-        "mac": "Command+B"
+        "mac": "Command+Y"
       },
-      "description": "Show HTML form"
+      "description": "Click or press Ctrl+Q to show the form"
     }
   },
   "web_accessible_resources": [

@@ -25,15 +25,17 @@
       </div>
     </dialog>
     <button id="clear-btn" class="clear-btn">Delete all rules</button>
+    <h2>Disable Limit Left: <span id="disable-limit"></span></h2>
   </header>
 
   <main class="options-main">
     <form id="url-input-form">
       <div class="form-input-wrapper">
-        <label for="url" class="url-input-label">
+        <label for="url-input" class="url-input-label">
           Enter URL of the website you want to block:
           <input 
-            class="url-input" 
+            class="url-input"
+            id="url-input"
             name="url" 
             type="text" 
             placeholder="example.com"
@@ -54,6 +56,12 @@
 
     <section id="settings-section" class="table-section">
       <h2>Blocked URLs</h2>
+      <form id="search-form" class="search-form">
+        <input id="search-bar" type="text" placeholder="Search URLs" />
+        <button id="search-input-clear-btn" type="button">
+          <img src="./icons/x.svg" alt="clear input">
+        </button>
+      </form>
       <div id="table-wrapper" class="table-wrapper">
         <table class="blacklist-table table">
           <thead>
@@ -91,6 +99,10 @@
       <input id="strict-mode-switch" type="checkbox" class="strict-mode-checkbox" name="strict-mode" />
       <span class="strict-mode-slider round"></span>
     </label>
+    <ul class="strict-mode-desc">
+      <li>Re-enables any inactive rules after 1 hour</li>
+      <li>Daily limit for disabling rules - 3</li>
+    </ul>
   </main>
 
   <footer class="options-footer">
