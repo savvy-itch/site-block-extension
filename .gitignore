@@ -8,3 +8,12 @@
 
 # local env files
 .env*.local
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/tmp-profile/
+/tests/tmp-profile/

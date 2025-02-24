@@ -50,6 +50,7 @@ export async function handleFormSubmission(urlForm: HTMLFormElement, errorPara: 
     const formData = new FormData(urlForm);
     const urlToBlock = formData.get('url') as string;
     const blockDomain = (document.getElementById('block-domain') as HTMLInputElement).checked;
+    errorPara.textContent = '';
 
     // handle errors
     if (!urlToBlock || forbiddenUrls.some(url => url.test(urlToBlock))) {
@@ -79,8 +80,11 @@ export async function handleFormSubmission(urlForm: HTMLFormElement, errorPara: 
       if (res.success) {
         if (res.status === 'added') {
           successFn();
+          const urlInput = urlForm.querySelector('.url-input') as HTMLInputElement;
+          urlInput.value = '';
         } else if (res.status === 'duplicate') {
-          alert('URL is already blocked');
+          errorPara.textContent = 'URL is already blocked';
+          // alert('URL is already blocked');
         }
       }
     } catch (error) {
@@ -145,8 +149,6 @@ export async function checkLastLimitReset() {
   console.log(dateResult[PREV_RESET_DATE]);
   const rawDate = dateResult[PREV_RESET_DATE] as string;
 
-  // const prevDate = dateResult[PREV_RESET_DATE] ? new Date(dateResult[PREV_RESET_DATE] as string) : null;
-
   if (!rawDate || isNaN(new Date(rawDate).getTime())) {
     console.log('no prev date found');
     await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
@@ -154,23 +156,19 @@ export async function checkLastLimitReset() {
     const prevDate = new Date(rawDate);
     console.log(prevDate);
     const currDate = new Date();
-    if (prevDate.getFullYear() < currDate.getFullYear() || 
-      prevDate.getMonth() < currDate.getMonth() || 
+    if (prevDate.getFullYear() < currDate.getFullYear() ||
+      prevDate.getMonth() < currDate.getMonth() ||
       prevDate.getDate() < currDate.getDate()) {
-        console.log('should update the date');
-        await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
-        await browser.storage.local.set({ disableLimit: defaultDisableLimit });
+      console.log('should update the date');
+      await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
+      await browser.storage.local.set({ disableLimit: defaultDisableLimit });
     }
-
-    // test update after 10 seconds
-    // if ((currDate.getTime() - prevDate.getTime()) > 10000) { // 10s
-    //     await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
-    //     await browser.storage.local.set({ disableLimit: defaultDisableLimit });
-    // }
   }
+  console.log("Stored date:", rawDate);
+  console.log("Parsed stored date:", new Date(rawDate));
+  console.log("Current date (new Date()):", new Date());
 }
 
 export function getUrlToBlock(strippedUrl: string, blockDomain: boolean) {
-  // return `^https?:\/\/${strippedUrl}?${blockDomain ? '.*' : '$'}`;
   return `^https?:\/\/${strippedUrl}${blockDomain ? '\/?.*' : '\/?$'}`
 }

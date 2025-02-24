@@ -184,7 +184,7 @@ async function getRules(): Promise<Site[]> {
       blockDomain: rule.condition.regexFilter ? rule.condition.regexFilter[rule.condition.regexFilter.length - 1] === '*' : true,
       isActive: rule.action.redirect ? true : false
     }));
-    console.log({blackList});
+    console.log({ blackList });
     return blackList;
   } catch (error) {
     console.error(error);
@@ -205,7 +205,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     if (strictMode) {
       checkInactiveRules();
     }
-  
+
     const url = changeInfo.url;
     if (url) {
       const blackList = await getRules();
@@ -221,6 +221,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
     return true;
   }
 });
+
 
 async function checkInactiveRules() {
   const result = await browser.storage.local.get([storageRulesKey]);
@@ -248,7 +249,7 @@ async function checkInactiveRules() {
     }
   }
 
-  console.log({rulesToUpdate});
+  console.log({ rulesToUpdate });
   console.log(inactiveRules);
 
   console.log('current time is ', new Date().getTime());
@@ -285,7 +286,7 @@ async function checkInactiveRules() {
     }
   });
 
-  console.log({rulesToUpdate});
+  console.log({ rulesToUpdate });
   browser.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: rulesToUpdate.map(rule => rule.id),
     addRules: rulesToUpdate
@@ -293,14 +294,8 @@ async function checkInactiveRules() {
     .then(() => {
       // remove rules with expired block time from the storage 
       const updatedRules = inactiveRules.filter(rule => !expiredRulesSet.has(rule.id));
-      console.log({updatedRules});
+      console.log({ updatedRules });
       browser.storage.local.set({ inactiveRules: updatedRules });
     })
     .catch(error => console.error(error));
 }
-
-// browser.storage.onChanged.addListener((changes, namespace) => {
-//   for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-//     console.log(newValue);
-//   }
-// });

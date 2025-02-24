@@ -17,6 +17,7 @@ async function showPopup() {
         const popupForm = document.createElement('form');
         popupForm.classList.add('extension-popup-form');
         popupForm.id = 'extension-popup-form';
+        popupForm.ariaLabel = 'extension-popup-form';
 
         const popupLabel = document.createElement('label');
         popupLabel.classList.add('url-input-label');

@@ -16,6 +16,7 @@ Edge cases:
 // + reset the limit every 24 hours
 
 const urlForm = document.getElementById('url-input-form') as HTMLFormElement;
+const urlInput = document.getElementById('url-input') as HTMLInputElement;
 const errorPara = document.getElementById('extension-error-para') as HTMLParagraphElement;
 const saveBtn = document.getElementById('save-btn');
 const cancelBtn = document.getElementById('cancel-btn');
@@ -216,6 +217,7 @@ function populateTableRows(rule: Site, i: number, tbody: HTMLTableSectionElement
   domainCheckbox.classList.add('domain-checkbox');
   domainCheckbox.name = 'domain';
   domainCheckbox.type = 'checkbox';
+  domainCheckbox.ariaLabel = 'domain';
   if (rule.blockDomain) {
     domainCheckbox.checked = true;
   }
