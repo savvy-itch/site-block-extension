@@ -1,7 +1,7 @@
 body {
   --text-color: #272835;
   --danger-color: hsl(348, 95%, 56%);
-  --danger-hover: hsl(348, 90%, 40%);
+  --danger-hover: hsl(348, 95%, 52%);
   --switch-width: 40px;
   --switch-height: 24px;
   --switch-padding: 4px;
@@ -15,7 +15,7 @@ body {
   --gap-between-checkbox-and-text: calc(var(--checkbox-size) + 10px);
 
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  background-image: linear-gradient(to right bottom, #e5d9f2, #d7d3eb, #abb7c9);
+  background-image: linear-gradient(to right bottom, hsl(269, 49%, 88%), hsl(250, 38%, 86%), hsl(216, 22%, 71%));
   color: var(--text-color);
   margin: 0;
   padding: 0;
@@ -30,6 +30,7 @@ h1 {
 }
 
 .extension-options-header {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;

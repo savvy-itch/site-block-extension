@@ -90,12 +90,13 @@ body {
 .about-main h3 {
   font-weight: 600;
   font-size: 1.25rem;
-  margin: 1rem 0;
+  margin: 2rem 0;
 }
 
 .about-main p,
 .about-main ol {
   font-size: 1.1rem;
+  margin: 1rem 0;
 }
 
 .about-img-wrapper {

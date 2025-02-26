@@ -48,11 +48,11 @@ let currEditDisableCount = 0;
 const rowIdPrefix = 'row-';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  displayUrlList();
+  await displayUrlList();
   saveBtn?.setAttribute('disabled', '');
   cancelBtn?.setAttribute('disabled', '');
-  syncStrictMode();
-  checkLastLimitReset();
+  await syncStrictMode();
+  await checkLastLimitReset();
 
   const storedLimitRes = await browser.storage.local.get(['disableLimit']);
   console.log(storedLimitRes.disableLimit);
@@ -70,13 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
-cancelBtn?.addEventListener('click', () => {
+cancelBtn?.addEventListener('click', async () => {
   searchBar.value = '';
   editedRulesIds.clear();
   toggleEditMode(false);
   currEditDisableCount = 0;
-  displayUrlList();
-  syncStrictMode();
+  await displayUrlList();
+  await syncStrictMode();
 });
 
 saveBtn?.addEventListener('click', async () => {
@@ -99,7 +99,7 @@ clearDialogOkBtn?.addEventListener('click', async () => {
   toggleEditMode(false);
   currEditDisableCount = 0;
   await displayUrlList();
-  syncStrictMode();
+  await syncStrictMode();
 });
 
 // Delete rule dialog
@@ -361,8 +361,8 @@ async function deleteRule(id: number) {
   try {
     if (res.success) {
       editedRulesIds.delete(id);
-      displayUrlList();
-      syncStrictMode();
+      await displayUrlList();
+      await syncStrictMode();
       idToDelete = null;
     }
   } catch (error) {
@@ -376,8 +376,8 @@ async function saveChanges() {
 
   if (editedRulesIds.size === 0) {
     toggleEditMode(false);
-    displayUrlList();
-    syncStrictMode();
+    await displayUrlList();
+    await syncStrictMode();
     currEditDisableCount = 0;
     alert('No changes were made');
     return;
@@ -407,8 +407,8 @@ async function saveChanges() {
         editedRulesIds.clear();
         toggleEditMode(false);
         currEditDisableCount = 0;
-        displayUrlList();
-        syncStrictMode();
+        await displayUrlList();
+        await syncStrictMode();
         console.error(`Invalid URL: ${urlToBlock}`);
         return;
       }
@@ -472,7 +472,7 @@ async function submitChanges(msg: UpdateAction, res: ResToSend, rulesToStore: Ru
       limitSpan.textContent = `${updatedLimit}`;
       editedRulesIds.clear();
       cachedRules = res.rules;
-      displayUrlList();
+      await displayUrlList();
       toggleEditMode(false);
       currEditDisableCount = 0;
       alert('Changes have been saved');

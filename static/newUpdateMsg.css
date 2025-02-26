@@ -1,0 +1,86 @@
+* {
+  box-sizing: border-box;
+}
+
+.extension-update-popup {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: linear-gradient(-145deg, hsl(203, 11%, 24%) 60%, hsl(203, 11%, 38%) 100%);
+  color: white;
+  border-radius: 0 0 6px 6px;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  font-size: 1rem;
+  overflow: hidden;
+
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: 320ms grid-template-rows ease-in;
+}
+
+.extension-update-popup::after {
+  position: absolute;
+  bottom: 10%;
+  left: 1%;
+  content: '';
+  width: 100px;
+  height: 60px;
+  border-radius: 0 0 0 20px;
+  border-left: 5px solid white;
+  border-bottom: 5px solid white;
+}
+
+.extension-update-popup h2 {
+  font-size: 1.5rem;
+}
+
+.extension-update-popup h3 {
+  font-size: 1.2rem;
+}
+
+.extension-update-popup h2,
+.extension-update-popup h3,
+.extension-update-popup p {
+  margin: .5rem;
+}
+
+.popup-close-btn {
+  position: absolute;
+  right: 2rem;
+  top: 10%;
+  background-color: transparent;
+  border: 2px solid white;
+  border-radius: 50%;
+  padding: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-close-btn svg {
+  width: 20px;
+  height: 20px;
+  stroke: white;
+}
+
+.popup-close-btn:hover {
+  background-color: hsl(0, 0%, 50%);
+  cursor: pointer;
+}
+
+.extension-update-popup > div {
+  overflow: hidden;
+}
+
+.extension-update-popup.collapse-popup {
+  grid-template-rows: 0fr;
+  padding: 0;
+}
+
+@keyframes collapse {
+  100% {
+    transform: scaleY(0);
+    transition: transform .3s ease-in;
+  }
+}

@@ -1,192 +1,247 @@
-import test, { BrowserContext, chromium, expect, Page } from "@playwright/test";
+import test, { BrowserContext, chromium, expect, Locator, Page } from "@playwright/test";
 import { RuleInStorage } from "../src/types";
 
 test.use({ browserName: 'chromium' });
 
-let context: BrowserContext;
+let globalContext: BrowserContext | null = null;
 let page: Page;
 let extensionId: string;
 
+const pathToExtension = require('path').join(__dirname, '..', 'dist');
 
-test.beforeAll(async () => {
-  const pathToExtension = require('path').join(__dirname, '..', 'dist');
-
-  context = await chromium.launchPersistentContext('', {
+async function createContext() {
+  const context = await chromium.launchPersistentContext('', {
     channel: 'chromium',
-    headless: false,
     args: [
       `--disable-extensions-except=${pathToExtension}`,
       `--load-extension=${pathToExtension}`
     ],
   });
 
-  page = await context.newPage();
+  const page = await context.newPage();
 
   let [background] = context.serviceWorkers();
   if (!background)
     background = await context.waitForEvent('serviceworker');
 
   extensionId = background.url().split('/')[2];
+
+  return { context, page };
+}
+
+test.beforeEach(async ({}, testInfo) => {
+  if (!testInfo.title.includes('describe')) {
+    const { context, page } = await createContext();
+    globalContext = context;
+  }
 });
 
-test.afterAll(async () => {
-  await context.close();
+test.afterEach(async ({}, testInfo) => {
+  if (!testInfo.title.includes('describe') && globalContext) {
+    await globalContext.close();
+    globalContext = null;
+  }
 });
 
 test('Open options page', async () => {
+  if (!globalContext) throw new Error('Context was not initialized');
+  const page = await globalContext.newPage();
+
   await page.goto(`chrome-extension://${extensionId}/options.html`);
   await expect(page.getByRole('heading', { name: 'Extension settings' })).toBeVisible();
 });
 
 test.describe.serial('Add URLs to block list', () => {
+  let sharedContext: BrowserContext;
+  let sharedPage: Page;
+
+  test.beforeAll(async () => {
+    const { context, page } = await createContext();
+    sharedContext = context;
+    sharedPage = page;
+  });
+
+  test.afterAll(async () => {
+    await sharedContext.close();
+  });
+
   test('Options page exists', async () => {
-    await page.goto(`chrome-extension://${extensionId}/options.html`);
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    await sharedPage.goto(`chrome-extension://${extensionId}/options.html`);
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await expect(urlInput).toBeVisible();
   });
 
   test('Add new URL to block list', async () => {
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await urlInput.fill('https://example.com');
-    await page.keyboard.press('Enter');
-    await page.waitForSelector('td.row-url', { state: 'visible' });
-    expect(await page.locator('td.row-url').textContent()).toContain('example.com/');
+    await sharedPage.keyboard.press('Enter');
+    await sharedPage.waitForSelector('td.row-url', { state: 'visible' });
+    expect(await sharedPage.locator('td.row-url').textContent()).toContain('example.com/');
   });
 
   test('Add duplicate URL to block list', async () => {
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await urlInput.fill('https://example.com');
-    await page.keyboard.press('Enter');
-    await expect(page.getByText('URL is already blocked', { exact: true })).toBeVisible();
+    await sharedPage.keyboard.press('Enter');
+    await expect(sharedPage.getByText('URL is already blocked', { exact: true })).toBeVisible();
   });
 
   test('URL from block list redirects to block page', async () => {
-    await page.goto('https://example.com');
-    await expect(page.getByText('This page is blocked!', { exact: true })).toBeVisible();
+    await sharedPage.goto('https://example.com');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).toBeVisible();
   });
 });
 
 test.describe.serial('Edit rules', () => {
+  let sharedContext: BrowserContext;
+  let sharedPage: Page;
+
+  test.beforeAll(async () => {
+    const { context, page } = await createContext();
+    sharedContext = context;
+    sharedPage = page;
+  });
+
+  test.afterAll(async () => {
+    await sharedContext.close();
+  });
+
   test.beforeEach(async () => {
-    await page.goto(`chrome-extension://${extensionId}/options.html`);
+    await sharedPage.goto(`chrome-extension://${extensionId}/options.html`);
   });
 
   test('Edit rule URL', async () => {
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await urlInput.fill('https://example.com');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
 
-    const editBtn = page.getByRole('button', { name: 'Edit URL button' });
+    const editBtn = sharedPage.getByRole('button', { name: 'Edit URL button' });
     await editBtn.click();
     await expect(editBtn).toBeVisible();
 
-    const editUrlInput = page.locator('.row-url input');
+    const editUrlInput = sharedPage.locator('.row-url input');
     await expect(editUrlInput).toBeVisible();
     await editUrlInput.fill('https://www.youtube.com/');
 
-    const saveBtn = page.getByRole('button', { name: 'Save Changes' });
+    const saveBtn = sharedPage.getByRole('button', { name: 'Save Changes' });
     await saveBtn.click();
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
-    await page.waitForSelector('td.row-url', { state: 'visible' });
-    expect(await page.locator('td.row-url').textContent()).toContain('www.youtube.com/');
+    await sharedPage.waitForSelector('td.row-url', { state: 'visible' });
+    expect(await sharedPage.locator('td.row-url').textContent()).toContain('www.youtube.com/');
 
-    await page.goto('https://example.com');
-    await expect(page.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
+    await sharedPage.goto('https://example.com');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
 
-    await page.goto('https://www.youtube.com/');
-    await expect(page.getByText('This page is blocked!', { exact: true })).toBeVisible();
+    await sharedPage.goto('https://www.youtube.com/');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).toBeVisible();
   });
 
   test('Allow subdomains', async () => {
-    await page.goto(`chrome-extension://${extensionId}/options.html`);
+    await sharedPage.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const editBtn = page.getByRole('button', { name: 'Edit URL button' });
+    const editBtn = sharedPage.getByRole('button', { name: 'Edit URL button' });
     await editBtn.click();
-    const editUrlInput = page.locator('.row-url input');
+    const editUrlInput = sharedPage.locator('.row-url input');
     await editUrlInput.fill('https://example.com');
-    const domainCheckbox = page.locator('.domain-checkbox');
+    const domainCheckbox = sharedPage.locator('.domain-checkbox');
     await domainCheckbox.waitFor();
     await expect(domainCheckbox).toBeVisible();
 
     await domainCheckbox.click();
-    const saveBtn = page.getByRole('button', { name: 'Save Changes' });
+    const saveBtn = sharedPage.getByRole('button', { name: 'Save Changes' });
     await saveBtn.click();
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
-    await page.goto('https://example.com/test/');
-    await expect(page.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
+    await sharedPage.goto('https://example.com/test/');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
 
-    await page.goto('https://example.com/');
-    await expect(page.getByText('This page is blocked!', { exact: true })).toBeVisible();
+    await sharedPage.goto('https://example.com/');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).toBeVisible();
   });
 
   test('Disable URL', async () => {
-    await page.goto(`chrome-extension://${extensionId}/options.html`);
+    await sharedPage.goto(`chrome-extension://${extensionId}/options.html`);
 
-    const activeCheckbox = page.locator('.active-switch');
+    const activeCheckbox = sharedPage.locator('.active-switch');
     await activeCheckbox.waitFor();
     await expect(activeCheckbox).toBeVisible();
 
     await activeCheckbox.click();
-    const saveBtn = page.getByRole('button', { name: 'Save Changes' });
+    const saveBtn = sharedPage.getByRole('button', { name: 'Save Changes' });
     await saveBtn.click();
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
-    await page.goto('https://example.com/');
-    await expect(page.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
+    await sharedPage.goto('https://example.com/');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
   });
 });
 
 test.describe('Delete rules', async () => {
+  let sharedContext: BrowserContext;
+  let sharedPage: Page;
+
+  test.beforeAll(async () => {
+    const { context, page } = await createContext();
+    sharedContext = context;
+    sharedPage = page;
+  });
+
+  test.afterAll(async () => {
+    await sharedContext.close();
+  });
+
   test.beforeEach(async () => {
-    await page.goto(`chrome-extension://${extensionId}/options.html`);
+    await sharedPage.goto(`chrome-extension://${extensionId}/options.html`);
   });
 
   test('Delete single rule', async () => {
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await urlInput.fill('https://example.com');
-    await page.keyboard.press('Enter');
-    const dltBtn = page.getByTitle('delete URL button');
+    await sharedPage.keyboard.press('Enter');
+    const dltBtn = sharedPage.getByTitle('delete URL button');
     await expect(dltBtn).toBeVisible();
 
     await dltBtn.click();
-    const okBtn = page.getByRole('button', { name: /ok/i });
+    const okBtn = sharedPage.getByRole('button', { name: /ok/i });
     await expect(okBtn).toBeVisible();
     await okBtn.click();
 
-    const noUrlsMsg = page.getByText('No URLs to block.');
+    const noUrlsMsg = sharedPage.getByText('No URLs to block.');
     await noUrlsMsg.waitFor();
     await expect(noUrlsMsg).toBeVisible();
-    await page.goto('https://example.com/');
-    await expect(page.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
+    await sharedPage.goto('https://example.com/');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
   });
 
   test('Delete all rules', async () => {
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await urlInput.fill('https://example.com');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
 
-    const dltAllBtn = page.getByRole('button', { name: 'Delete all rules' });
+    const dltAllBtn = sharedPage.getByRole('button', { name: 'Delete all rules' });
     await expect(dltAllBtn).toBeVisible();
 
     await dltAllBtn.click();
-    const okBtn = page.getByRole('button', { name: /ok/i });
+    const okBtn = sharedPage.getByRole('button', { name: /ok/i });
     await expect(okBtn).toBeVisible();
     await okBtn.click();
 
-    const noUrlsMsg = page.getByText('No URLs to block.');
+    const noUrlsMsg = sharedPage.getByText('No URLs to block.');
     await noUrlsMsg.waitFor();
     await expect(noUrlsMsg).toBeVisible();
-    await page.goto('https://example.com/');
-    await expect(page.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
+    await sharedPage.goto('https://example.com/');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
   });
 });
 
 test('Search list', async () => {
+  if (!globalContext) throw new Error('Context was not initialized');
+  const page = await globalContext.newPage();
+
   await page.goto(`chrome-extension://${extensionId}/options.html`);
   const urlInput = page.getByLabel('Enter URL of the website you want to block:');
   const testUrl = 'https://foo.com';
@@ -202,42 +257,55 @@ test('Search list', async () => {
 
   await page.waitForTimeout(500);
 
-  expect(page.getByText('foo.com/')).toBeVisible();
-  expect(page.getByText('bar.com')).not.toBeVisible();
+  await expect(page.getByText('foo.com/')).toBeVisible();
+  await expect(page.getByText('bar.com/')).not.toBeVisible();
 });
 
 test.describe('Strict mode works', () => {
+  let sharedContext: BrowserContext;
+  let sharedPage: Page;
+
+  test.beforeAll(async () => {
+    const { context, page } = await createContext();
+    sharedContext = context;
+    sharedPage = page;
+  });
+
+  test.afterAll(async () => {
+    await sharedContext.close();
+  });
+
   test.beforeEach(async () => {
-    await page.goto(`chrome-extension://${extensionId}/options.html`);
+    await sharedPage.goto(`chrome-extension://${extensionId}/options.html`);
   });
 
   test('Disabled rule re-enabled after 1 hour', async () => {
-    await page.clock.install();
-    const strictModeSwitch = page.locator('.strict-mode-switch');
+    await sharedPage.clock.install();
+    const strictModeSwitch = sharedPage.locator('.strict-mode-switch');
     await expect(strictModeSwitch).toBeVisible();
 
     await strictModeSwitch.click();
 
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await urlInput.fill('https://example.com/');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
-  const activeCheckbox = page.locator('.active-switch');
-  await activeCheckbox.waitFor();
-  await activeCheckbox.click();
-  const saveBtn = page.getByRole('button', { name: 'Save Changes' });
-  await saveBtn.click();
+    const activeCheckbox = sharedPage.locator('.active-switch');
+    await activeCheckbox.waitFor();
+    await activeCheckbox.click();
+    const saveBtn = sharedPage.getByRole('button', { name: 'Save Changes' });
+    await saveBtn.click();
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
-    await page.goto('https://example.com/');
-    await expect(page.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
+    await sharedPage.goto('https://example.com/');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).not.toBeVisible();
 
-    await page.goto(`chrome-extension://${extensionId}/options.html`);
+    await sharedPage.goto(`chrome-extension://${extensionId}/options.html`);
 
-    await page.evaluate(async () => {
+    await sharedPage.evaluate(async () => {
       await new Promise<void>(resolve => {
         chrome.storage.local.get('inactiveRules', (data) => {
           if (data.inactiveRules) {
@@ -255,7 +323,7 @@ test.describe('Strict mode works', () => {
       });
     });
 
-    await page.waitForFunction(async () => {
+    await sharedPage.waitForFunction(async () => {
       return new Promise(resolve => {
         chrome.storage.local.get('inactiveRules', data => {
           resolve(data.inactiveRules && data.inactiveRules.length === 0);
@@ -263,77 +331,77 @@ test.describe('Strict mode works', () => {
       });
     });
 
-    await page.reload();
-    await page.waitForTimeout(3000);
+    await sharedPage.reload();
+    await sharedPage.waitForTimeout(3000);
     expect(activeCheckbox.isChecked).toBeTruthy();
-    await page.goto('https://example.com/');
-    await expect(page.getByText('This page is blocked!', { exact: true })).toBeVisible();
+    await sharedPage.goto('https://example.com/');
+    await expect(sharedPage.getByText('This page is blocked!', { exact: true })).toBeVisible();
   });
 
   test('Exceed daily disable limit', async () => {
-    const strictModeSwitch = page.locator('.strict-mode-switch');
+    const strictModeSwitch = sharedPage.locator('.strict-mode-switch');
     await strictModeSwitch.click();
 
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await urlInput.fill('https://foo.com/');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
     await urlInput.fill('https://bar.com/');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
     await urlInput.fill('https://baz.com/');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
     await urlInput.fill('https://example.com/');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
-    const activeCheckboxes = page.locator('.active-switch');
+    const activeCheckboxes = sharedPage.locator('.active-switch');
     const count = await activeCheckboxes.count();
 
     for (let i = 0; i < count; i++) {
       await activeCheckboxes.nth(i).click();
     }
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
     // the 4th URL won't disable as the daily limit is 3
-    const lastCheckbox = page.locator('.active-checkbox').nth(3);
+    const lastCheckbox = sharedPage.locator('.active-checkbox').nth(3);
     await expect(lastCheckbox).toBeInViewport();
     expect(lastCheckbox.isChecked).toBeTruthy();
   });
 
   test('Reset daily limit', async () => {
-    const strictModeSwitch = page.locator('.strict-mode-switch');
+    const strictModeSwitch = sharedPage.locator('.strict-mode-switch');
     await strictModeSwitch.click();
 
-    const urlInput = page.getByLabel('Enter URL of the website you want to block:');
+    const urlInput = sharedPage.getByLabel('Enter URL of the website you want to block:');
     await urlInput.fill('https://foo.com/');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
     await urlInput.fill('https://bar.com/');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
     await urlInput.fill('https://baz.com/');
-    await page.keyboard.press('Enter');
+    await sharedPage.keyboard.press('Enter');
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
-    const activeCheckboxes = page.locator('.active-switch');
+    const activeCheckboxes = sharedPage.locator('.active-switch');
     const count = await activeCheckboxes.count();
 
     for (let i = 0; i < count; i++) {
       await activeCheckboxes.nth(i).click();
     }
 
-    const saveBtn = page.getByRole('button', { name: 'Save Changes' });
+    const saveBtn = sharedPage.getByRole('button', { name: 'Save Changes' });
     await saveBtn.click();
 
-    await page.waitForTimeout(500);
+    await sharedPage.waitForTimeout(500);
 
-    const limitCount = page.locator('#disable-limit');
+    const limitCount = sharedPage.locator('#disable-limit');
     expect(await limitCount.textContent()).toEqual('0');
 
     const fakeYesterday = new Date();
     fakeYesterday.setDate(fakeYesterday.getDate() - 1);
 
-    await page.evaluate(async (fakeYesterday) => {
+    await sharedPage.evaluate(async (fakeYesterday) => {
       await new Promise<void>(resolve => {
         chrome.storage.local.get('prevResetDate', (data) => {
           if (data.prevResetDate) {
@@ -345,11 +413,51 @@ test.describe('Strict mode works', () => {
         });
       });
     }, fakeYesterday);
-    
-    await page.waitForTimeout(3000);
-    await page.reload();
-    await page.waitForTimeout(500);
-    await page.reload();
-    expect(await limitCount.textContent()).toEqual('3');
+
+    await sharedPage.waitForTimeout(3000);
+    await sharedPage.reload();
+    await expect(await limitCount.textContent()).toEqual('3');
+  });
+});
+
+async function waitForAnimationEnd(locator: Locator) {
+	const handle = await locator.elementHandle();
+	await handle?.waitForElementState('stable');
+	handle?.dispose();
+}
+
+test.describe('Update popup works', () => {
+  let sharedContext: BrowserContext;
+  let sharedPage: Page;
+
+  test.beforeAll(async () => {
+    const { context, page } = await createContext();
+    sharedContext = context;
+    sharedPage = page;
+  });
+
+  test.afterAll(async () => {
+    await sharedContext.close();
+  });
+
+  test.beforeEach(async () => {
+    await sharedPage.goto(`chrome-extension://${extensionId}/options.html`);
+  });
+
+  test('Popup appears with new update', async () => {
+    const popup = sharedPage.getByText('Your extension has received a new update');
+    await expect(popup).toBeVisible();
+  });
+
+  test('Popup doesn\'t appear after closing the popup', async () => {
+    const popup = sharedPage.locator('.extension-update-popup');
+    const closeBtn = sharedPage.getByRole('button', { name: 'close popup' });
+    await expect(closeBtn).toBeVisible();
+    await closeBtn.click();
+
+    await waitForAnimationEnd(popup);
+    await expect(popup).toBeHidden();
+    await sharedPage.reload();
+    await expect(popup).toBeHidden();
   });
 });

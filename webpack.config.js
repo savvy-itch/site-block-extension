@@ -10,7 +10,8 @@ module.exports = {
     content: './src/content.ts',
     options: './src/options.ts',
     blocked: './src/blocked.ts',
-    about: './src/about.ts'
+    about: './src/about.ts',
+    newUpdateMsg: './src/newUpdateMsg.ts',
   },
   output: {
     path: path.resolve(__dirname, "dist"),

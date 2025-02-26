@@ -12,9 +12,7 @@ Edge:    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, l
 
 export function assignStoreLink(webStoreLink: HTMLAnchorElement) {
   const browser = navigator.userAgent;
-  if (browser.includes('OPR/')) {
-    webStoreLink.href = webStores.opera;
-  } else if (browser.includes('Firefox/')) {
+  if (browser.includes('Firefox/')) {
     webStoreLink.href = webStores.firefox;
   } else if (browser.includes('Edg/')) {
     webStoreLink.href = webStores.edge;
@@ -146,27 +144,23 @@ export function disableOtherBtns(tbody: HTMLTableSectionElement, ruleId: number)
 
 export async function checkLastLimitReset() {
   const dateResult = await browser.storage.local.get(PREV_RESET_DATE);
-  console.log(dateResult[PREV_RESET_DATE]);
   const rawDate = dateResult[PREV_RESET_DATE] as string;
 
   if (!rawDate || isNaN(new Date(rawDate).getTime())) {
-    console.log('no prev date found');
     await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
   } else {
     const prevDate = new Date(rawDate);
-    console.log(prevDate);
     const currDate = new Date();
     if (prevDate.getFullYear() < currDate.getFullYear() ||
       prevDate.getMonth() < currDate.getMonth() ||
       prevDate.getDate() < currDate.getDate()) {
-      console.log('should update the date');
       await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
       await browser.storage.local.set({ disableLimit: defaultDisableLimit });
     }
   }
-  console.log("Stored date:", rawDate);
-  console.log("Parsed stored date:", new Date(rawDate));
-  console.log("Current date (new Date()):", new Date());
+  // console.log("Stored date:", rawDate);
+  // console.log("Parsed stored date:", new Date(rawDate));
+  // console.log("Current date (new Date()):", new Date());
 }
 
 export function getUrlToBlock(strippedUrl: string, blockDomain: boolean) {

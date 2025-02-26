@@ -72,3 +72,8 @@ export interface GetCurrentUrl {
 
 export type Action = AddAction | DeleteAction | DeleteAllAction | GetAllAction |
 GetCurrentUrl | UpdateAction
+
+export interface UpdateMsg {
+  v: string,
+  desc: string
+}
