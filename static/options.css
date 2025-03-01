@@ -66,6 +66,16 @@ h1 {
   height: 2rem;
 }
 
+.limit-para {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.limit-para.hide-limit-para {
+  visibility: hidden;
+}
+
 /*============= TABLE SECTION ============== */
 .options-main {
   padding: 0 2rem;

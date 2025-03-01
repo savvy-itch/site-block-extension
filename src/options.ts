@@ -1,4 +1,4 @@
-import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
+import browser, { DeclarativeNetRequest, search } from 'webextension-polyfill';
 import { defaultDisableLimit, forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
 import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
 import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules } from './helpers';
@@ -9,11 +9,6 @@ Edge cases:
   + don't allow empty url string
   + adding an existing URL (when one is temporarily disabled)
 */
-
-// + set disable limit in storage to 3 by default
-// + update the limit when a rule gets disabled
-// + forbid disabling when the limit has been exceeded
-// + reset the limit every 24 hours
 
 const urlForm = document.getElementById('url-input-form') as HTMLFormElement;
 const urlInput = document.getElementById('url-input') as HTMLInputElement;
@@ -36,6 +31,7 @@ const strictModeSwitch = document.getElementById('strict-mode-switch') as HTMLIn
 const webStoreLink = document.getElementById('web-store-link') as HTMLAnchorElement;
 const searchBar = document.getElementById('search-bar') as HTMLInputElement;
 const searchClearBtn = document.getElementById('search-input-clear-btn') as HTMLButtonElement;
+const limitPara = document.querySelector('.limit-para') as HTMLParagraphElement;
 const limitSpan = document.getElementById('disable-limit') as HTMLSpanElement;
 
 let isEdited = false;
@@ -55,13 +51,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   await checkLastLimitReset();
 
   const storedLimitRes = await browser.storage.local.get(['disableLimit']);
-  console.log(storedLimitRes.disableLimit);
   if (!storedLimitRes.disableLimit && storedLimitRes.disableLimit !== 0) {
     browser.storage.local.set({ disableLimit: defaultDisableLimit });
   }
   disableAttemptsLeft = storedLimitRes.disableLimit as number ?? defaultDisableLimit;
-  console.log(disableAttemptsLeft);
-  limitSpan.textContent = `${disableAttemptsLeft}`;
+  if (strictModeSwitch.checked) {
+    limitPara?.classList.remove('hide-limit-para');
+    limitSpan.textContent = `${disableAttemptsLeft}`;
+  } else {
+    limitPara?.classList.add('hide-limit-para')
+  }
+
   if (versionElem) {
     versionElem.innerText = getExtVersion() ?? '';
   }
@@ -118,6 +118,12 @@ strictModeSwitch?.addEventListener('change', () => {
   const isStrictModeOn = strictModeSwitch.checked;
   browser.storage.local.set({ strictMode: isStrictModeOn });
   handleInactiveRules(isStrictModeOn);
+  if (isStrictModeOn) {
+    limitPara?.classList.remove('hide-limit-para');
+    limitSpan.textContent = `${disableAttemptsLeft}`;
+  } else {
+    limitPara?.classList.add('hide-limit-para');
+  }
 });
 
 urlForm?.addEventListener('submit', async (e) => {
@@ -153,7 +159,6 @@ async function displayUrlList() {
     if (res.success && wrapperElem) {
       if (res.rules) {
         cachedRules = res.rules;
-        console.log(res.rules);
         populateList(cachedRules);
       }
     }
@@ -201,7 +206,6 @@ function populateTableRows(rule: Site, i: number, tbody: HTMLTableSectionElement
   const ruleElem = document.createElement('tr');
   ruleElem.id = `${rowIdPrefix}${rule.id}`;
   ruleElem.classList.add('row');
-  console.log('isActive', rule.isActive);
   !rule.isActive && ruleElem.classList.add('inactive-url');
 
   const noCell = document.createElement('td');
@@ -327,17 +331,14 @@ function handleEditBtnClick(ruleId: number, ruleUrl: string, updateRuleRow: HTML
 
 function handleActiveCheckboxClick(activeCheckboxChecked: boolean, updateRuleRow: HTMLElement | null, ruleId: number, e: MouseEvent) {
   if (strictModeSwitch.checked) {
-    console.log(disableAttemptsLeft);
 
     // enable rule
     if (activeCheckboxChecked) {
-      console.log('enabling the rule...');
       updateRuleRow?.classList.toggle('inactive-url');
       toggleEditMode(true);
       editedRulesIds.add(ruleId);
     } else {
       // disable rule
-      console.log('disabling the rule...');
       if (currEditDisableCount < disableAttemptsLeft) {
         currEditDisableCount++;
         updateRuleRow?.classList.toggle('inactive-url');
@@ -384,7 +385,8 @@ async function saveChanges() {
   }
 
   const rulesToStore: RuleInStorage[] = [];
-  const strictModeOn = await browser.storage.local.get([storageStrictModeKey]);
+  const strictModeOnStorage = await browser.storage.local.get([storageStrictModeKey]);
+  const strictModeOn = strictModeOnStorage[storageStrictModeKey] as boolean;
   const storedDisableLimit = await browser.storage.local.get('disableLimit');
   const limitVal = storedDisableLimit.disableLimit as number;
   let disabledRules = 0;
@@ -399,7 +401,6 @@ async function saveChanges() {
       strippedUrl = strippedUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
       const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
       const urlToBlock = getUrlToBlock(strippedUrl, blockDomain);
-      // const urlToBlock = `^https?:\/\/${strippedUrl}${blockDomain ? '\/?.*' : '\/?$'}`;
       const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;
 
       if (!strippedUrl || forbiddenUrls.some(url => url.test(strippedUrl))) {
@@ -414,7 +415,6 @@ async function saveChanges() {
       }
 
       if (!isActive) {
-        console.log({ disabledRules });
         if (disabledRules < defaultDisableLimit) {
           disabledRules++;
         }
@@ -454,22 +454,23 @@ async function saveChanges() {
       strictModeOn && !isActive && rulesToStore.push({ id: rowId, unblockDate, urlToBlock });
     }
   }
-  console.log({ limitVal, disabledRules });
 
   const msg: UpdateAction = { action: 'updateRules', updatedRules };
   const res: ResToSend = await browser.runtime.sendMessage(msg);
   const updatedLimit = limitVal - disabledRules;
-  submitChanges(msg, res, rulesToStore, updatedLimit);
+  submitChanges(res, rulesToStore, updatedLimit, strictModeOn);
 }
 
-async function submitChanges(msg: UpdateAction, res: ResToSend, rulesToStore: RuleInStorage[], updatedLimit: number) {
+async function submitChanges(res: ResToSend, rulesToStore: RuleInStorage[], updatedLimit: number, strictModeOn: boolean) {
   try {
     if (res.success && res.rules) {
       isEdited = false;
-      browser.storage.local.set({ inactiveRules: rulesToStore });
-      browser.storage.local.set({ disableLimit: updatedLimit });
-      disableAttemptsLeft = updatedLimit;
-      limitSpan.textContent = `${updatedLimit}`;
+      if (strictModeOn) {
+        await browser.storage.local.set({ inactiveRules: rulesToStore });
+        await browser.storage.local.set({ disableLimit: updatedLimit });
+        disableAttemptsLeft = updatedLimit;
+        limitSpan.textContent = `${updatedLimit}`;
+      }
       editedRulesIds.clear();
       cachedRules = res.rules;
       await displayUrlList();
@@ -514,7 +515,7 @@ searchBar.addEventListener('input', async (e) => {
 });
 
 searchClearBtn.addEventListener('click', () => {
-  if (!searchBar.value) {
+  if (searchBar && !searchBar.value) {
     searchBar.value = '';
     toggleEditMode(false);
     currEditDisableCount = 0;

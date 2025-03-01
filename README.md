@@ -18,6 +18,7 @@ On Pace is a cross-browser extension for blocking websites.
 - "Block subdomains" feature allows to choose between blocking the entire domain or blocking a specific URL.
 - users can disable URLs from the blacklist to regain access to them without deleting them.
 - "Strict mode" feature adds an additional layer of restriction for users who require a more rigid control over their internet browsing. With strict mode enabled, any disabled URLs will be automatically reenabled in 1 hour.
+- Disable limit - when strict mode is on, users can disable URLs up to 3 times per day. The limit resets daily.
 
 ## How to use it
 To start the extension, simply click on its icon in your browser or use `Ctrl+Q` keyboard shortcut.

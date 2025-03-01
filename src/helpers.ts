@@ -158,9 +158,6 @@ export async function checkLastLimitReset() {
       await browser.storage.local.set({ disableLimit: defaultDisableLimit });
     }
   }
-  // console.log("Stored date:", rawDate);
-  // console.log("Parsed stored date:", new Date(rawDate));
-  // console.log("Current date (new Date()):", new Date());
 }
 
 export function getUrlToBlock(strippedUrl: string, blockDomain: boolean) {

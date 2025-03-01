@@ -5,7 +5,7 @@ export const STORAGE_PREV_UPDATE_VERSION = 'prevUpdate';
 export const forbiddenUrls: RegExp[] = [
   /^chrome-extension:\/\//
 ];
-export const strictModeBlockPeriod = 1 * 60 * 60 * 1000; // 1h 
+export const strictModeBlockPeriod = 1 * 60 * 60 * 1000; // 1h
 // export const strictModeBlockPeriod = 1 * 10 * 1000; // 10s
 export const minUrlLength = 4;
 export const maxUrlLength = 75;
@@ -15,5 +15,3 @@ export const webStores = {
   firefox: "https://addons.mozilla.org/en-US/firefox/addon/on-pace/"
 };
 export const defaultDisableLimit = 3;
-// export const LIMIT_RESET_INTERVAL =  1 * 1000 * 60 * 60 * 24; // 24h
-// export const LIMIT_RESET_INTERVAL =  10 * 1000; // 10s

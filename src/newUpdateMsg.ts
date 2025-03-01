@@ -1,16 +1,19 @@
 import browser from 'webextension-polyfill';
 import { STORAGE_PREV_UPDATE_VERSION } from "./globals";
 import { UpdateMsg } from "./types";
+import { getExtVersion } from './helpers';
 
 const lastUpdateContent: UpdateMsg = {
-  v: '1.1.0',
-  desc: 'This is test update message'
+  v: getExtVersion(),
+  desc: [`
+    Strict mode daily limit: when strict mode is enabled, you can disable URLs up to 3 times per day. The limit resets daily.`,
+    `List search: you can now search the URLs from the block list.`
+  ]
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
   const prevUpdate = await browser.storage.local.get([STORAGE_PREV_UPDATE_VERSION]);
   const updateVersion = prevUpdate[STORAGE_PREV_UPDATE_VERSION] as string;
-  console.log({prevUpdate, updateVersion});
 
   if (!prevUpdate || !updateVersion || updateVersion !== lastUpdateContent.v) {  
     displayUpdateMsg();
@@ -20,13 +23,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 function displayUpdateMsg() {
   const msgElem = document.createElement('div');
   msgElem.classList.add('extension-update-popup');
-  msgElem.innerHTML = `
-    <div class="extension-update-popup-container">
-      <h2>Your extension has received a new update to v${lastUpdateContent.v}!</h2>
-      <h3>What's new?</h3>
-      <p>${lastUpdateContent.desc}</p>
-    </div>
-  `;
+
+  const msgInnerDiv = document.createElement('div');
+  msgInnerDiv.classList.add('extension-update-popup-container');
+
+  const msgHeading = document.createElement('h2');
+  msgHeading.textContent = `Your extension has received an update to v${lastUpdateContent.v}!`;
+
+  const msgSubheading = document.createElement('h3');
+  msgSubheading.textContent = 'What\'s new?';
+
+  msgInnerDiv.appendChild(msgHeading);
+  msgInnerDiv.appendChild(msgSubheading);
+  
+  lastUpdateContent.desc.forEach(str => {
+    const msgContent = document.createElement('p');
+    msgContent.textContent = str;
+    msgInnerDiv.appendChild(msgContent);
+  });
+
+  msgElem.appendChild(msgInnerDiv);
+
   const closeBtn = document.createElement('button');
   closeBtn.classList.add('popup-close-btn');
   closeBtn.ariaLabel = 'close popup';

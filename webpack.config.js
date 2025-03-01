@@ -1,10 +1,12 @@
 const path = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 const targetBrowser = process.env.TARGET_BROWSER || 'chrome';
 
 module.exports = {
-  mode: "development",
+  mode: "production",
   entry: {
     background: './src/background.ts',
     content: './src/content.ts',
@@ -28,6 +30,10 @@ module.exports = {
         loader: "ts-loader",
         exclude: /node_modules/,
       },
+      {
+        test: /\.css$/,
+        use: [MiniCssExtractPlugin.loader, "css-loader"],
+      },
     ],
   },
   devtool: 'cheap-module-source-map', // Avoids eval in source maps
@@ -48,6 +54,15 @@ module.exports = {
           from: 'node_modules/webextension-polyfill/dist/browser-polyfill.js'
         }
       ],
-    })
-  ]
+    }),
+    new MiniCssExtractPlugin({
+      filename: "[name].css",
+      chunkFilename: "[id].css",
+    }),
+  ],
+  optimization: {
+    minimizer: [
+      new CssMinimizerPlugin(),
+    ]
+  },
 };

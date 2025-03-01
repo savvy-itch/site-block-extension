@@ -75,5 +75,5 @@ GetCurrentUrl | UpdateAction
 
 export interface UpdateMsg {
   v: string,
-  desc: string
+  desc: string[]
 }

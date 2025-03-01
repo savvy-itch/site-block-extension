@@ -17,3 +17,5 @@ node_modules/
 /playwright/.cache/
 /tmp-profile/
 /tests/tmp-profile/
+
+/web-ext-artifacts/

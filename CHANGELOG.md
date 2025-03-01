@@ -6,3 +6,9 @@
 ## 1.0.0 (Nov 23, 2024)
 
 - Initial release.
+
+## 1.1.0 (Feb 28, 2025)
+
+- Added daily disable limit for strict mode.
+- Added search bar for the block list.
+- Fixed bugs related to popup styles inconsistency and disabled URLs re-enabling.
