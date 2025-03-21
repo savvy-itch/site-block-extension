@@ -1,17 +1,9 @@
-import browser, { DeclarativeNetRequest, search } from 'webextension-polyfill';
+import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
 import { defaultDisableLimit, forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
 import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
-import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules } from './helpers';
-
-/*
-Edge cases:
-  + don't allow adding options page to the list
-  + don't allow empty url string
-  + adding an existing URL (when one is temporarily disabled)
-*/
+import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules, stripUrl1 } from './helpers';
 
 const urlForm = document.getElementById('url-input-form') as HTMLFormElement;
-const urlInput = document.getElementById('url-input') as HTMLInputElement;
 const errorPara = document.getElementById('extension-error-para') as HTMLParagraphElement;
 const saveBtn = document.getElementById('save-btn');
 const cancelBtn = document.getElementById('cancel-btn');
@@ -398,7 +390,7 @@ async function saveChanges() {
       const rowId = Number(editedRow.id.substring(rowIdPrefix.length)); // e.g. "row-1"
       const urlInput = editedRow.querySelector('.row-url > input') as HTMLInputElement;
       let strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent ?? '';
-      strippedUrl = strippedUrl.replace(/^https?:\/\//, '').replace(/\/$/, '');
+      strippedUrl = stripUrl1(strippedUrl);
       const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
       const urlToBlock = getUrlToBlock(strippedUrl, blockDomain);
       const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;

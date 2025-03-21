@@ -3,7 +3,7 @@
   "name": "On Pace",
   "author": "msavprojects@gmail.com",
   "description": "Extension for blocking unwanted websites",
-  "version": "1.1.0",
+  "version": "1.1.1.1",
   "browser_action": {
     "default_title": "Click to show the form"
   },

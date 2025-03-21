@@ -26,8 +26,13 @@ export function getExtVersion() {
   return v;
 }
 
-export function stripUrl(url: string): string {
-  return url.replace(/^\^https\?:\/\//, '').replace(/\?\.\*|\?\$$/, '');
+export function stripUrl1(url:string): string {
+  return url.replace(/^https?:\/\//, '').replace(/\/+$/, '') + '/';
+}
+
+export function stripRegexFilter(url: string): string {
+  // www.foo.com/
+  return url.replace(/^\^https\?:\/\//, '').replace(/\?\.\*|\?\$$/, '').replace(/\/+$/, '') + '/';
 }
 
 export async function deleteRules() {
@@ -113,7 +118,7 @@ export async function handleInactiveRules(isStrictModeOn: boolean) {
         const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
         res.rules.forEach(rule => {
           if (!rule.isActive) {
-            const urlToBlock = `^https?:\/\/${rule.strippedUrl}?${rule.blockDomain ? '\/?.*' : '\/?$'}`;
+            const urlToBlock = getUrlToBlock(rule.strippedUrl, rule.blockDomain);
             inactiveRulesToStore.push({ id: rule.id, unblockDate: unblockDate, urlToBlock })
           }
         });
@@ -161,5 +166,5 @@ export async function checkLastLimitReset() {
 }
 
 export function getUrlToBlock(strippedUrl: string, blockDomain: boolean) {
-  return `^https?:\/\/${strippedUrl}${blockDomain ? '\/?.*' : '\/?$'}`
+  return `^https?:\/\/${strippedUrl}${blockDomain ? '?.*' : '?$'}`;
 }

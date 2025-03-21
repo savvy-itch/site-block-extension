@@ -5,9 +5,8 @@ import { getExtVersion } from './helpers';
 
 const lastUpdateContent: UpdateMsg = {
   v: getExtVersion(),
-  desc: [`
-    Strict mode daily limit: when strict mode is enabled, you can disable URLs up to 3 times per day. The limit resets daily.`,
-    `List search: you can now search the URLs from the block list.`
+  desc: [
+    `Bug fixes`
   ]
 };
 

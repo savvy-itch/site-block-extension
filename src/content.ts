@@ -107,7 +107,7 @@ async function showPopup() {
         });
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape') {
-            if (popupForm) {
+            if (popupForm && popupForm.parentNode === body) {
               body.removeChild(popupForm);
             }
           }

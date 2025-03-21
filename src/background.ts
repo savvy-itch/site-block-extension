@@ -1,6 +1,6 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
-import { maxUrlLength, storageRulesKey, storageStrictModeKey } from "./globals";
-import { getUrlToBlock, stripUrl } from "./helpers";
+import { forbiddenUrls, maxUrlLength, storageRulesKey, storageStrictModeKey } from "./globals";
+import { getUrlToBlock, stripRegexFilter, stripUrl1 } from "./helpers";
 import { Action, NewRule, ResToSend, Site, RuleInStorage } from "./types";
 import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
@@ -19,11 +19,6 @@ const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
     - notification about a newly added rule
     - notification about rules deletion
   - when user clicks "Unblock URL", highlight that URL in the options page
-
-  Edge cases:
-  + don't display popup on options and blocked page
-  + don't allow adding block page to the list
-  + adding an existing URL (when one is temporarily disabled)
 */
 
 // on icon click
@@ -33,8 +28,9 @@ action.onClicked.addListener(tab => {
 });
 
 // on shortcut key press 
-browser.commands.onCommand.addListener(command => {
-  if (command === 'trigger_form') {
+browser.commands.onCommand.addListener(async (command) => {
+  const currUrl = await getCurrentUrl();
+  if (command === 'trigger_form' && currUrl && !forbiddenUrls.some(url => url.test(currUrl))) {
     browser.tabs.query({ active: true, currentWindow: true })
       .then((tabs) => {
         const tab = tabs[0];
@@ -71,8 +67,8 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
   const msg = message as Action;
   if (msg.action === 'blockUrl') {
     const blackList = await getRules();
-    const normalizedUrl = msg.url?.replace(/^https?:\/\//, '').replace(/\/$/, ''); // remove the protocol and the last slash
-    const urlToBlock = `^https?:\/\/${normalizedUrl}\/?${msg.blockDomain ? '.*' : '$'}`;
+    const normalizedUrl = stripUrl1(msg.url);
+    const urlToBlock = getUrlToBlock(normalizedUrl, msg.blockDomain);
 
     if (blackList.some(site => site.url === urlToBlock)) {
       return { success: true, status: "duplicate", msg: 'URL is already blocked' };
@@ -177,13 +173,15 @@ async function getRules(): Promise<Site[]> {
   try {
     const existingRules = await browser.declarativeNetRequest.getDynamicRules();
 
-    const blackList: Site[] = existingRules.map(rule => ({
-      id: rule.id,
-      url: rule.condition.regexFilter as string,
-      strippedUrl: stripUrl(rule.condition.regexFilter as string),
-      blockDomain: rule.condition.regexFilter ? rule.condition.regexFilter[rule.condition.regexFilter.length - 1] === '*' : true,
-      isActive: rule.action.redirect ? true : false
-    }));
+    const blackList: Site[] = existingRules.map(rule => {
+      return {
+        id: rule.id,
+        url: rule.condition.regexFilter as string,
+        strippedUrl: stripRegexFilter(rule.condition.regexFilter as string),
+        blockDomain: rule.condition.regexFilter ? rule.condition.regexFilter[rule.condition.regexFilter.length - 1] === '*' : true,
+        isActive: rule.action.redirect ? true : false
+      };
+    });
     return blackList;
   } catch (error) {
     console.error(error);
