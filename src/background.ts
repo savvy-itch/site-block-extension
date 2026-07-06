@@ -5,22 +5,6 @@ import { Action, NewRule, ResToSend, Site, RuleInStorage } from "./types";
 import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
 
-/* 
-  ? test extension on Android
-  ? localization
-  ? display feedback page on extension deletion
-  ? add and display timestamp for each rule
-  ? sort/filter rules by alphabet/active/domain
-  ? block URLs with specific words in them
-  ? allow blocking a list of URLs
-  ? testing
-  ? add tooltips
-  ? add more custom messages for failed and successful actions
-    - notification about a newly added rule
-    - notification about rules deletion
-  - when user clicks "Unblock URL", highlight that URL in the options page
-*/
-
 // on icon click
 const action = chrome.action ?? browser.browserAction;
 action.onClicked.addListener(tab => {
@@ -63,7 +47,7 @@ function triggerPopup(tab: browser.Tabs.Tab) {
   }
 }
 
-browser.runtime.onMessage.addListener(async (message, sender) => {
+browser.runtime.onMessage.addListener(async (message: any, sender: browser.Runtime.MessageSender) => {
   const msg = message as Action;
   if (msg.action === 'blockUrl') {
     const blackList = await getRules();
@@ -116,7 +100,7 @@ browser.runtime.onMessage.addListener(async (message, sender) => {
       removeRuleIds: [msg.deleteRuleId],
       addRules: []
     })
-    return { success: true, status: "deletedRule", msg: `Rule ${msg.deleteRuleId} have been deleted` };
+    return { success: true, status: "deletedRule", msg: `Rule ${msg.deleteRuleId} has been deleted` };
   } else if (msg.action === 'deleteAll') {
     const existingRules = await browser.declarativeNetRequest.getDynamicRules();
     await browser.declarativeNetRequest.updateDynamicRules({

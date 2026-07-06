@@ -1,7 +1,7 @@
-body {
-  --text-color: #272835;
-  --danger-color: hsl(348, 95%, 56%);
-  --danger-hover: hsl(348, 95%, 52%);
+body,
+body[data-theme="light"] {
+  --danger-color: hsl(347.71deg 91.11% 55.88%);
+  --danger-hover: hsl(347.9deg 70.1% 46%);
   --switch-width: 40px;
   --switch-height: 24px;
   --switch-padding: 4px;
@@ -9,17 +9,23 @@ body {
   --slider-width: calc(var(--switch-width) - (var(--switch-padding) * 2));
   --dim-color: hsl(231, 28%, 35%);
   --darker-dim-color: hsl(231, 28%, 30%);
-  --footer-highlight: hsl(216, 18%, 26%);
   --main-highlight: #6495ed;
   --checkbox-size: 25px;
   --gap-between-checkbox-and-text: calc(var(--checkbox-size) + 10px);
 
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  background-image: linear-gradient(to right bottom, hsl(269, 49%, 88%), hsl(250, 38%, 86%), hsl(216, 22%, 71%));
-  color: var(--text-color);
-  margin: 0;
-  padding: 0;
-  scroll-behavior: smooth;
+}
+
+body[data-theme="dark"] {
+  --dim-color: hsl(212deg 15% 13%);
+  --darker-dim-color: hsl(212deg 15% 10%);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    --dim-color: hsl(212deg 15% 13%);
+    --darker-dim-color: hsl(212deg 15% 10%);
+  }
 }
 
 /* =========== HEADER ============ */
@@ -55,12 +61,6 @@ h1 {
   cursor: pointer;
 }
 
-.about-link {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-}
-
 .about-link img {
   width: 2rem;
   height: 2rem;
@@ -74,6 +74,30 @@ h1 {
 
 .limit-para.hide-limit-para {
   visibility: hidden;
+}
+
+.header-subwrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.theme-btn {
+  border: 2px solid var(--text-color);
+  border-radius: 6px;
+  padding: 2px;
+  background-color: transparent;
+  display: flex;
+
+  img {
+    height: 1.9rem;
+    width: 1.9rem;
+  }
+}
+
+.theme-btn:hover {
+  cursor: pointer;
 }
 
 /*============= TABLE SECTION ============== */
@@ -91,7 +115,7 @@ h1 {
 }
 
 
-.table-section > h2 {
+.table-section>h2 {
   font-size: 1.5rem;
 }
 
@@ -120,12 +144,11 @@ h1 {
 .table td {
   padding: 12px 15px;
   text-align: left;
-  /* delete this before production: */
-  border: none; 
+  border: none;
 }
 
 .table td {
-  color: var(--text-color);
+  color: var(--table-text-color);
 }
 
 .table .domain-th {
@@ -147,6 +170,10 @@ h1 {
   color: hsl(0, 0%, 36%);
 }
 
+.blacklist-table tbody .inactive-url-address {
+  color: var(--dark-link-text);
+}
+
 .table th {
   background-color: var(--main-highlight);
   color: white;
@@ -162,7 +189,7 @@ h1 {
   width: 40%;
 }
 
-.row-url > input {
+.row-url>input {
   width: 90%;
   font-size: 1.1rem;
 }
@@ -224,7 +251,7 @@ h1 {
   position: relative;
   display: inline-block;
   width: var(--switch-width);
-  height: var(--switch-height); 
+  height: var(--switch-height);
 }
 
 /* Hide default HTML checkbox */
@@ -258,15 +285,15 @@ h1 {
   transition: .3s;
 }
 
-.active-checkbox:checked + .active-slider {
+.active-checkbox:checked+.active-slider {
   background-color: var(--dark-highlight);
 }
 
-.active-checkbox:focus + .active-slider {
+.active-checkbox:focus+.active-slider {
   box-shadow: 0 0 1px var(--dark-highlight);
 }
 
-.active-checkbox:checked + .active-slider:before {
+.active-checkbox:checked+.active-slider:before {
   -webkit-transform: translateX(16px);
   -ms-transform: translateX(16px);
   transform: translateX(16px);
@@ -352,15 +379,15 @@ h1 {
   transition: .3s;
 }
 
-.strict-mode-checkbox:checked + .strict-mode-slider {
+.strict-mode-checkbox:checked+.strict-mode-slider {
   background-color: var(--highlight-color);
 }
 
-.strict-mode-checkbox:focus + .strict-mode-slider {
+.strict-mode-checkbox:focus+.strict-mode-slider {
   box-shadow: 0 0 1px var(--highlight-color);
 }
 
-.strict-mode-checkbox:checked + .strict-mode-slider:before {
+.strict-mode-checkbox:checked+.strict-mode-slider:before {
   -webkit-transform: translateX(16px);
   -ms-transform: translateX(16px);
   transform: translateX(16px);
@@ -439,7 +466,7 @@ h1 {
   position: relative;
 }
 
-.search-form > input {
+.search-form>input {
   border: 1px solid var(--dark-highlight);
   border-radius: 4px;
   font-size: 1.2rem;
@@ -447,7 +474,7 @@ h1 {
   width: 100%;
 }
 
-.search-form > button {
+.search-form>button {
   position: absolute;
   right: 1%;
   top: 50%;
@@ -460,10 +487,10 @@ h1 {
   transition: background-color .2s;
 }
 
-.search-form > button:hover {
+.search-form>button:hover {
   background-color: var(--light-highlight);
   cursor: pointer;
-} 
+}
 
 .extension-error-para {
   font-size: 1rem;
@@ -488,6 +515,7 @@ h1 {
   position: relative;
   animation: rotate 1s linear infinite
 }
+
 .loader::before {
   content: "";
   box-sizing: border-box;
@@ -495,19 +523,35 @@ h1 {
   inset: 0px;
   border-radius: 50%;
   border: 5px solid var(--darker-dim-color);
-  animation: prixClipFix 2s linear infinite ;
+  animation: prixClipFix 2s linear infinite;
 }
 
 @keyframes rotate {
-  100%   {transform: rotate(360deg)}
+  100% {
+    transform: rotate(360deg)
+  }
 }
 
 @keyframes prixClipFix {
-    0%   {clip-path:polygon(50% 50%,0 0,0 0,0 0,0 0,0 0)}
-    25%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 0,100% 0,100% 0)}
-    50%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,100% 100%,100% 100%)}
-    75%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 100%)}
-    100% {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 0)}
+  0% {
+    clip-path: polygon(50% 50%, 0 0, 0 0, 0 0, 0 0, 0 0)
+  }
+
+  25% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 0, 100% 0, 100% 0)
+  }
+
+  50% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%)
+  }
+
+  75% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 100%)
+  }
+
+  100% {
+    clip-path: polygon(50% 50%, 0 0, 100% 0, 100% 100%, 0 100%, 0 0)
+  }
 }
 
 @media screen and (max-width: 768px) {
@@ -533,11 +577,6 @@ h1 {
     padding: 0 1rem;
   }
 
-  .about-link {
-    top: 3.5rem;
-    right: 1rem;
-  }
-
   .options-main {
     padding: 0 1rem;
   }
@@ -550,7 +589,7 @@ h1 {
   .url-input {
     width: 80dvw;
   }
-  
+
   .btn {
     min-width: 120px;
   }
@@ -559,7 +598,8 @@ h1 {
     font-size: 1rem;
   }
 
-  .table th, .table td {
+  .table th,
+  .table td {
     padding: 6px;
   }
 

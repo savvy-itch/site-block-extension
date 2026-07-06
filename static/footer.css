@@ -42,7 +42,7 @@
 }
 
 .options-footer .footer-developer {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   text-align: center;
   font-size: .9rem;
 }
@@ -61,6 +61,7 @@
 
 .footer-list-col h3 {
   font-size: 1.2rem;
+  margin: 0;
 }
 
 .footer-list-col h3:last-of-type {

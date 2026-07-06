@@ -14,9 +14,15 @@
 <body>
   <header class="extension-options-header">
     <h1>Extension settings</h1>
-    <a class="about-link" href="./about.html" title="About" aria-label="About page">
-      <img src="./icons/help.svg" alt="about page icon">
-    </a>
+    <div class="header-subwrapper">
+      <button id="theme-btn" class="theme-btn" title="Theme" arid-label="Theme">
+        <img id="theme-btn-icon" src="./icons/sun.svg" alt="light theme" />
+      </button>
+      <button id="clear-btn" class="clear-btn">Delete all rules</button>
+      <a class="about-link" href="./about.html" title="About" aria-label="About page">
+        <img id="help-icon" src="./icons/help.svg" alt="about page icon" />
+      </a>
+    </div>
     <dialog id="clear-all-dialog" class="dialog">
       <p>Are you sure you want to delete all URLs from the block list?</p>
       <p>This action cannot be undone.</p>
@@ -25,7 +31,6 @@
         <button id="dialog-clear-cancel-btn" class="dialog-cancel-btn dialog-btn" type="button">Cancel</button>
       </div>
     </dialog>
-    <button id="clear-btn" class="clear-btn">Delete all rules</button>
     <p class="limit-para">Daily disable attemps left: <span id="disable-limit" class="disable-limit"></span></p>
   </header>
 
@@ -116,7 +121,7 @@
           Rate the extension
           <img src="./icons/star.svg" alt="rate icon">
         </a>
-        <p>You can find Website blocker in these stores:</p>
+        <p>You can find <strong>On Pace</strong> in these stores:</p>
         <ul class="stores-list">
           <li>
             <a href="https://chromewebstore.google.com/detail/on-pace/kpniallfjagbbjigjigdlkoambcipoea?hl=en-US&utm_source=ext_sidebar" target="_blank" title="Chrome web store link">

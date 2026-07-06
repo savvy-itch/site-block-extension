@@ -5,13 +5,14 @@
   --font-size: 16px;
   --checkbox-size: 25px;
   --gap-between-checkbox-and-text: calc(var(--checkbox-size) + 10px);
+  --text-color: #272835;
 
   position: fixed;
   top: 50dvh;
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 1.5rem;
-  padding: 2rem;
+  padding: 15px 20px;
   border: 2px solid var(--highlight-color);
   border-radius: 10px;
   background-color: var(--form-bg);

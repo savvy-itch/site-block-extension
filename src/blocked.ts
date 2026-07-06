@@ -1,6 +1,7 @@
 import browser from 'webextension-polyfill';
-import { DeleteAction, GetAllAction, ResToSend } from './types';
+import { DeleteAction, GetAllAction, ResToSend, Theme } from './types';
 
+const body = document.querySelector('body') as HTMLBodyElement;
 const para = document.getElementById('blocked-url');
 const deleteBtn = document.getElementById('delete-btn');
 const params = new URLSearchParams(location.search);
@@ -9,6 +10,10 @@ const motivationHeading = document.getElementById('motivation-heading');
 const deleteDialog = document.getElementById('delete-dialog') as HTMLDialogElement;
 const deleteDialogOkBtn = document.getElementById('dialog-delete-ok-btn');
 const deleteDialogCancelBtn = document.getElementById('dialog-delete-cancel-btn');
+const curYearElem = document.getElementById("cur-year") as HTMLSpanElement;
+const heroImg = document.getElementById('hero-img') as HTMLImageElement;
+const heroImgLight = "./icons/block-hero.svg";
+const heroImgDark = "./icons/block-hero-dark.svg";
 const motivanionalMsgs = [
   "Remember to stay focused and achieve your goals!",
   "Distractions are temporary, but your goals are forever. Keep going!",
@@ -17,11 +22,22 @@ const motivanionalMsgs = [
 ];
 let blockedUrl: string | undefined = '';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const record = await browser.storage.local.get('darkMode');
+  const persistedTheme = record.darkMode;
+  if (persistedTheme === Theme.Dark) {
+    body?.setAttribute('data-theme', Theme.Dark);
+    heroImg.src = heroImgDark;
+  } else {
+    body?.setAttribute('data-theme', Theme.Light);
+    heroImg.src = heroImgLight;
+  }
+
   if (para) {
     getBlockedUrl();
   }
   displayMotivationMsg();
+  displayCurYear();
 });
 
 deleteBtn?.addEventListener('click', () => {
@@ -37,8 +53,8 @@ deleteDialogCancelBtn?.addEventListener('click', () => {
   deleteDialog.close();
 });
 
-async function  getBlockedUrl() {
-  const msg:GetAllAction = { action: 'getRules' };
+async function getBlockedUrl() {
+  const msg: GetAllAction = { action: 'getRules' };
 
   try {
     const res: ResToSend = await browser.runtime.sendMessage(msg);
@@ -76,5 +92,12 @@ function displayMotivationMsg() {
   if (motivationHeading) {
     const idx = Math.floor(Math.random() * motivanionalMsgs.length);
     motivationHeading.innerText = motivanionalMsgs[idx];
+  }
+}
+
+function displayCurYear() {
+  if (curYearElem) {
+    const curYear = new Date().getFullYear();
+    curYearElem.textContent = `-${curYear}`;
   }
 }

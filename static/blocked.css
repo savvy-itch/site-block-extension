@@ -5,21 +5,31 @@
 }
 
 body {
-  --text-color: #272835;
   --disabled-btn: hsl(236, 15%, 28%);
-  --dark-highlight: hsl(215, 51%, 37%);
+  --url-highlight: hsl(215, 51%, 37%);
   --font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   --dim-color: hsl(231, 28%, 35%);
-  --highlight-color: hsl(21, 87%, 56%);
 
   font-family: var(--font-family);
-  background-image: linear-gradient(to right bottom, #e5d9f2, #d7d3eb, #abb7c9);
-  color: var(--text-color);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
+}
+
+body[data-theme="light"] {
+  --url-highlight: hsl(215, 51%, 37%);
+}
+
+body[data-theme="dark"] {
+  --url-highlight: #9CB2E3;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    --url-highlight: hsl(215, 51%, 37%);
+  }
 }
 
 h1 {
@@ -28,7 +38,7 @@ h1 {
 
 .blocked-url {
   font-size: 1.4rem;
-  color: var(--dark-highlight);
+  color: var(--url-highlight);
 }
 
 .motivation-heading {
@@ -36,6 +46,10 @@ h1 {
   font-style: italic;
   color: var(--dim-color);
   text-align: center;
+}
+
+body[data-theme="dark"] .motivation-heading {
+  color: white;
 }
 
 .hero-img {

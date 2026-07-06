@@ -308,7 +308,7 @@ test.describe('Strict mode works', () => {
     await sharedPage.evaluate(async () => {
       await new Promise<void>(resolve => {
         chrome.storage.local.get('inactiveRules', (data) => {
-          if (data.inactiveRules) {
+          if (data.inactiveRules && Array.isArray(data.inactiveRules)) {
             const updatedRules: RuleInStorage[] = data.inactiveRules.map((rule: RuleInStorage) => ({
               ...rule,
               unblockDate: Date.now() - 360000 // Set past timestamp
@@ -326,7 +326,7 @@ test.describe('Strict mode works', () => {
     await sharedPage.waitForFunction(async () => {
       return new Promise(resolve => {
         chrome.storage.local.get('inactiveRules', data => {
-          resolve(data.inactiveRules && data.inactiveRules.length === 0);
+          resolve(data.inactiveRules && Array.isArray(data.inactiveRules) && data.inactiveRules.length === 0);
         });
       });
     });

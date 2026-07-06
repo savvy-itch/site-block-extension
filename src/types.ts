@@ -77,3 +77,5 @@ export interface UpdateMsg {
   v: string,
   desc: string[]
 }
+
+export enum Theme { Light = "light", Dark = "dark" };

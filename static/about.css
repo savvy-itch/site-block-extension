@@ -5,15 +5,9 @@
 }
 
 body {
-  --text-color: #272835;
   --page-px: 2rem; 
 
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  background-image: linear-gradient(to right bottom, #e5d9f2, #d7d3eb, #abb7c9);
-  color: var(--text-color);
-  margin: 0;
-  padding: 0;
-  scroll-behavior: smooth;
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
@@ -117,6 +111,7 @@ body {
 
 .about-example {
   background-color: hsl(0, 0%, 93%);
+  color: var(--table-text-color);
   padding: 15px;
   border-radius: 6px;
   font-size: 1.1rem;

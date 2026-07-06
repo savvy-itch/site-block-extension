@@ -1,14 +1,43 @@
 body {
-  --text-color: #272835;
-  --success-color: hsl(160, 100%, 35%);
-  --success-dark-color: hsl(160, 100%, 26%);
+  --bg-light: linear-gradient(to right bottom, hsl(269, 49%, 88%), hsl(250, 38%, 86%), hsl(216, 22%, 71%));
+  --bg-dark: linear-gradient(to right bottom, hsl(231, 15%, 40%), hsl(231, 15%, 30%), hsl(236, 3%, 16%));
+  --table-text-color: #272835;
+  --success-color: hsl(160deg 100% 28%);
+  --success-dark-color: hsl(160, 100%, 23%);
   --dark-highlight: #3767a9;
   --dark-highlight2: hsl(215, 51%, 37%);
   --light-highlight: hsl(0, 0%, 78%);
   --bg-transition: background-color .2s ease-in-out;
   --dialog-transition: .3s;
   --footer-bg: #222831;
+  --footer-highlight: hsl(216, 18%, 26%);
   --highlight-color: #FC8F54;
+  --dark-link-text: #142B42;
+
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  scroll-behavior: smooth;
+}
+
+body[data-theme="light"] {
+  --text-color: #272835;
+
+  background-image: var(--bg-light);
+}
+
+body[data-theme="dark"] {
+  --text-color: white;
+
+  background-image: var(--bg-dark);
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    --text-color: white;
+
+    background-image: var(--bg-dark);
+  }
 }
 
 .extension-block-domain-label:hover input~.extension-domain-checkmark {
@@ -60,6 +89,10 @@ body {
 .dialog[open] {
   opacity: 1;
   transform: scale(1);
+}
+
+body[data-theme="dark"] .dialog {
+  background-color: var(--footer-highlight);
 }
 
 .dialog {

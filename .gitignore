@@ -19,3 +19,5 @@ node_modules/
 /tests/tmp-profile/
 
 /web-ext-artifacts/
+
+todo.txt

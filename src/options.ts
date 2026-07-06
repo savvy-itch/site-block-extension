@@ -1,8 +1,9 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
 import { defaultDisableLimit, forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
-import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
+import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, Theme, UpdateAction } from "./types";
 import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules, stripUrl1 } from './helpers';
 
+const body = document.querySelector('body') as HTMLBodyElement;
 const urlForm = document.getElementById('url-input-form') as HTMLFormElement;
 const errorPara = document.getElementById('extension-error-para') as HTMLParagraphElement;
 const saveBtn = document.getElementById('save-btn');
@@ -25,6 +26,15 @@ const searchBar = document.getElementById('search-bar') as HTMLInputElement;
 const searchClearBtn = document.getElementById('search-input-clear-btn') as HTMLButtonElement;
 const limitPara = document.querySelector('.limit-para') as HTMLParagraphElement;
 const limitSpan = document.getElementById('disable-limit') as HTMLSpanElement;
+const themeBtn = document.getElementById('theme-btn') as HTMLButtonElement;
+const themeBtnIcon = document.getElementById('theme-btn-icon') as HTMLImageElement;
+const helpIcon = document.getElementById('help-icon') as HTMLImageElement;
+const dark = '(prefers-color-scheme: dark)';
+const light = '(prefers-color-scheme: light)';
+const lightIcon = "./icons/sun.svg";
+const darkIcon = "./icons/moon.svg";
+const helpIconLight = "./icons/help.svg";
+const helpIconDark = "./icons/help-dark.svg";
 
 let isEdited = false;
 let showEditInput = false;
@@ -33,9 +43,11 @@ let idToDelete: number | null;
 let cachedRules: Site[] = [];
 let disableAttemptsLeft = defaultDisableLimit;
 let currEditDisableCount = 0;
+let curTheme = "light";
 const rowIdPrefix = 'row-';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  detectColorScheme();
   await displayUrlList();
   saveBtn?.setAttribute('disabled', '');
   cancelBtn?.setAttribute('disabled', '');
@@ -59,6 +71,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (webStoreLink) {
     assignStoreLink(webStoreLink);
+  }
+});
+
+themeBtn.addEventListener('click', () => {
+  if (curTheme === "light") {
+    changeTheme(Theme.Dark);
+  } else {
+    changeTheme(Theme.Light);
   }
 });
 
@@ -205,7 +225,11 @@ function populateTableRows(rule: Site, i: number, tbody: HTMLTableSectionElement
 
   const urlCell = document.createElement('td');
   urlCell.classList.add('row-url');
-  urlCell.textContent = `${rule.strippedUrl}`;
+  if (rule.isActive) {
+    urlCell.textContent = `${rule.strippedUrl}`;
+  } else {
+    urlCell.innerHTML = `<a class="inactive-url-address" href="https://${rule.strippedUrl}" target="_blank">${rule.strippedUrl}</a>`;
+  }
 
   const domainCell = document.createElement('td');
   domainCell.classList.add('row-domain');
@@ -515,3 +539,47 @@ searchClearBtn.addEventListener('click', () => {
     populateList(cachedRules);
   }
 });
+
+function changeTheme(newScheme: Theme) {
+  body?.setAttribute('data-theme', newScheme);
+  if (newScheme === Theme.Light) {
+    themeBtnIcon.src = darkIcon;
+    themeBtnIcon.alt = "dark icon";
+    helpIcon.src = helpIconLight;
+    curTheme = Theme.Light;
+  } else {
+    themeBtnIcon.src = lightIcon;
+    themeBtnIcon.alt = "light icon";
+    helpIcon.src = helpIconDark;
+    curTheme = Theme.Dark;
+  }
+  browser.storage.local.set({ darkMode: newScheme });
+}
+
+async function detectColorScheme() {
+  const record = await browser.storage.local.get('darkMode');
+  const persistedTheme = record.darkMode;
+  if (persistedTheme === Theme.Dark || persistedTheme === Theme.Light) {
+    curTheme = persistedTheme;
+    changeTheme(persistedTheme);
+  } else if (!window.matchMedia) {
+    changeTheme(Theme.Light);
+    curTheme = Theme.Light;
+  }
+
+  function callback({ matches, media }: { matches: boolean, media: string }) {
+    if (!matches) return;
+
+    if (media === dark) {
+      changeTheme(Theme.Dark);
+    } else if (media === light) {
+      changeTheme(Theme.Light);
+    }
+  }
+
+  const mqDark = window.matchMedia(dark);
+  mqDark.addEventListener('change', callback);
+
+  const mqLight = window.matchMedia(light);
+  mqLight.addEventListener('change', callback);
+}
