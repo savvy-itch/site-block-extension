@@ -31,6 +31,7 @@ export interface RuleInStorage {
 
 export interface ResToSend {
   success: boolean,
+  id?: number,
   status?: Status, 
   msg?: string,
   rules?: Site[],

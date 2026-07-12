@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Settings | On Pace Extension</title>
   <link rel="stylesheet" href="./global.css">
+  <link rel="stylesheet" href="./global-pages.css">
   <link rel="stylesheet" href="./options.css">
   <link rel="stylesheet" href="./footer.css">
-  <link rel="stylesheet" href="./newUpdateMsg.css">
+  <link rel="stylesheet" href="./new-update-msg.css">
 </head>
 
 <body>
@@ -109,6 +110,15 @@
       <li>Re-enables any inactive rules after 1 hour</li>
       <li>Daily limit for disabling rules - 3</li>
     </ul>
+    
+    <div>
+      <div>
+        <button id="export-btn">Export data</button>
+        <button id="import-btn">Import data</button>
+        <input id="file-import-input" class="file-import-input" type="file" accept=".json" />
+      </div>
+      <p id="data-msg-para"></p>
+    </div>
   </main>
 
   <footer class="options-footer">

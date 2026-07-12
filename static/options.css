@@ -526,6 +526,10 @@ h1 {
   animation: prixClipFix 2s linear infinite;
 }
 
+.file-import-input {
+  display: none;
+}
+
 @keyframes rotate {
   100% {
     transform: rotate(360deg)

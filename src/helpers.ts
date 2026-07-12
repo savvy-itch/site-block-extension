@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill';
-import { AddAction, DeleteAllAction, GetAllAction, ResToSend, RuleInStorage } from "./types";
+import { AddAction, DeleteAllAction, GetAllAction, ResToSend, RuleInStorage, Site } from "./types";
 import { defaultDisableLimit, forbiddenUrls, maxUrlLength, minUrlLength, PREV_RESET_DATE, strictModeBlockPeriod, webStores } from './globals';
 
 /*
@@ -26,7 +26,7 @@ export function getExtVersion() {
   return v;
 }
 
-export function stripUrl1(url:string): string {
+export function stripUrl(url: string): string {
   return url.replace(/^https?:\/\//, '').replace(/\/+$/, '') + '/';
 }
 
@@ -168,3 +168,158 @@ export async function checkLastLimitReset() {
 export function getUrlToBlock(strippedUrl: string, blockDomain: boolean) {
   return `^https?:\/\/${strippedUrl}${blockDomain ? '?.*' : '?$'}`;
 }
+
+export async function exportData(cachedRules: Site[]) {
+  console.log("exportData");
+  const filename = "on-pace-data.json";
+  let url = "";
+
+  try {
+    const data = await getSettingsFromStorage();
+    const dataObj = { settings: data, rules: cachedRules };
+    const settings = new Blob([JSON.stringify(dataObj)], { type: "application/json" });
+    url = URL.createObjectURL(settings);
+    const options: browser.Downloads.DownloadOptionsType = {
+      filename,
+      saveAs: true,
+      url
+    };
+    await browser.downloads.download(options);
+  } catch (error) {
+    console.error(error);
+  } finally {
+    console.log("data exported");
+    if (url) URL.revokeObjectURL(url);
+  }
+}
+
+interface Settings {
+  darkMode?: string,
+  disableLimit?: number,
+  inactiveRules?: RuleInStorage[],
+  prevResetDate?: string,
+  prevUpdate?: string,
+  strictMode?: boolean
+};
+
+interface ImportData {
+  settings: Settings,
+  rules: Site[]
+}
+
+export async function getSettingsFromStorage(): Promise<Settings> {
+  const keys: (keyof Settings)[] = ["darkMode", "disableLimit", "inactiveRules", "prevResetDate", "prevUpdate", "strictMode"];
+
+  const entries = await Promise.all(
+    keys.map(async (key) => {
+      const obj = await browser.storage.local.get(key);
+      // explicit null check is needed to prevent skipping keys with "false" values
+      return obj[key] !== null ? [key, obj[key]] : null;
+    })
+  );
+
+  return Object.fromEntries(entries.filter(e => e !== null));
+}
+
+export function openFile(importInput: HTMLInputElement, reader: FileReader) {
+  if (importInput.files) {
+    const file = importInput.files[0];
+    if (file.type !== "application/json") {
+      alert(`Unsupported format. Expected .json, got ${file.type}`);
+      return;
+    }
+    reader.readAsText(file);
+  }
+}
+
+export async function importData(reader: FileReader) {
+  if (typeof (reader.result) === "string") {
+    const res: ImportData = JSON.parse(reader.result);
+    const newData: ImportData = await assignNewIds(res);
+    console.log(newData);
+    const settings: Settings = newData.settings;
+    for (const [key, value] of Object.entries(settings)) {
+      if (key !== "prevResetDate" && key !== "prevUpdate" && key !== "strictMode") {
+        await browser.storage.local.set({ [key]: value });
+      }
+    }
+  } else {
+    console.error("Error during data parsing");
+  }
+}
+
+/*
+interface Site {
+  id: number,
+  url: string,
+  strippedUrl: string,
+  blockDomain: boolean,
+  isActive: boolean
+}
+
+interface RuleInStorage {
+  id: number,
+  unblockDate: number,
+  urlToBlock: string
+}
+*/
+
+async function assignNewIds(dataObj: ImportData): Promise<ImportData> {
+  const updatedData = dataObj;
+  await Promise.allSettled(updatedData.rules.map(async (rule) => {
+    const msg: AddAction = { action: "blockUrl", url: rule.strippedUrl, blockDomain: rule.blockDomain };
+    const res: ResToSend = await browser.runtime.sendMessage(msg);
+    if (res.success) {
+      if (res.status === 'added') {
+        console.log("added");
+        if (updatedData.settings.inactiveRules && updatedData.settings.inactiveRules.length > 0) {
+          const match = updatedData.settings.inactiveRules.find(r => r.urlToBlock === rule.url);
+          if (match && res.id) {
+            match.id = res.id;
+          }
+        }
+      } else if (res.status === 'duplicate') {
+        console.log("duplicate");
+      }
+    }
+  }))
+    .catch(err => console.error(err))
+    .finally(() => console.log("ID assignment completed"));
+
+  return updatedData;
+}
+
+/**
+{
+    "settings": {
+        "darkMode": "dark",
+        "disableLimit": 2,
+        "inactiveRules": [
+            {
+                "id": 510,
+                "unblockDate": 1783621073277,
+                "urlToBlock": "^https?://colorhunt.co/palettes/light/?.*"
+            }
+        ],
+        "prevResetDate": "2026-07-09T11:39:37.916Z",
+        "prevUpdate": "1.1.1",
+        "strictMode": true
+    },
+    "rules": [
+        {
+            "id": 510,
+            "url": "^https?://colorhunt.co/palettes/light/?.*",
+            "strippedUrl": "colorhunt.co/palettes/light/",
+            "blockDomain": true,
+            "isActive": false
+        },
+        {
+            "id": 656,
+            "url": "^https?://example.com/?.*",
+            "strippedUrl": "example.com/",
+            "blockDomain": true,
+            "isActive": true
+        }
+    ]
+}
+ */

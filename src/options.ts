@@ -1,7 +1,7 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
 import { defaultDisableLimit, forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
 import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, Theme, UpdateAction } from "./types";
-import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules, stripUrl1 } from './helpers';
+import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, exportData, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules, importData, openFile, stripUrl } from './helpers';
 
 const body = document.querySelector('body') as HTMLBodyElement;
 const urlForm = document.getElementById('url-input-form') as HTMLFormElement;
@@ -28,6 +28,9 @@ const limitPara = document.querySelector('.limit-para') as HTMLParagraphElement;
 const limitSpan = document.getElementById('disable-limit') as HTMLSpanElement;
 const themeBtn = document.getElementById('theme-btn') as HTMLButtonElement;
 const themeBtnIcon = document.getElementById('theme-btn-icon') as HTMLImageElement;
+const exportBtn = document.getElementById("export-btn") as HTMLButtonElement;
+const importBtn = document.getElementById("import-btn") as HTMLButtonElement;
+const importInput = document.getElementById("file-import-input") as HTMLInputElement;
 const helpIcon = document.getElementById('help-icon') as HTMLImageElement;
 const dark = '(prefers-color-scheme: dark)';
 const light = '(prefers-color-scheme: light)';
@@ -35,6 +38,7 @@ const lightIcon = "./icons/sun.svg";
 const darkIcon = "./icons/moon.svg";
 const helpIconLight = "./icons/help.svg";
 const helpIconDark = "./icons/help-dark.svg";
+const reader = new FileReader();
 
 let isEdited = false;
 let showEditInput = false;
@@ -73,6 +77,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     assignStoreLink(webStoreLink);
   }
 });
+
+exportBtn.addEventListener('click', () => exportData(cachedRules));
+importBtn.addEventListener('click', () => {
+  // import input activated indirectly to hide default "No file chosen" message next to it
+  importInput.click();
+});
+importInput.addEventListener('change', () => openFile(importInput, reader));
+
+reader.addEventListener("load", async () => {
+  await importData(reader);
+  displayUrlList();
+});
+reader.addEventListener("error", () => console.error("An error occured during file load."));
 
 themeBtn.addEventListener('click', () => {
   if (curTheme === "light") {
@@ -414,7 +431,7 @@ async function saveChanges() {
       const rowId = Number(editedRow.id.substring(rowIdPrefix.length)); // e.g. "row-1"
       const urlInput = editedRow.querySelector('.row-url > input') as HTMLInputElement;
       let strippedUrl = urlInput ? urlInput.value : editedRow.querySelector('.row-url')?.textContent ?? '';
-      strippedUrl = stripUrl1(strippedUrl);
+      strippedUrl = stripUrl(strippedUrl);
       const blockDomain = (editedRow.querySelector('.domain-checkbox') as HTMLInputElement)?.checked;
       const urlToBlock = getUrlToBlock(strippedUrl, blockDomain);
       const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;
@@ -559,10 +576,14 @@ function changeTheme(newScheme: Theme) {
 async function detectColorScheme() {
   const record = await browser.storage.local.get('darkMode');
   const persistedTheme = record.darkMode;
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   if (persistedTheme === Theme.Dark || persistedTheme === Theme.Light) {
     curTheme = persistedTheme;
     changeTheme(persistedTheme);
-  } else if (!window.matchMedia) {
+  } else if (prefersDark) {
+    curTheme = Theme.Dark;
+    changeTheme(Theme.Dark);
+  } else {
     changeTheme(Theme.Light);
     curTheme = Theme.Light;
   }

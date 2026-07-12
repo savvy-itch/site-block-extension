@@ -1,6 +1,6 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
 import { forbiddenUrls, maxUrlLength, storageRulesKey, storageStrictModeKey } from "./globals";
-import { getUrlToBlock, stripRegexFilter, stripUrl1 } from "./helpers";
+import { getUrlToBlock, stripRegexFilter, stripUrl } from "./helpers";
 import { Action, NewRule, ResToSend, Site, RuleInStorage } from "./types";
 import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet('1234567890', 3); // max 1000 ids
@@ -51,7 +51,7 @@ browser.runtime.onMessage.addListener(async (message: any, sender: browser.Runti
   const msg = message as Action;
   if (msg.action === 'blockUrl') {
     const blackList = await getRules();
-    const normalizedUrl = stripUrl1(msg.url);
+    const normalizedUrl = stripUrl(msg.url);
     const urlToBlock = getUrlToBlock(normalizedUrl, msg.blockDomain);
 
     if (blackList.some(site => site.url === urlToBlock)) {
@@ -85,7 +85,7 @@ browser.runtime.onMessage.addListener(async (message: any, sender: browser.Runti
         addRules: [newRule],
         removeRuleIds: []
       });
-      const res: ResToSend = { success: true, status: "added", msg: 'URL has been saved' };
+      const res: ResToSend = { success: true, status: "added", id: newId, msg: 'URL has been saved' };
       return res;
     } catch (error) {
       console.error('Error updating rules:', error);

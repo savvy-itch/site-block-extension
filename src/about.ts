@@ -20,9 +20,12 @@ links.forEach(s => {
 document.addEventListener('DOMContentLoaded', async () => {
   const record = await browser.storage.local.get('darkMode');
   const persistedTheme = record.darkMode;
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   if (persistedTheme === Theme.Dark || persistedTheme === Theme.Light) {
     body?.setAttribute('data-theme', persistedTheme);
-  } else if (!window.matchMedia) {
+  } else if (prefersDark) {
+    body?.setAttribute('data-theme', Theme.Dark);
+  } else {
     body?.setAttribute('data-theme', Theme.Light);
   }
 

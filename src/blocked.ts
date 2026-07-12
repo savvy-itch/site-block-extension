@@ -25,9 +25,13 @@ let blockedUrl: string | undefined = '';
 document.addEventListener('DOMContentLoaded', async () => {
   const record = await browser.storage.local.get('darkMode');
   const persistedTheme = record.darkMode;
-  if (persistedTheme === Theme.Dark) {
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  if (persistedTheme === Theme.Dark || prefersDark) {
     body?.setAttribute('data-theme', Theme.Dark);
     heroImg.src = heroImgDark;
+  } else if (persistedTheme === Theme.Light) {
+    body?.setAttribute('data-theme', Theme.Light);
+    heroImg.src = heroImgLight;
   } else {
     body?.setAttribute('data-theme', Theme.Light);
     heroImg.src = heroImgLight;

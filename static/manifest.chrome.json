@@ -17,6 +17,7 @@
   "permissions": [
     "activeTab",
     "declarativeNetRequestWithHostAccess",
+    "downloads",
     "scripting",
     "storage",
     "tabs"
