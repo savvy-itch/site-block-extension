@@ -112,39 +112,44 @@
     </ul>
     
     <div>
-      <div>
-        <button id="export-btn">Export data</button>
-        <button id="import-btn">Import data</button>
+      <div class="data-btns-wrapper">
+        <div>
+          <button id="export-btn" class="data-transfer-btn btn">Export data</button>
+          <p class="data-btn-desc">Save data into a JSON file</p>
+        </div>
+        <div>
+          <button id="import-btn" class="data-transfer-btn btn">Import data</button>
+          <p class="data-btn-desc">Open data from a JSON file</p>
+        </div>
         <input id="file-import-input" class="file-import-input" type="file" accept=".json" />
       </div>
-      <p id="data-msg-para"></p>
+      <p id="data-msg-para" class="data-msg-para danger-msg"></p>
     </div>
   </main>
 
   <footer class="options-footer">
     <div class="footer-wrapper">
       <div class="footer-general-col">
-        <p>On Pace v<span id="ext-version"></span> - website blocker extension.</p>
-        <p>Found a bug?</p>
-        <a class="link-to-highlight" href="mailto:msavprojects@gmail.com" target="_blank">Report via Email</a>
+        <p>On Pace v<span id="ext-version"></span> - website blocker extension</p>
+        <p>Found a bug? <a class="link-to-highlight" href="mailto:msavprojects@gmail.com" target="_blank">Report via Email</a></p>
         <a id="web-store-link" class="link-to-highlight" href="#" target="_blank">
           Rate the extension
           <img src="./icons/star.svg" alt="rate icon">
         </a>
-        <p>You can find <strong>On Pace</strong> in these stores:</p>
+        <p>Find <strong>On Pace</strong> in these stores:</p>
         <ul class="stores-list">
           <li>
-            <a href="https://chromewebstore.google.com/detail/on-pace/kpniallfjagbbjigjigdlkoambcipoea?hl=en-US&utm_source=ext_sidebar" target="_blank" title="Chrome web store link">
+            <a href="https://chromewebstore.google.com/detail/on-pace/kpniallfjagbbjigjigdlkoambcipoea?hl=en-US&utm_source=ext_sidebar" target="_blank" title="Chrome Web Store" aria-label="Chrome Web Store">
               <img src="./icons/chrome.svg" alt="Chrome web store" />
             </a>
           </li>
           <li>
-            <a href="https://addons.mozilla.org/en-US/firefox/addon/on-pace/" target="_blank" title="Firefox browser add-ons" title="Firefox browser add-ons link">
+            <a href="https://addons.mozilla.org/en-US/firefox/addon/on-pace/" target="_blank" title="Firefox Add-ons" aria-label="Firefox Add-ons">
               <img src="./icons/firefox.svg" alt="Firefox browser add-ons" />
             </a>
           </li>
           <li>
-            <a href="https://microsoftedge.microsoft.com/addons/detail/on-pace/oifamaadhbcefjhakfkojcomahfkchpi" target="_blank" title="Microsoft Edge Extensions" aria-label="Microsoft Edge Extensions link">
+            <a href="https://microsoftedge.microsoft.com/addons/detail/on-pace/oifamaadhbcefjhakfkojcomahfkchpi" target="_blank" title="Microsoft Edge Extensions" aria-label="Microsoft Edge Extensions">
               <img src="./icons/edge.svg" alt="Microsoft Edge Extensions" />
             </a>
           </li>
@@ -169,9 +174,6 @@
         <ul class="contact-list">
           <li>
             <a href="https://www.linkedin.com/in/mykhailo-savych-a31366248/" target="_blank" title="Linkedin" aria-label="Linkedin link"><img src="./icons/linkedin.svg" alt="Linkedin icon" /></a>
-          </li>
-          <li>
-            <a href="https://bsky.app/profile/savvy-itch.bsky.social" target="_blank" title="Bluesky" aria-label="Bluesky link"><img src="./icons/bluesky.svg" alt="Bluesky icon" /></a>
           </li>
           <li>
             <a href="https://github.com/savvy-itch" target="_blank" title="GitHub" aria-label="GitHub link"><img src="./icons/github.svg" alt="GitHub icon" /></a>

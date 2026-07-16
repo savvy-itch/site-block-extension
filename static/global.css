@@ -1,6 +1,4 @@
 body {
-  /* --bg-light: linear-gradient(to right bottom, hsl(269, 49%, 88%), hsl(250, 38%, 86%), hsl(216, 22%, 71%));
-  --bg-dark: linear-gradient(to right bottom, hsl(231, 15%, 40%), hsl(231, 15%, 30%), hsl(236, 3%, 16%)); */
   --table-text-color: #272835;
   --success-color: hsl(160deg 100% 28%);
   --success-dark-color: hsl(160, 100%, 23%);
@@ -19,26 +17,6 @@ body {
   padding: 0;
   scroll-behavior: smooth;
 }
-
-/* body[data-theme="light"] {
-  --text-color: #272835;
-
-  background-image: var(--bg-light);
-}
-
-body[data-theme="dark"] {
-  --text-color: white;
-
-  background-image: var(--bg-dark);
-}
-
-@media (prefers-color-scheme: dark) {
-  body {
-    --text-color: white;
-
-    background-image: var(--bg-dark);
-  }
-} */
 
 .extension-block-domain-label:hover input~.extension-domain-checkmark {
   background-color: #ccc;

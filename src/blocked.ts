@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill';
 import { DeleteAction, GetAllAction, ResToSend, Theme } from './types';
+import { DARK_PREF } from './globals';
 
 const body = document.querySelector('body') as HTMLBodyElement;
 const para = document.getElementById('blocked-url');
@@ -25,7 +26,7 @@ let blockedUrl: string | undefined = '';
 document.addEventListener('DOMContentLoaded', async () => {
   const record = await browser.storage.local.get('darkMode');
   const persistedTheme = record.darkMode;
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const prefersDark = window.matchMedia(DARK_PREF).matches;
   if (persistedTheme === Theme.Dark || prefersDark) {
     body?.setAttribute('data-theme', Theme.Dark);
     heroImg.src = heroImgDark;

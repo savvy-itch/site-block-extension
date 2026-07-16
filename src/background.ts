@@ -1,5 +1,5 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
-import { forbiddenUrls, maxUrlLength, storageRulesKey, storageStrictModeKey } from "./globals";
+import { FORBIDDEN_URLS, MAX_URL_LEN, STORAGE_INACTIVE_RULES, STORAGE_STRICT_MODE } from "./globals";
 import { getUrlToBlock, stripRegexFilter, stripUrl } from "./helpers";
 import { Action, NewRule, ResToSend, Site, RuleInStorage } from "./types";
 import { customAlphabet } from "nanoid";
@@ -14,7 +14,7 @@ action.onClicked.addListener(tab => {
 // on shortcut key press 
 browser.commands.onCommand.addListener(async (command) => {
   const currUrl = await getCurrentUrl();
-  if (command === 'trigger_form' && currUrl && !forbiddenUrls.some(url => url.test(currUrl))) {
+  if (command === 'trigger_form' && currUrl && !FORBIDDEN_URLS.some(url => url.test(currUrl))) {
     browser.tabs.query({ active: true, currentWindow: true })
       .then((tabs) => {
         const tab = tabs[0];
@@ -54,8 +54,9 @@ browser.runtime.onMessage.addListener(async (message: any, sender: browser.Runti
     const normalizedUrl = stripUrl(msg.url);
     const urlToBlock = getUrlToBlock(normalizedUrl, msg.blockDomain);
 
-    if (blackList.some(site => site.url === urlToBlock)) {
-      return { success: true, status: "duplicate", msg: 'URL is already blocked' };
+    const duplicate = blackList.find(site => site.url === urlToBlock);
+    if (duplicate) {
+      return { success: true, status: "duplicate", msg: 'URL is already blocked', id: duplicate.id };
     }
 
     let newId = Number(nanoid());
@@ -69,16 +70,20 @@ browser.runtime.onMessage.addListener(async (message: any, sender: browser.Runti
       id: newId,
       priority: 1,
       action: {
-        type: 'redirect',
-        redirect: {
-          regexSubstitution: `${browser.runtime.getURL("blocked.html")}?id=${newId}`
-        }
+        type: msg.isActive ? "redirect" : "allow",
       },
       condition: {
         regexFilter: urlToBlock,
         resourceTypes: ["main_frame" as DeclarativeNetRequest.ResourceType]
       }
     };
+
+    if (msg.isActive) {
+      newRule.action.redirect = {
+        regexSubstitution: `${browser.runtime.getURL("blocked.html")}?id=${newId}`
+
+      }
+    }
 
     try {
       browser.declarativeNetRequest.updateDynamicRules({
@@ -143,7 +148,7 @@ browser.runtime.onMessage.addListener(async (message: any, sender: browser.Runti
     return { success: true, status: "updated", msg: 'Rules updated', rules: storedRules };
   } else if (msg.action === 'getCurrentUrl') {
     let currUrl = await getCurrentUrl();
-    currUrl = currUrl?.substring(0, maxUrlLength - 1);
+    currUrl = currUrl?.substring(0, MAX_URL_LEN - 1);
     return { success: true, status: "currUrl", url: currUrl ?? '' };
   } else {
     // will throw error if type doesn't match the existing actions
@@ -182,7 +187,7 @@ async function getCurrentUrl() {
 // client-side redirection (when no new requests are sent)
 browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' || changeInfo.url) {
-    const { strictMode } = await browser.storage.local.get([storageStrictModeKey]);
+    const { strictMode } = await browser.storage.local.get([STORAGE_STRICT_MODE]);
     if (strictMode) {
       checkInactiveRules();
     }
@@ -204,7 +209,7 @@ browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 });
 
 async function checkInactiveRules() {
-  const result = await browser.storage.local.get([storageRulesKey]);
+  const result = await browser.storage.local.get([STORAGE_INACTIVE_RULES]);
   const inactiveRules = result.inactiveRules as RuleInStorage[];
   const allRules = await getRules();
   const rulesToUpdate: NewRule[] = [];

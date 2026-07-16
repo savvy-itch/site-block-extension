@@ -1,23 +1,15 @@
-import browser from 'webextension-polyfill';
-import { AddAction, DeleteAllAction, GetAllAction, ResToSend, RuleInStorage, Site } from "./types";
-import { defaultDisableLimit, forbiddenUrls, maxUrlLength, minUrlLength, PREV_RESET_DATE, strictModeBlockPeriod, webStores } from './globals';
-
-/*
-Brave:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-Chrome:  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
-Opera:   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 OPR/114.0.0.0'
-Firefox: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0'
-Edge:    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0'
-*/
+import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
+import { AddAction, DeleteAllAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
+import { DEFAULT_DISABLE_LIMIT, FORBIDDEN_URLS, MAX_URL_LEN, MIN_URL_LEN, PREV_RESET_DATE, STORAGE_INACTIVE_RULES, STRICT_MODE_BLOCK_PERIOD, WEB_STORES_LIST } from './globals';
 
 export function assignStoreLink(webStoreLink: HTMLAnchorElement) {
   const browser = navigator.userAgent;
   if (browser.includes('Firefox/')) {
-    webStoreLink.href = webStores.firefox;
+    webStoreLink.href = WEB_STORES_LIST.firefox;
   } else if (browser.includes('Edg/')) {
-    webStoreLink.href = webStores.edge;
+    webStoreLink.href = WEB_STORES_LIST.edge;
   } else {
-    webStoreLink.href = webStores.chrome;
+    webStoreLink.href = WEB_STORES_LIST.chrome;
   }
 }
 
@@ -56,19 +48,19 @@ export async function handleFormSubmission(urlForm: HTMLFormElement, errorPara: 
     errorPara.textContent = '';
 
     // handle errors
-    if (!urlToBlock || forbiddenUrls.some(url => url.test(urlToBlock))) {
+    if (!urlToBlock || FORBIDDEN_URLS.some(url => url.test(urlToBlock))) {
       if (errorPara) {
         errorPara.textContent = 'Invalid URL';
       }
       console.error(`Invalid URL: ${urlToBlock}`);
       return;
-    } else if (urlToBlock.length < minUrlLength) {
+    } else if (urlToBlock.length < MIN_URL_LEN) {
       if (errorPara) {
         errorPara.textContent = 'URL is too short';
       }
       console.error(`URL is too short`);
       return;
-    } else if (urlToBlock.length > maxUrlLength) {
+    } else if (urlToBlock.length > MAX_URL_LEN) {
       if (errorPara) {
         errorPara.textContent = 'URL is too long';
       }
@@ -76,7 +68,7 @@ export async function handleFormSubmission(urlForm: HTMLFormElement, errorPara: 
       return;
     }
 
-    const msg: AddAction = { action: "blockUrl", url: urlToBlock, blockDomain };
+    const msg: AddAction = { action: "blockUrl", url: urlToBlock, blockDomain, isActive: true };
 
     try {
       const res: ResToSend = await browser.runtime.sendMessage(msg);
@@ -115,7 +107,7 @@ export async function handleInactiveRules(isStrictModeOn: boolean) {
       if (res.success && res.rules) {
         const inactiveRulesToStore: RuleInStorage[] = [];
         const date = new Date();
-        const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
+        const unblockDate = new Date(date.getTime() + STRICT_MODE_BLOCK_PERIOD).getTime();
         res.rules.forEach(rule => {
           if (!rule.isActive) {
             const urlToBlock = getUrlToBlock(rule.strippedUrl, rule.blockDomain);
@@ -160,7 +152,7 @@ export async function checkLastLimitReset() {
       prevDate.getMonth() < currDate.getMonth() ||
       prevDate.getDate() < currDate.getDate()) {
       await browser.storage.local.set({ [PREV_RESET_DATE]: new Date().toISOString() });
-      await browser.storage.local.set({ disableLimit: defaultDisableLimit });
+      await browser.storage.local.set({ disableLimit: DEFAULT_DISABLE_LIMIT });
     }
   }
 }
@@ -197,18 +189,15 @@ interface Settings {
   darkMode?: string,
   disableLimit?: number,
   inactiveRules?: RuleInStorage[],
-  prevResetDate?: string,
-  prevUpdate?: string,
-  strictMode?: boolean
 };
 
-interface ImportData {
+interface ImportedData {
   settings: Settings,
   rules: Site[]
 }
 
 export async function getSettingsFromStorage(): Promise<Settings> {
-  const keys: (keyof Settings)[] = ["darkMode", "disableLimit", "inactiveRules", "prevResetDate", "prevUpdate", "strictMode"];
+  const keys: (keyof Settings)[] = ["darkMode", "disableLimit", STORAGE_INACTIVE_RULES];
 
   const entries = await Promise.all(
     keys.map(async (key) => {
@@ -232,94 +221,128 @@ export function openFile(importInput: HTMLInputElement, reader: FileReader) {
   }
 }
 
-export async function importData(reader: FileReader) {
+export async function importData(reader: FileReader, dataPara: HTMLParagraphElement, cachedRules: Site[]) {
   if (typeof (reader.result) === "string") {
-    const res: ImportData = JSON.parse(reader.result);
-    const newData: ImportData = await assignNewIds(res);
-    console.log(newData);
-    const settings: Settings = newData.settings;
-    for (const [key, value] of Object.entries(settings)) {
-      if (key !== "prevResetDate" && key !== "prevUpdate" && key !== "strictMode") {
+    const res: ImportedData = JSON.parse(reader.result);
+    if (!isImportStructureValid(res)) {
+      dataPara.textContent = "Invalid file structure";
+      console.error("Invalid file structure");
+    }
+
+    try {
+      const newData: ImportedData = await saveRules(res, cachedRules);
+      const { settings } = newData;
+      for (const [key, value] of Object.entries(settings)) {
         await browser.storage.local.set({ [key]: value });
       }
+      dataPara.textContent = "";
+    } catch (error) {
+      dataPara.textContent = String(error);
+      console.error(error);
     }
   } else {
+    dataPara.textContent = "Error during data parsing";
     console.error("Error during data parsing");
   }
 }
 
+function isImportStructureValid(data: ImportedData): boolean {
+  return (data.settings && data.rules
+    && Array.isArray(data.rules)
+  )
+    ? true
+    : false;
+}
+
 /*
-interface Site {
-  id: number,
-  url: string,
-  strippedUrl: string,
-  blockDomain: boolean,
-  isActive: boolean
-}
-
-interface RuleInStorage {
-  id: number,
-  unblockDate: number,
-  urlToBlock: string
-}
+  Assigns new IDs and saves the rules.
 */
-
-async function assignNewIds(dataObj: ImportData): Promise<ImportData> {
+async function saveRules(dataObj: ImportedData, cachedRules: Site[]): Promise<ImportedData> {
   const updatedData = dataObj;
-  await Promise.allSettled(updatedData.rules.map(async (rule) => {
-    const msg: AddAction = { action: "blockUrl", url: rule.strippedUrl, blockDomain: rule.blockDomain };
-    const res: ResToSend = await browser.runtime.sendMessage(msg);
-    if (res.success) {
-      if (res.status === 'added') {
-        console.log("added");
-        if (updatedData.settings.inactiveRules && updatedData.settings.inactiveRules.length > 0) {
-          const match = updatedData.settings.inactiveRules.find(r => r.urlToBlock === rule.url);
-          if (match && res.id) {
-            match.id = res.id;
-          }
-        }
-      } else if (res.status === 'duplicate') {
-        console.log("duplicate");
+  const { uniqueRules, duplicates } = separateUniqueFromDuplicates(updatedData.rules, cachedRules);
+
+  // handle unique rules
+  const res = await saveUniqueRules(uniqueRules);
+  const failures = res.filter(r => r.status === "rejected");
+  if (failures.length > 0) {
+    throw new Error(
+      failures.map(f => String(f.reason)).join("; ")
+    );
+  }
+
+  // handle duplicate rules
+  const res2 = await updateDuplicates(duplicates);
+  if (!res2.success) {
+    throw new Error(res2.error);
+  }
+
+  updatedData.rules = [...uniqueRules, ...duplicates];
+
+  if (updatedData.settings.inactiveRules && updatedData.settings.inactiveRules.length > 0) {
+    updatedData.settings.inactiveRules.map(ir => {
+      const match = updatedData.rules.find(r => r.url === ir.urlToBlock);
+      if (match) {
+        ir.id = match.id;
       }
-    }
-  }))
-    .catch(err => console.error(err))
-    .finally(() => console.log("ID assignment completed"));
+    });
+  }
 
   return updatedData;
 }
 
-/**
-{
-    "settings": {
-        "darkMode": "dark",
-        "disableLimit": 2,
-        "inactiveRules": [
-            {
-                "id": 510,
-                "unblockDate": 1783621073277,
-                "urlToBlock": "^https?://colorhunt.co/palettes/light/?.*"
-            }
-        ],
-        "prevResetDate": "2026-07-09T11:39:37.916Z",
-        "prevUpdate": "1.1.1",
-        "strictMode": true
-    },
-    "rules": [
-        {
-            "id": 510,
-            "url": "^https?://colorhunt.co/palettes/light/?.*",
-            "strippedUrl": "colorhunt.co/palettes/light/",
-            "blockDomain": true,
-            "isActive": false
-        },
-        {
-            "id": 656,
-            "url": "^https?://example.com/?.*",
-            "strippedUrl": "example.com/",
-            "blockDomain": true,
-            "isActive": true
-        }
-    ]
+function separateUniqueFromDuplicates(importedRules: Site[], cachedRules: Site[]): { uniqueRules: Site[], duplicates: Site[] } {
+  const uniqueRules: Site[] = [];
+  const duplicates: Site[] = [];
+
+  for (const rule of importedRules) {
+    const match = cachedRules.find(cr => cr.strippedUrl === rule.strippedUrl);
+    if (match) {
+      duplicates.push({ ...rule, id: match.id });
+    } else {
+      uniqueRules.push(rule);
+    }
+  }
+
+  return { uniqueRules, duplicates };
 }
- */
+
+async function saveUniqueRules(uniqueRules: Site[]): Promise<PromiseSettledResult<ResToSend>[]> {
+  return await Promise.allSettled(uniqueRules.map(async (rule) => {
+    const msg: AddAction = { action: "blockUrl", url: rule.strippedUrl, blockDomain: rule.blockDomain, isActive: rule.isActive };
+    const res: ResToSend = await browser.runtime.sendMessage(msg);
+    if (res.status === "added" && res.id) {
+      rule.id = res.id;
+    }
+    return res;
+  }))
+    .finally(() => console.log("Unique ID assignment completed"));
+}
+
+async function updateDuplicates(duplicates: Site[]): Promise<ResToSend> {
+  const updatedDuplicates: NewRule[] = [];
+  duplicates.map((rule) => {
+    const updatedRule: NewRule = {
+      id: rule.id,
+      priority: 1,
+      action: {
+        type: rule.isActive ? "redirect" : "allow",
+      },
+      condition: {
+        regexFilter: rule.url,
+        resourceTypes: ["main_frame" as DeclarativeNetRequest.ResourceType]
+      }
+    };
+
+    if (rule.isActive) {
+      updatedRule.action.redirect = {
+        regexSubstitution: `${browser.runtime.getURL("blocked.html")}?id=${rule.id}`
+      }
+    }
+    updatedDuplicates.push(updatedRule);
+  });
+
+  const msg: UpdateAction = { action: "updateRules", updatedRules: updatedDuplicates };
+
+  const res: ResToSend = await browser.runtime.sendMessage(msg);
+  return res;
+}

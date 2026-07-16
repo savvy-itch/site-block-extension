@@ -1,5 +1,5 @@
 import browser from 'webextension-polyfill';
-import { maxUrlLength, minUrlLength } from "./globals";
+import { MAX_URL_LEN, MIN_URL_LEN } from "./globals";
 import { GetCurrentUrl, ResToSend } from "./types";
 import { handleFormSubmission } from './helpers';
 
@@ -30,8 +30,8 @@ async function showPopup() {
         popupInput.type = 'text';
         popupInput.placeholder = 'example.com';
         popupInput.value = currUrl;
-        popupInput.minLength = minUrlLength;
-        popupInput.maxLength = maxUrlLength;
+        popupInput.minLength = MIN_URL_LEN;
+        popupInput.maxLength = MAX_URL_LEN;
         popupInput.required = true;
         popupInput.autofocus = true;
 

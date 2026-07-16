@@ -6,7 +6,9 @@ import { getExtVersion } from './helpers';
 const lastUpdateContent: UpdateMsg = {
   v: getExtVersion(),
   desc: [
-    `Bug fixes`
+    "Added dark mode",
+    "Added data export/import",
+    "Minor UX improvements"
   ]
 };
 
@@ -30,7 +32,7 @@ function displayUpdateMsg() {
   msgHeading.textContent = `Your extension has received an update to v${lastUpdateContent.v}!`;
 
   const msgSubheading = document.createElement('h3');
-  msgSubheading.textContent = 'What\'s new?';
+  msgSubheading.textContent = 'What\'s new:';
 
   msgInnerDiv.appendChild(msgHeading);
   msgInnerDiv.appendChild(msgSubheading);

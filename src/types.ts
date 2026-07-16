@@ -45,7 +45,8 @@ type Status = "added" |
 export interface AddAction {
   action: "blockUrl",
   url: string,
-  blockDomain: boolean
+  blockDomain: boolean,
+  isActive: boolean
 }
 
 export interface DeleteAction {

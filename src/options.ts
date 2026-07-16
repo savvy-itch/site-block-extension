@@ -1,5 +1,5 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
-import { defaultDisableLimit, forbiddenUrls, storageStrictModeKey, strictModeBlockPeriod } from "./globals";
+import { DARK_PREF, DEFAULT_DISABLE_LIMIT, FORBIDDEN_URLS, LIGHT_PREF, STORAGE_STRICT_MODE, STRICT_MODE_BLOCK_PERIOD } from "./globals";
 import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, Theme, UpdateAction } from "./types";
 import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, exportData, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules, importData, openFile, stripUrl } from './helpers';
 
@@ -10,11 +10,9 @@ const saveBtn = document.getElementById('save-btn');
 const cancelBtn = document.getElementById('cancel-btn');
 const tbody = document.getElementById('url-table') as HTMLTableSectionElement;
 const clearBtn = document.getElementById('clear-btn');
-// delete all rules dialog
 const clearAllDialog = document.getElementById('clear-all-dialog') as HTMLDialogElement;
 const clearDialogOkBtn = document.getElementById('dialog-clear-ok-btn');
 const clearDialogCancelBtn = document.getElementById('dialog-clear-cancel-btn');
-// delete rule dialog
 const deleteDialog = document.getElementById('delete-dialog') as HTMLDialogElement;
 const deleteDialogOkBtn = document.getElementById('dialog-delete-ok-btn');
 const deleteDialogCancelBtn = document.getElementById('dialog-delete-cancel-btn');
@@ -31,9 +29,8 @@ const themeBtnIcon = document.getElementById('theme-btn-icon') as HTMLImageEleme
 const exportBtn = document.getElementById("export-btn") as HTMLButtonElement;
 const importBtn = document.getElementById("import-btn") as HTMLButtonElement;
 const importInput = document.getElementById("file-import-input") as HTMLInputElement;
+const dataPara = document.getElementById("data-msg-para") as HTMLParagraphElement;
 const helpIcon = document.getElementById('help-icon') as HTMLImageElement;
-const dark = '(prefers-color-scheme: dark)';
-const light = '(prefers-color-scheme: light)';
 const lightIcon = "./icons/sun.svg";
 const darkIcon = "./icons/moon.svg";
 const helpIconLight = "./icons/help.svg";
@@ -45,7 +42,7 @@ let showEditInput = false;
 let editedRulesIds: Set<number> = new Set();
 let idToDelete: number | null;
 let cachedRules: Site[] = [];
-let disableAttemptsLeft = defaultDisableLimit;
+let disableAttemptsLeft = DEFAULT_DISABLE_LIMIT;
 let currEditDisableCount = 0;
 let curTheme = "light";
 const rowIdPrefix = 'row-';
@@ -60,9 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const storedLimitRes = await browser.storage.local.get(['disableLimit']);
   if (!storedLimitRes.disableLimit && storedLimitRes.disableLimit !== 0) {
-    browser.storage.local.set({ disableLimit: defaultDisableLimit });
+    browser.storage.local.set({ disableLimit: DEFAULT_DISABLE_LIMIT });
   }
-  disableAttemptsLeft = storedLimitRes.disableLimit as number ?? defaultDisableLimit;
+  disableAttemptsLeft = storedLimitRes.disableLimit as number ?? DEFAULT_DISABLE_LIMIT;
   if (strictModeSwitch.checked) {
     limitPara?.classList.remove('hide-limit-para');
     limitSpan.textContent = `${disableAttemptsLeft}`;
@@ -80,13 +77,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 exportBtn.addEventListener('click', () => exportData(cachedRules));
 importBtn.addEventListener('click', () => {
+  searchBar.value = '';
+  editedRulesIds.clear();
+  toggleEditMode(false);
+  currEditDisableCount = 0;
   // import input activated indirectly to hide default "No file chosen" message next to it
   importInput.click();
 });
 importInput.addEventListener('change', () => openFile(importInput, reader));
 
 reader.addEventListener("load", async () => {
-  await importData(reader);
+  await importData(reader, dataPara, cachedRules);
   displayUrlList();
 });
 reader.addEventListener("error", () => console.error("An error occured during file load."));
@@ -180,6 +181,7 @@ function toggleEditMode(bool: boolean) {
 }
 
 async function displayUrlList() {
+  dataPara.textContent = "";
   displayLoader(wrapperElem);
   const msg: GetAllAction = { action: 'getRules' };
   const res: ResToSend = await browser.runtime.sendMessage(msg);
@@ -364,7 +366,6 @@ function handleEditBtnClick(ruleId: number, ruleUrl: string, updateRuleRow: HTML
 
 function handleActiveCheckboxClick(activeCheckboxChecked: boolean, updateRuleRow: HTMLElement | null, ruleId: number, e: MouseEvent) {
   if (strictModeSwitch.checked) {
-
     // enable rule
     if (activeCheckboxChecked) {
       updateRuleRow?.classList.toggle('inactive-url');
@@ -418,13 +419,13 @@ async function saveChanges() {
   }
 
   const rulesToStore: RuleInStorage[] = [];
-  const strictModeOnStorage = await browser.storage.local.get([storageStrictModeKey]);
-  const strictModeOn = strictModeOnStorage[storageStrictModeKey] as boolean;
+  const strictModeOnStorage = await browser.storage.local.get([STORAGE_STRICT_MODE]);
+  const strictModeOn = strictModeOnStorage[STORAGE_STRICT_MODE] as boolean;
   const storedDisableLimit = await browser.storage.local.get('disableLimit');
   const limitVal = storedDisableLimit.disableLimit as number;
   let disabledRules = 0;
   const date = new Date();
-  const unblockDate = new Date(date.getTime() + strictModeBlockPeriod).getTime();
+  const unblockDate = new Date(date.getTime() + STRICT_MODE_BLOCK_PERIOD).getTime();
   for (const elem of editedRulesIds) {
     const editedRow = document.getElementById(`row-${elem}`);
     if (editedRow) {
@@ -436,7 +437,7 @@ async function saveChanges() {
       const urlToBlock = getUrlToBlock(strippedUrl, blockDomain);
       const isActive = (editedRow.querySelector('.active-checkbox') as HTMLInputElement)?.checked;
 
-      if (!strippedUrl || forbiddenUrls.some(url => url.test(strippedUrl))) {
+      if (!strippedUrl || FORBIDDEN_URLS.some(url => url.test(strippedUrl))) {
         alert('Invalid URL');
         editedRulesIds.clear();
         toggleEditMode(false);
@@ -448,7 +449,7 @@ async function saveChanges() {
       }
 
       if (!isActive) {
-        if (disabledRules < defaultDisableLimit) {
+        if (disabledRules < DEFAULT_DISABLE_LIMIT) {
           disabledRules++;
         }
       }
@@ -519,9 +520,9 @@ async function submitChanges(res: ResToSend, rulesToStore: RuleInStorage[], upda
 
 async function syncStrictMode() {
   try {
-    const result = await browser.storage.local.get(storageStrictModeKey);
-    if (storageStrictModeKey in result) {
-      const strictMode = result[storageStrictModeKey];
+    const result = await browser.storage.local.get(STORAGE_STRICT_MODE);
+    if (STORAGE_STRICT_MODE in result) {
+      const strictMode = result[STORAGE_STRICT_MODE];
       if (typeof strictMode === 'boolean') {
         strictModeSwitch.checked = strictMode;
       } else {
@@ -576,7 +577,7 @@ function changeTheme(newScheme: Theme) {
 async function detectColorScheme() {
   const record = await browser.storage.local.get('darkMode');
   const persistedTheme = record.darkMode;
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const prefersDark = window.matchMedia(DARK_PREF).matches;
   if (persistedTheme === Theme.Dark || persistedTheme === Theme.Light) {
     curTheme = persistedTheme;
     changeTheme(persistedTheme);
@@ -591,16 +592,16 @@ async function detectColorScheme() {
   function callback({ matches, media }: { matches: boolean, media: string }) {
     if (!matches) return;
 
-    if (media === dark) {
+    if (media === DARK_PREF) {
       changeTheme(Theme.Dark);
-    } else if (media === light) {
+    } else if (media === LIGHT_PREF) {
       changeTheme(Theme.Light);
     }
   }
 
-  const mqDark = window.matchMedia(dark);
+  const mqDark = window.matchMedia(DARK_PREF);
   mqDark.addEventListener('change', callback);
 
-  const mqLight = window.matchMedia(light);
+  const mqLight = window.matchMedia(LIGHT_PREF);
   mqLight.addEventListener('change', callback);
 }

@@ -1,6 +1,7 @@
 import { assignStoreLink, getExtVersion } from "./helpers";
 import browser from 'webextension-polyfill';
 import { Theme } from "./types";
+import { DARK_PREF } from "./globals";
 
 const body = document.querySelector('body') as HTMLBodyElement;
 const links = document.querySelectorAll<HTMLAnchorElement>('.sublink');
@@ -20,7 +21,7 @@ links.forEach(s => {
 document.addEventListener('DOMContentLoaded', async () => {
   const record = await browser.storage.local.get('darkMode');
   const persistedTheme = record.darkMode;
-  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const prefersDark = window.matchMedia(DARK_PREF).matches;
   if (persistedTheme === Theme.Dark || persistedTheme === Theme.Light) {
     body?.setAttribute('data-theme', persistedTheme);
   } else if (prefersDark) {

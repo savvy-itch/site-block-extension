@@ -530,6 +530,39 @@ h1 {
   display: none;
 }
 
+.data-transfer-btn {
+  background-color: var(--dim-color);
+}
+
+.data-transfer-btn:hover {
+  background-color: var(--darker-dim-color);
+}
+
+.data-btns-wrapper {
+  display: flex;
+  gap: 2rem;
+}
+
+.data-btn-desc {
+  font-size: small;
+  margin-top: 7px;
+  margin-bottom: 0;
+}
+
+.data-msg-para {
+  margin-top: 1rem;
+  font-size: 15px;
+  height: 15px;
+}
+
+.data-msg-para.danger-msg {
+  color: var(--danger-color);
+}
+
+body[data-theme="dark"] .data-msg-para.danger-msg {
+  color: #FF7070;
+}
+
 @keyframes rotate {
   100% {
     transform: rotate(360deg)
