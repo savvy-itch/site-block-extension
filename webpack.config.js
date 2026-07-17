@@ -15,6 +15,7 @@ module.exports = {
     blocked: './src/blocked.ts',
     about: './src/about.ts',
     newUpdateMsg: './src/newUpdateMsg.ts',
+    dataTransfer: './src/dataTransfer.ts',
   },
   output: {
     path: path.resolve(__dirname, "dist"),

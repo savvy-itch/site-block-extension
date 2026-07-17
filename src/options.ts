@@ -1,7 +1,8 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
 import { DARK_PREF, DEFAULT_DISABLE_LIMIT, FORBIDDEN_URLS, LIGHT_PREF, STORAGE_STRICT_MODE, STRICT_MODE_BLOCK_PERIOD } from "./globals";
 import { DeleteAction, GetAllAction, NewRule, ResToSend, RuleInStorage, Site, Theme, UpdateAction } from "./types";
-import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, exportData, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules, importData, openFile, stripUrl } from './helpers';
+import { assignStoreLink, checkLastLimitReset, deleteRules, disableOtherBtns, displayLoader, getExtVersion, getUrlToBlock, handleFormSubmission, handleInactiveRules, stripUrl } from './helpers';
+import { exportData, importData, openFile } from './dataTransfer';
 
 const body = document.querySelector('body') as HTMLBodyElement;
 const urlForm = document.getElementById('url-input-form') as HTMLFormElement;

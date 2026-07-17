@@ -17,6 +17,7 @@
     "activeTab",
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
+    "downloads",
     "scripting", 
     "storage",
     "tabs",

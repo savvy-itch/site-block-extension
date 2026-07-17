@@ -12,6 +12,7 @@ body[data-theme="light"] {
   --main-highlight: #6495ed;
   --checkbox-size: 25px;
   --gap-between-checkbox-and-text: calc(var(--checkbox-size) + 10px);
+  --page-px: 3rem;
 
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
@@ -41,7 +42,7 @@ h1 {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  padding: 0 2rem;
+  padding: 0 var(--page-px);
   min-height: 20dvh;
 }
 
@@ -102,7 +103,7 @@ h1 {
 
 /*============= TABLE SECTION ============== */
 .options-main {
-  padding: 0 2rem;
+  padding: 0 var(--page-px);
   min-height: 60dvh;
 }
 
@@ -561,6 +562,10 @@ h1 {
 
 body[data-theme="dark"] .data-msg-para.danger-msg {
   color: #FF7070;
+}
+
+.data-transfer-container {
+  margin-top: 2rem;
 }
 
 @keyframes rotate {

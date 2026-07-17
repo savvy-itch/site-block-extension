@@ -1,3 +1,10 @@
+## 1.2.0 (Jul 18, 2026)
+
+- Added data export/import through JSON.
+- Added dark mode.
+- improve colors contrast.
+- Disabled URLs in the blacklist are now clickable.
+
 ## 1.1.1 (Mar 21, 2025)
 
 - Fixed bugs related to incorrect display of URLs after automatic re-enabling in the options page.

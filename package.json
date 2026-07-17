@@ -9,7 +9,8 @@
     "test:chrome": "npx playwright test --headed --project=chromium",
     "test:chrome-headless": "npx playwright test --project=chromium",
     "test:firefox": "npx playwright test --headed --project=firefox",
-    "test:firefox-headless": "npx playwright test --project=firefox"
+    "test:firefox-headless": "npx playwright test --project=firefox",
+    "unit": "vitest"
   },
   "engines": {
     "node": ">=24.14.1"
@@ -32,6 +33,7 @@
     "ts-jest": "^29.4.11",
     "ts-loader": "^9.6.2",
     "typescript": "^6.0.3",
+    "vitest": "^4.1.10",
     "web-ext": "^10.4.0",
     "webextension-polyfill": "^0.12.0",
     "webpack": "^5.108.3",

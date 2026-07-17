@@ -9,7 +9,6 @@
 
 .options-footer a {
   color: white;
-  display: block;
   transition: color .3s;
 }
 
@@ -41,14 +40,14 @@
 }
 
 .options-footer .footer-developer {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   text-align: center;
   font-size: .9rem;
 }
 
-.footer-developer a {
+/* .footer-developer a {
   display: inline;
-}
+} */
 
 .footer-general-col > a:last-of-type {
   display: flex;

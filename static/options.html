@@ -32,7 +32,7 @@
         <button id="dialog-clear-cancel-btn" class="dialog-cancel-btn dialog-btn" type="button">Cancel</button>
       </div>
     </dialog>
-    <p class="limit-para">Daily disable attemps left: <span id="disable-limit" class="disable-limit"></span></p>
+    <p class="limit-para">Daily peeks left: <span id="disable-limit" class="disable-limit"></span></p>
   </header>
 
   <main class="options-main">
@@ -108,10 +108,10 @@
     </label>
     <ul class="strict-mode-desc">
       <li>Re-enables any inactive rules after 1 hour</li>
-      <li>Daily limit for disabling rules - 3</li>
+      <li>Daily peeks limit - 3</li>
     </ul>
     
-    <div>
+    <section class="data-transfer-container">
       <div class="data-btns-wrapper">
         <div>
           <button id="export-btn" class="data-transfer-btn btn">Export data</button>
@@ -124,13 +124,13 @@
         <input id="file-import-input" class="file-import-input" type="file" accept=".json" />
       </div>
       <p id="data-msg-para" class="data-msg-para danger-msg"></p>
-    </div>
+    </section>
   </main>
 
   <footer class="options-footer">
     <div class="footer-wrapper">
       <div class="footer-general-col">
-        <p>On Pace v<span id="ext-version"></span> - website blocker extension</p>
+        <p>On Pace v<span id="ext-version"></span> - website blocking extension</p>
         <p>Found a bug? <a class="link-to-highlight" href="mailto:msavprojects@gmail.com" target="_blank">Report via Email</a></p>
         <a id="web-store-link" class="link-to-highlight" href="#" target="_blank">
           Rate the extension
