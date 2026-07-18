@@ -11,7 +11,7 @@
   </a>
 </p>
 
-On Pace is a cross-browser extension for blocking websites.
+On Pace is a cross-browser extension for blocking unwanted websites. Positioned as a productivity tool, the extension aims to help users maintain cleaner browsing habits.
 
 ## Functionality
 - users can add/edit/delete websites to blacklist to restrain access to them.
@@ -42,4 +42,10 @@ For Firefox:
 
 ``` 
 npm run build:firefox
+```
+
+To test the extension in Firefox run:
+
+```
+nom run run:firefox
 ```

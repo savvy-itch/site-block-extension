@@ -1,11 +1,12 @@
 import browser, { DeclarativeNetRequest } from 'webextension-polyfill';
 import { AddAction, NewRule, ResToSend, RuleInStorage, Site, UpdateAction } from "./types";
-import { STORAGE_INACTIVE_RULES } from './globals';
+import { STORAGE_INACTIVE_RULES, STORAGE_STRICT_MODE } from './globals';
 
 interface Settings {
   darkMode?: string,
   disableLimit?: number,
   inactiveRules?: RuleInStorage[],
+  strictMode?: boolean
 };
 
 interface ImportedData {
@@ -14,7 +15,6 @@ interface ImportedData {
 }
 
 export async function exportData(cachedRules: Site[]) {
-  console.log("exportData");
   const filename = "on-pace-data.json";
   let url = "";
 
@@ -32,13 +32,12 @@ export async function exportData(cachedRules: Site[]) {
   } catch (error) {
     console.error(error);
   } finally {
-    console.log("data exported");
     if (url) URL.revokeObjectURL(url);
   }
 }
 
 export async function getSettingsFromStorage(): Promise<Settings> {
-  const keys: (keyof Settings)[] = ["darkMode", "disableLimit", STORAGE_INACTIVE_RULES];
+  const keys: (keyof Settings)[] = ["darkMode", "disableLimit", STORAGE_INACTIVE_RULES, STORAGE_STRICT_MODE];
 
   const entries = await Promise.all(
     keys.map(async (key) => {
@@ -156,7 +155,7 @@ async function saveUniqueRules(uniqueRules: Site[]): Promise<PromiseSettledResul
     }
     return res;
   }))
-    .finally(() => console.log(`Unique ID assignment completed. Found: ${uniqueRules.length}`));
+    // .finally(() => console.log(`Unique ID assignment completed. Found: ${uniqueRules.length}`));
 }
 
 async function updateDuplicates(duplicates: Site[]): Promise<ResToSend> {
@@ -185,6 +184,5 @@ async function updateDuplicates(duplicates: Site[]): Promise<ResToSend> {
   const msg: UpdateAction = { action: "updateRules", updatedRules: updatedDuplicates };
 
   const res: ResToSend = await browser.runtime.sendMessage(msg);
-  console.log(`duplicates handled. Found: ${updatedDuplicates.length}`);
   return res;
 }

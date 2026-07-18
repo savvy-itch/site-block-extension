@@ -6,6 +6,7 @@
     "build:chrome": "cross-env TARGET_BROWSER=chrome webpack --config webpack.config.js",
     "build:firefox": "cross-env TARGET_BROWSER=firefox webpack --config webpack.config.js",
     "lint": "web-ext lint --source-dir=dist/",
+    "run:firefox": "web-ext run --source-dir=dist/",
     "test:chrome": "npx playwright test --headed --project=chromium",
     "test:chrome-headless": "npx playwright test --project=chromium",
     "test:firefox": "npx playwright test --headed --project=firefox",
