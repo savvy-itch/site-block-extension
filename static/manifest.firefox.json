@@ -18,11 +18,21 @@
     "declarativeNetRequest",
     "declarativeNetRequestWithHostAccess",
     "downloads",
-    "scripting", 
+    "scripting",
     "storage",
     "tabs",
     "*://*/"
   ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{c0a41ac8-ef33-4d90-8e51-ff536a889cca}",
+      "data_collection_permissions": {
+        "required": [
+          "browsingActivity"
+        ]
+      }
+    }
+  },
   "background": {
     "scripts": [
       "browser-polyfill.js",
@@ -39,15 +49,19 @@
       "description": "Click or press Ctrl+Q to show the form"
     }
   },
-  "content_scripts": [{
-    "matches": ["<all_urls>"],
-    "js": [
-      "browser-polyfill.js"
-    ]
-  }],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "browser-polyfill.js"
+      ]
+    }
+  ],
   "web_accessible_resources": [
     "blocked.html",
-    "options.html", 
+    "options.html",
     "icons/*.svg"
   ],
   "content_security_policy": "script-src 'self'; object-src 'self'",
